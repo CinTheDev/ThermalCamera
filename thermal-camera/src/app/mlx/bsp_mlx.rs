@@ -29,14 +29,27 @@ pub fn read(address: u16) -> u16 {
     command.arg(addr1.to_string());
     command.arg(addr2.to_string());
 
-    // Receive value
+    // Receive value command
     let com_read = format!("{}{}", "r2@", CAM_ADDR.to_string());
     command.arg(com_read);
 
-    // TODO
+    // Get output and format into u16
     command.stdout(Stdio::piped());
     let out = command.output().expect("I2C read failed.");
-    print!("{}", String::from_utf8_lossy(&out.stdout));
+    let output_string = String::from_utf8_lossy(&out.stdout);
+    
+    print!("Control: {}", output_string);
 
-    return 0;
+    let values: Vec<&str> = output_string.split_ascii_whitespace().collect();
+    let mut res: u16 = 0;
+
+    for i in 0..2 {
+        let without_prefix = values[i].trim_start_matches("0x");
+        let val = u16::from_str_radix(without_prefix, 16).unwrap();
+        res |= val << ((1 - i) * 8);
+    }
+
+    println!("Value: {:x}", res);
+
+    return res;
 }
