@@ -18,3 +18,13 @@ Following steps have been taken for the Raspberry Pi setup:
 Now the Raspi can be accessed via `ssh thermal-camera@raspberrypi`
 
 At this point, there is no need for an external keyboard and monitor anymore, the Raspi just needs to be powered and in reach of the configured WIFI.
+
+## Development setup
+
+On our working machine, we have to make sure we can compile a binary and upload it to the raspi.
+
+Following rust commands have been run:
+
+`sudo apt install gcc-arm-linux-gnueabihf`
+
+`rustup target add armv7-unknown-linux-gnueabihf`
