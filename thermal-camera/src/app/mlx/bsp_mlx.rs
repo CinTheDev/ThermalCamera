@@ -30,6 +30,11 @@ pub fn read(address: u16) -> u16 {
     command.arg(addr2.to_string());
 
     // Receive value
+    let com_read = format!("{}{}", "r2@", CAM_ADDR.to_string());
+    command.arg(com_read);
+    
     // TODO
+
+    command.exec();
     return 0;
 }
