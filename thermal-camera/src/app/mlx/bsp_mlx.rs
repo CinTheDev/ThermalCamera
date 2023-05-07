@@ -1,4 +1,4 @@
-use std::{process::Command, os::unix::process::CommandExt};
+use std::process::{Command, Stdio};
 
 const CAM_ADDR: u8 = 0x33;
 
@@ -12,7 +12,7 @@ pub fn write(data: &[u8]) {
         command.arg(d.to_string());
     }
 
-    command.exec();
+    command.output().expect("I2C write failed.");
 }
 
 pub fn read(address: u16) -> u16 {
@@ -32,9 +32,11 @@ pub fn read(address: u16) -> u16 {
     // Receive value
     let com_read = format!("{}{}", "r2@", CAM_ADDR.to_string());
     command.arg(com_read);
-    
-    // TODO
 
-    command.exec();
+    // TODO
+    command.stdout(Stdio::piped());
+    let out = command.output().expect("I2C read failed.");
+    print!("{}", String::from_utf8_lossy(&out.stdout));
+
     return 0;
 }
