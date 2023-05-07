@@ -1,5 +1,3 @@
-// use std::{process::Command, os::unix::process::CommandExt};
-
 mod app;
 
 fn main() {
