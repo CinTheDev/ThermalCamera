@@ -5,7 +5,9 @@ const PIXELS_HEIGHT: usize = 24;
 const PIXEL_COUNT: usize = PIXELS_WIDTH * PIXELS_HEIGHT;
 
 pub fn test() {
-    bsp_mlx::read(0x0400);
+    //bsp_mlx::read(0x0400);
+    let img = read_image();
+    bsp_mlx::write_image("./test.pgm", &img, PIXELS_WIDTH, PIXELS_HEIGHT);
 }
 
 fn read_image() -> [u8; PIXEL_COUNT] {

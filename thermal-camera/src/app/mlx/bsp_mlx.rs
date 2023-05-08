@@ -1,4 +1,6 @@
+use std::io::Write;
 use std::process::{Command, Stdio};
+use std::fs::File;
 
 const CAM_ADDR: u8 = 0x33;
 
@@ -38,7 +40,7 @@ pub fn read(address: u16) -> u16 {
     let out = command.output().expect("I2C read failed.");
     let output_string = String::from_utf8_lossy(&out.stdout);
 
-    print!("Control: {}", output_string);
+    //print!("Control: {}", output_string);
 
     let values: Vec<&str> = output_string.split_ascii_whitespace().collect();
     let mut res: u16 = 0;
@@ -49,11 +51,24 @@ pub fn read(address: u16) -> u16 {
         res |= val << ((1 - i) * 8);
     }
 
-    println!("Value: {:x}", res);
+    //println!("Value: {:x}", res);
 
     return res;
 }
 
 pub fn write_image(path: &str, img: &[u8], width: usize, height: usize) {
     // Raw image is graymap
+    let mut file = File::create(path).unwrap();
+
+    let err_msg = "Failed to write image to disk.";
+
+    // Write header info
+    file.write(b"P2\n").expect(err_msg);
+    file.write(format!("{} {}\n", width, height).as_bytes()).expect(err_msg);
+    file.write(b"255\n").expect(err_msg);
+
+    for p in img {
+        file.write(p.to_string().as_bytes()).expect(err_msg);
+        file.write(b"\n").expect(err_msg);
+    }
 }
