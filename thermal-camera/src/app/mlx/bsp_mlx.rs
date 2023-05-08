@@ -63,12 +63,10 @@ pub fn write_image(path: &str, img: &[u8], width: usize, height: usize) {
     let err_msg = "Failed to write image to disk.";
 
     // Write header info
-    file.write(b"P2\n").expect(err_msg);
+    file.write(b"P5\n").expect(err_msg);
     file.write(format!("{} {}\n", width, height).as_bytes()).expect(err_msg);
     file.write(b"255\n").expect(err_msg);
 
-    for p in img {
-        file.write(p.to_string().as_bytes()).expect(err_msg);
-        file.write(b"\n").expect(err_msg);
-    }
+    // Write image contents in binary format
+    file.write(img).expect(err_msg);
 }
