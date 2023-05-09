@@ -54,3 +54,15 @@ For our program to link correctly, we have to manually download the gnu toolchai
 I chose **gcc-arm-11.2-2022.02-x86_64-arm-none-linux-gnueabihf.tar.xz**, extracted it somewhere in my home directory, and prepended the binary directory to PATH via ~/.bashrc
 
 Verify the installation by running `cargo clean` (if there's some build files already) and `cargo build`. If it compiles successfully, that's a good sign. Finally, upload the binary to the raspi using the **upload_bin.sh** script, and do a test run on the raspi with ssh.
+
+## Hardware setup & Used pins
+
+The Thermal Camera is connected in the following fashion:
+
+- [Camera Pin] > [Raspi Pin]
+- 3vo > 3.3V
+- GND > Ground
+- SCL > GPIO 3 (I2C SCL)
+- SDA > GPIO 2 (I2C SDA)
+
+**Make sure not to switch up 3.3V and 5V!! Doing so could damage the camera!**
