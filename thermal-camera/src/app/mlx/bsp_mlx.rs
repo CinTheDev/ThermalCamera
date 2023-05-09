@@ -4,15 +4,17 @@ use std::fs::File;
 
 const CAM_ADDR: u8 = 0x33;
 
-pub fn write(data: &[u8]) {
+pub fn write(address: u16, data: u16) {
     let mut command = Command::new("i2cset");
     command.arg("-y");
     command.arg(CAM_ADDR.to_string());
     command.arg("1");
 
-    for d in data {
-        command.arg(d.to_string());
-    }
+    command.arg(((address & 0xFF00) >> 8).to_string());
+    command.arg(((address & 0x00FF) >> 0).to_string());
+
+    command.arg(((data & 0xFF00) >> 8).to_string());
+    command.arg(((data & 0x00FF) >> 0).to_string());
 
     command.output().expect("I2C write failed.");
 }
