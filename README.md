@@ -21,6 +21,10 @@ Now the Raspi can be accessed via `ssh thermal-camera@raspberrypi`
 
 At this point, there is no need for an external keyboard and monitor anymore, the Raspi just needs to be powered and in reach of the configured WIFI.
 
+Optional:
+
+- Add personal public ssh key for easy access via ssh
+
 ### Peripheral setup
 
 Later, when enabling the I2C peripheral:
