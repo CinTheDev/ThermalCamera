@@ -5,7 +5,11 @@ const PIXELS_HEIGHT: usize = 24;
 const PIXEL_COUNT: usize = PIXELS_WIDTH * PIXELS_HEIGHT;
 
 pub fn test() {
-    //bsp_mlx::read(0x0400);
+    let mut control_reg = bsp_mlx::read(0x800D);
+    control_reg &= !(0x80 | 0x100 | 0x200); // Reduce refresh rate to 0.5Hz
+    bsp_mlx::write(0x800D, control_reg);
+
+
     let img = read_image();
     bsp_mlx::write_image("./test.pgm", &img, PIXELS_WIDTH, PIXELS_HEIGHT);
 }
@@ -29,36 +33,26 @@ fn wait_for_data() {
 fn read_image() -> [u8; PIXEL_COUNT] {
     let mut img: [u8; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
 
-    wait_for_data();
+    let subpage = bsp_mlx::read(0x8000) & 0x1;
+    let mut offset = subpage;
 
-    // Read subpage 1
-    for row in 0..PIXELS_HEIGHT as u16 {
-        for i in 0..(PIXELS_WIDTH/2) as u16 {
-            let mut addr: u16 = row * PIXELS_WIDTH as u16;
-            let pos: u16 = i * 2 + row % 2;
+    for _sub in 0..2 {
+        wait_for_data();
 
-            addr += pos;
-
-            let meas = bsp_mlx::read(0x0400 + addr);
-
-            img[addr as usize] = meas as u8;
+        for row in 0..PIXELS_HEIGHT as u16 {
+            for i in 0..(PIXELS_WIDTH/2) as u16 {
+                let mut addr: u16 = row * PIXELS_WIDTH as u16;
+                let pos: u16 = i * 2 + (row + offset) % 2;
+    
+                addr += pos;
+    
+                let meas = bsp_mlx::read(0x0400 + addr);
+    
+                img[addr as usize] = meas as u8;
+            }
         }
-    }
 
-    wait_for_data();
-
-    // Read subpage 2
-    for row in 0..PIXELS_HEIGHT as u16 {
-        for i in 0..(PIXELS_WIDTH/2) as u16 {
-            let mut addr: u16 = row * PIXELS_WIDTH as u16;
-            let pos: u16 = i * 2 + (row + 1) % 2;
-
-            addr += pos;
-
-            let meas = bsp_mlx::read(0x0400 + addr);
-
-            img[addr as usize] = meas as u8;
-        }
+        offset += 1;
     }
 
     return img;
