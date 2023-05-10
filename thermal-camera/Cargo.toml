@@ -2,3 +2,6 @@
 name = "thermal-camera"
 version = "0.1.0"
 edition = "2021"
+
+[dependencies]
+rppal = "0.14.1"
