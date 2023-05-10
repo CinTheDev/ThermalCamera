@@ -66,3 +66,8 @@ The Thermal Camera is connected in the following fashion:
 - SDA > GPIO 2 (I2C SDA)
 
 **Make sure not to switch up 3.3V and 5V!! Doing so could damage the camera!**
+
+## Remaining Problems
+
+- Image capture really slow
+- Captured image has grid-like appearance
