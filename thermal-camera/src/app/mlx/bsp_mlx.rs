@@ -1,5 +1,4 @@
 use std::io::Write;
-use std::process::{Command, Stdio};
 use std::fs::File;
 use rppal::i2c::I2c;
 
@@ -28,10 +27,23 @@ pub fn write(address: u16, data: u16) {
     buffer[0..2].copy_from_slice(&address.to_le_bytes());
     buffer[2..4].copy_from_slice(&data.to_le_bytes());
 
-    i2c.write(&buffer).unwrap();
+    i2c.write(&buffer).expect("I2C write failed.");
 }
 
 pub fn read(address: u16) -> u16 {
+    let mut i2c = I2c::new().unwrap();
+    i2c.set_slave_address(CAM_ADDR as u16).unwrap();
+
+    let mut write_buffer: [u8; 2] = [0x00; 2];
+    write_buffer.copy_from_slice(&address.to_le_bytes());
+
+    let mut read_buffer: [u8; 2] = [0x00; 2];
+
+    i2c.write_read(&write_buffer, &mut read_buffer).expect("I2C read failed.");
+
+    let output = u16::from_le_bytes(read_buffer);
+    return output;
+    /*
     let mut command = Command::new("i2ctransfer");
     command.arg("-y");
     command.arg("1");
@@ -68,6 +80,7 @@ pub fn read(address: u16) -> u16 {
     //println!("Value: {:x}", res);
 
     return res;
+    */
 }
 
 pub fn write_image(path: &str, img: &[u8], width: usize, height: usize) {
