@@ -9,9 +9,9 @@ pub fn write(address: u16, data: u16) {
     i2c.set_slave_address(CAM_ADDR as u16).unwrap();
 
     let mut buffer: [u8; 4] = [0x00; 4];
-    buffer[0..2].copy_from_slice(&address.to_le_bytes());
-    buffer[2..4].copy_from_slice(&data.to_le_bytes());
-
+    buffer[0..2].copy_from_slice(&address.to_be_bytes());
+    buffer[2..4].copy_from_slice(&data.to_be_bytes());
+    
     i2c.write(&buffer).expect("I2C write failed.");
 }
 
@@ -20,13 +20,13 @@ pub fn read(address: u16) -> u16 {
     i2c.set_slave_address(CAM_ADDR as u16).unwrap();
 
     let mut write_buffer: [u8; 2] = [0x00; 2];
-    write_buffer.copy_from_slice(&address.to_le_bytes());
+    write_buffer.copy_from_slice(&address.to_be_bytes());
 
     let mut read_buffer: [u8; 2] = [0x00; 2];
 
     i2c.write_read(&write_buffer, &mut read_buffer).expect("I2C read failed.");
 
-    let output = u16::from_le_bytes(read_buffer);
+    let output = u16::from_be_bytes(read_buffer);
     return output;
 }
 

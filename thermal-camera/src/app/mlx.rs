@@ -48,7 +48,7 @@ fn read_image() -> [u8; PIXEL_COUNT] {
     
                 let meas = bsp_mlx::read(0x0400 + addr);
     
-                img[addr as usize] = meas as u8;
+                img[addr as usize] = (meas) as u8;
             }
         }
 
