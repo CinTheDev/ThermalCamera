@@ -69,5 +69,8 @@ The Thermal Camera is connected in the following fashion:
 
 ## Remaining Problems
 
-- Image capture really slow
-- Captured image has grid-like appearance
+### Captured image has grid-like appearance
+
+The output data seems to be a little weird still, especially a visible "grid" which I don't know where it comes from.
+
+I think I might need to dig further into the Datasheet, as there are some interesting formulas inside there. All of these procedures have to be implemented.
