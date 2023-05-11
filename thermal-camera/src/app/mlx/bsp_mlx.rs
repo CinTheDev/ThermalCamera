@@ -132,6 +132,7 @@ pub fn write_image(path: &str, img: &[u8], width: usize, height: usize) {
     file.write(img).expect(err_msg);
 }
 
+// TODO: Put all the EEPROM calculations into extra module
 fn restore() -> eeprom_vars {
     // Read eeprom data
     read_eeprom();
