@@ -1,5 +1,6 @@
 use std::io::Write;
 use std::fs::File;
+use lazy_static::lazy_static;
 use rppal::i2c::I2c;
 
 pub const PIXELS_WIDTH: usize = 32;
@@ -77,6 +78,10 @@ struct eeprom_vars {
     Resolution: u32,
 }
 
+lazy_static! {
+    static ref EEPROM_VARS: eeprom_vars = restore();
+}
+
 const CAM_ADDR: u8 = 0x33;
 
 pub fn init() {
@@ -126,7 +131,7 @@ pub fn write_image(path: &str, img: &[u8], width: usize, height: usize) {
     file.write(img).expect(err_msg);
 }
 
-fn restore() {
+fn restore() -> eeprom_vars {
     // Read eeprom data
     read_eeprom();
 
