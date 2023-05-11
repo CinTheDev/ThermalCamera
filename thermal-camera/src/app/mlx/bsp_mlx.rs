@@ -2,6 +2,10 @@ use std::io::Write;
 use std::fs::File;
 use rppal::i2c::I2c;
 
+pub const PIXELS_WIDTH: usize = 32;
+pub const PIXELS_HEIGHT: usize = 24;
+pub const PIXEL_COUNT: usize = PIXELS_WIDTH * PIXELS_HEIGHT;
+
 struct eeprom_raw {
     // VDD
 
@@ -36,6 +40,53 @@ struct eeprom_raw {
     // TGC
 
     // Resolution control
+}
+
+struct eeprom_vars {
+    K_Vdd: i32,
+    VDD_25: i32,
+
+    T_a: i32,
+
+    pix_os_ref: [i32; PIXEL_COUNT],
+
+    a: [i32; PIXEL_COUNT],
+
+    Kv: [i32; PIXEL_COUNT],
+
+    Kta: [i32; PIXEL_COUNT],
+
+    GAIN: i32,
+
+    KsTa: i32,
+
+    Step: i32,
+    CT3: i32,
+    CT4: i32,
+
+    Ks_To1: i32,
+    Ks_To2: i32,
+    Ks_To3: i32,
+    Ks_To4: i32,
+
+    Alpha_corr_1: i32,
+    Alpha_corr_2: i32,
+    Alpha_corr_3: i32,
+    Alpha_corr_4: i32,
+
+    a_cp_0: i32,
+    a_cp_1: i32,
+
+    off_cp_0: i32,
+    off_cp_1: i32,
+
+    Kv_cp: i32,
+
+    K_Ta_cp: i32,
+
+    TGC: i32,
+
+    Resolution: u32,
 }
 
 const CAM_ADDR: u8 = 0x33;
