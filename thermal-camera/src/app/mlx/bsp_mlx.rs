@@ -13,8 +13,11 @@ struct eeprom_raw {
 }
 impl Default for eeprom_raw {
     fn default() -> eeprom_raw {
-        eeprom_raw { 
-            data: [0x00; EEPROM_SIZE]
+        let mut d: [u8; EEPROM_SIZE];
+        read(0x2440, &mut d);
+
+        return eeprom_raw { 
+            data: d,
         }
     }
 }
