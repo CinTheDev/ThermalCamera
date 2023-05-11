@@ -2,6 +2,42 @@ use std::io::Write;
 use std::fs::File;
 use rppal::i2c::I2c;
 
+struct eeprom_raw {
+    // VDD
+
+    // Ta
+
+    // Offset
+
+    // Sensitivity a (i, j)
+
+    // Kv (i, j)
+
+    // Kta (i, j)
+
+    // GAIN
+
+    // KsTa
+
+    // Corner temperatures
+
+    // KsTo
+
+    // Ranged sensitivity correction
+
+    // Sensitivity a_CP
+
+    // Offset of CP
+
+    // Kv CP
+
+    // Kta CP
+
+    // TGC
+
+    // Resolution control
+}
+
 const CAM_ADDR: u8 = 0x33;
 
 pub fn write(address: u16, data: u16) {
@@ -43,4 +79,58 @@ pub fn write_image(path: &str, img: &[u8], width: usize, height: usize) {
 
     // Write image contents in binary format
     file.write(img).expect(err_msg);
+}
+
+pub fn restore() {
+    // VDD
+
+    // Ta
+
+    // Offset
+
+    // Sensitivity a (i, j)
+
+    // Kv (i, j)
+
+    // Kta (i, j)
+
+    // GAIN
+
+    // KsTa
+
+    // Corner temperatures
+
+    // KsTo
+
+    // Ranged sensitivity correction
+
+    // Sensitivity a_CP
+
+    // Offset of CP
+
+    // Kv CP
+
+    // Kta CP
+
+    // TGC
+
+    // Resolution control
+}
+
+pub fn calibrate() {
+    // Calculate Voltage
+
+    // Calculate Ambient temperature
+
+    // Compensate for gain
+
+    // Offset, VDD and Ta
+
+    // Emissivity compensation
+
+    // Gradient compensation
+
+    // Normalize to sensitivity
+
+    // Calculate To
 }
