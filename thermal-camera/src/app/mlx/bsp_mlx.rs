@@ -9,23 +9,27 @@ pub const PIXEL_COUNT: usize = PIXELS_WIDTH * PIXELS_HEIGHT;
 const EEPROM_SIZE: usize = 767;
 
 struct eeprom_raw {
-    data: [u8; EEPROM_SIZE],
+    data: [u16; EEPROM_SIZE],
 }
-impl Default for eeprom_raw {
-    fn default() -> eeprom_raw {
-        let mut d: [u8; EEPROM_SIZE];
-        read(0x2440, &mut d);
 
-        return eeprom_raw { 
-            data: d,
-        }
+static mut EEPROM_RAW: eeprom_raw = eeprom_raw { data: [0x00; EEPROM_SIZE] };
+
+fn read_eeprom() {
+    let mut d: [u8; EEPROM_SIZE * 2] = [0x00; EEPROM_SIZE * 2];
+    read(0x2440, &mut d);
+
+    let mut converted: [u16; EEPROM_SIZE] = [0x00; EEPROM_SIZE];
+
+    for i in 0..EEPROM_SIZE {
+        let msb: u16 = d[i * 2 + 0] as u16;
+        let lsb: u16 = d[i * 2 + 1] as u16;
+        converted[i] = (msb << 8) | lsb;
     }
 }
 
-static EEPROM_RAW: eeprom_raw = eeprom_raw { ..Default::default() };
-
-fn get_eeprom_val(address: u16) -> u8 {
-
+fn get_eeprom_val(address: u16) -> u16 {
+    let index:usize = (address - 0x2440) as usize;
+    return unsafe { EEPROM_RAW.data[index] };
 }
 
 struct eeprom_vars {
