@@ -25,6 +25,8 @@ fn read_eeprom() {
         let lsb: u16 = d[i * 2 + 1] as u16;
         converted[i] = (msb << 8) | lsb;
     }
+
+    unsafe { EEPROM_RAW.data = converted };
 }
 
 fn get_eeprom_val(address: u16) -> u16 {
