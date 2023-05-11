@@ -4,6 +4,10 @@ const PIXELS_WIDTH: usize = 32;
 const PIXELS_HEIGHT: usize = 24;
 const PIXEL_COUNT: usize = PIXELS_WIDTH * PIXELS_HEIGHT;
 
+pub fn init() {
+    bsp_mlx::init();
+}
+
 pub fn test() {
     let mut control_reg = bsp_mlx::read_value(0x800D);
     control_reg &= !(0x80 | 0x100 | 0x200); // Reduce refresh rate to 0.5Hz

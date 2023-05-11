@@ -8,11 +8,7 @@ pub const PIXEL_COUNT: usize = PIXELS_WIDTH * PIXELS_HEIGHT;
 
 const EEPROM_SIZE: usize = 767;
 
-struct eeprom_raw {
-    data: [u16; EEPROM_SIZE],
-}
-
-static mut EEPROM_RAW: eeprom_raw = eeprom_raw { data: [0x00; EEPROM_SIZE] };
+static mut EEPROM_RAW: [u16; EEPROM_SIZE] = [0x00; EEPROM_SIZE];
 
 fn read_eeprom() {
     let mut d: [u8; EEPROM_SIZE * 2] = [0x00; EEPROM_SIZE * 2];
@@ -26,12 +22,12 @@ fn read_eeprom() {
         converted[i] = (msb << 8) | lsb;
     }
 
-    unsafe { EEPROM_RAW.data = converted };
+    unsafe { EEPROM_RAW = converted };
 }
 
 fn get_eeprom_val(address: u16) -> u16 {
     let index:usize = (address - 0x2440) as usize;
-    return unsafe { EEPROM_RAW.data[index] };
+    return unsafe { EEPROM_RAW[index] };
 }
 
 struct eeprom_vars {
@@ -83,6 +79,10 @@ struct eeprom_vars {
 
 const CAM_ADDR: u8 = 0x33;
 
+pub fn init() {
+    restore();
+}
+
 pub fn write(address: u16, data: u16) {
     let mut i2c = I2c::new().unwrap();
     i2c.set_slave_address(CAM_ADDR as u16).unwrap();
@@ -126,7 +126,10 @@ pub fn write_image(path: &str, img: &[u8], width: usize, height: usize) {
     file.write(img).expect(err_msg);
 }
 
-pub fn restore() {
+fn restore() {
+    // Read eeprom data
+    read_eeprom();
+
     // VDD
 
     // Ta
@@ -162,7 +165,7 @@ pub fn restore() {
     // Resolution control
 }
 
-pub fn calibrate() {
+fn calibrate() {
     // Calculate Voltage
 
     // Calculate Ambient temperature

@@ -1,6 +1,7 @@
 mod bsp;
 mod mlx;
 
-pub fn test() {
+pub fn init() {
+    mlx::init();
     mlx::test();
 }
