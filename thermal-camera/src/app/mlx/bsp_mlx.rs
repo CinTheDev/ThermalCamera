@@ -7,39 +7,15 @@ pub const PIXELS_HEIGHT: usize = 24;
 pub const PIXEL_COUNT: usize = PIXELS_WIDTH * PIXELS_HEIGHT;
 
 struct eeprom_raw {
-    // VDD
+    data: [u8; 767],
+}
 
-    // Ta
+fn read_eeprom() {
 
-    // Offset
+}
 
-    // Sensitivity a (i, j)
-
-    // Kv (i, j)
-
-    // Kta (i, j)
-
-    // GAIN
-
-    // KsTa
-
-    // Corner temperatures
-
-    // KsTo
-
-    // Ranged sensitivity correction
-
-    // Sensitivity a_CP
-
-    // Offset of CP
-
-    // Kv CP
-
-    // Kta CP
-
-    // TGC
-
-    // Resolution control
+fn get_eeprom_val(address: u16) -> u8 {
+    
 }
 
 struct eeprom_vars {
