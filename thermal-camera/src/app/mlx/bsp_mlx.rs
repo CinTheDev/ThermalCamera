@@ -10,24 +10,24 @@ pub const PIXEL_COUNT: usize = PIXELS_WIDTH * PIXELS_HEIGHT;
 
 const EEPROM_SIZE: usize = 767;
 
-static mut EEPROM_RAW: [u16; EEPROM_SIZE] = [0x00; EEPROM_SIZE];
+static mut EEPROM_RAW: [i16; EEPROM_SIZE] = [0x00; EEPROM_SIZE];
 
 fn read_eeprom() {
     let mut d: [u8; EEPROM_SIZE * 2] = [0x00; EEPROM_SIZE * 2];
     read(0x2440, &mut d);
 
-    let mut converted: [u16; EEPROM_SIZE] = [0x00; EEPROM_SIZE];
+    let mut converted: [i16; EEPROM_SIZE] = [0x00; EEPROM_SIZE];
 
     for i in 0..EEPROM_SIZE {
-        let msb: u16 = d[i * 2 + 0] as u16;
-        let lsb: u16 = d[i * 2 + 1] as u16;
+        let msb: i16 = d[i * 2 + 0] as i16;
+        let lsb: i16 = d[i * 2 + 1] as i16;
         converted[i] = (msb << 8) | lsb;
     }
 
     unsafe { EEPROM_RAW = converted };
 }
 
-fn get_eeprom_val(address: u16) -> u16 {
+fn get_eeprom_val(address: u16) -> i16 {
     let index:usize = (address - 0x2440) as usize;
     return unsafe { EEPROM_RAW[index] };
 }
@@ -137,11 +137,11 @@ fn restore() -> eeprom_vars {
     read_eeprom();
 
     // VDD
-    let mut K_Vdd: i16 = ((get_eeprom_val(0x2433) & 0xFF00) / power_of_two!(8) as u16) as i16;
+    let mut K_Vdd: i16 = (get_eeprom_val(0x2433) & 0xFF00) / power_of_two!(8) as i16;
     if K_Vdd > 127 {
         K_Vdd = K_Vdd - 256;
     }
-    let mut VDD: i16 = (get_eeprom_val(0x2433) & 0x00FF) as i16;
+    let mut VDD: i16 = get_eeprom_val(0x2433) & 0x00FF;
     VDD = (VDD - 256) * power_of_two!(5) as i16 - power_of_two!(13) as i16;
 
     // Ta
