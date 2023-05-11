@@ -5,7 +5,7 @@ const PIXELS_HEIGHT: usize = 24;
 const PIXEL_COUNT: usize = PIXELS_WIDTH * PIXELS_HEIGHT;
 
 pub fn test() {
-    let mut control_reg = bsp_mlx::read(0x800D);
+    let mut control_reg = bsp_mlx::read_value(0x800D);
     control_reg &= !(0x80 | 0x100 | 0x200); // Reduce refresh rate to 0.5Hz
     bsp_mlx::write(0x800D, control_reg);
 
@@ -16,7 +16,7 @@ pub fn test() {
 
 fn wait_for_data() {
     loop {
-        let status_reg = bsp_mlx::read(0x8000);
+        let status_reg = bsp_mlx::read_value(0x8000);
 
         // If that bit is a 1, it's bigger than 0
         let new_data = status_reg & 0x8 > 0;
@@ -24,7 +24,7 @@ fn wait_for_data() {
         if new_data { break }
     }
 
-    let mut status_reg = bsp_mlx::read(0x8000);
+    let mut status_reg = bsp_mlx::read_value(0x8000);
     status_reg &= !0x8; // Clear that bit
 
     bsp_mlx::write(0x8000, status_reg);
@@ -33,7 +33,7 @@ fn wait_for_data() {
 fn read_image() -> [u8; PIXEL_COUNT] {
     let mut img: [u8; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
 
-    let subpage = bsp_mlx::read(0x8000) & 0x1;
+    let subpage = bsp_mlx::read_value(0x8000) & 0x1;
     let mut offset = subpage;
 
     for _sub in 0..2 {
@@ -46,7 +46,7 @@ fn read_image() -> [u8; PIXEL_COUNT] {
     
                 addr += pos;
     
-                let meas = bsp_mlx::read(0x0400 + addr);
+                let meas = bsp_mlx::read_value(0x0400 + addr);
     
                 img[addr as usize] = (meas) as u8;
             }

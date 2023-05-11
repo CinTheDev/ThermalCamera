@@ -6,16 +6,23 @@ pub const PIXELS_WIDTH: usize = 32;
 pub const PIXELS_HEIGHT: usize = 24;
 pub const PIXEL_COUNT: usize = PIXELS_WIDTH * PIXELS_HEIGHT;
 
+const EEPROM_SIZE: usize = 767;
+
 struct eeprom_raw {
-    data: [u8; 767],
+    data: [u8; EEPROM_SIZE],
+}
+impl Default for eeprom_raw {
+    fn default() -> eeprom_raw {
+        eeprom_raw { 
+            data: [0x00; EEPROM_SIZE]
+        }
+    }
 }
 
-fn read_eeprom() {
-
-}
+static EEPROM_RAW: eeprom_raw = eeprom_raw { ..Default::default() };
 
 fn get_eeprom_val(address: u16) -> u8 {
-    
+
 }
 
 struct eeprom_vars {
@@ -78,19 +85,21 @@ pub fn write(address: u16, data: u16) {
     i2c.write(&buffer).expect("I2C write failed.");
 }
 
-pub fn read(address: u16) -> u16 {
+pub fn read(address: u16, read_buffer: &mut [u8]) {
     let mut i2c = I2c::new().unwrap();
     i2c.set_slave_address(CAM_ADDR as u16).unwrap();
 
     let mut write_buffer: [u8; 2] = [0x00; 2];
     write_buffer.copy_from_slice(&address.to_be_bytes());
 
+    i2c.write_read(&write_buffer, read_buffer).expect("I2C read failed.");
+}
+
+pub fn read_value(address: u16) -> u16 {
     let mut read_buffer: [u8; 2] = [0x00; 2];
+    read(address, &mut read_buffer);
 
-    i2c.write_read(&write_buffer, &mut read_buffer).expect("I2C read failed.");
-
-    let output = u16::from_be_bytes(read_buffer);
-    return output;
+    return u16::from_be_bytes(read_buffer);
 }
 
 pub fn write_image(path: &str, img: &[u8], width: usize, height: usize) {
