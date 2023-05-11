@@ -1,7 +1,8 @@
 use std::io::Write;
 use std::fs::File;
-use lazy_static::lazy_static;
 use rppal::i2c::I2c;
+use lazy_static::lazy_static;
+use power_of_two::power_of_two;
 
 pub const PIXELS_WIDTH: usize = 32;
 pub const PIXELS_HEIGHT: usize = 24;
@@ -32,50 +33,50 @@ fn get_eeprom_val(address: u16) -> u16 {
 }
 
 struct eeprom_vars {
-    K_Vdd: i32,
-    VDD_25: i32,
+    K_Vdd: i16,
+    VDD_25: i16,
 
-    T_a: i32,
+    T_a: i16,
 
-    pix_os_ref: [i32; PIXEL_COUNT],
+    pix_os_ref: [i16; PIXEL_COUNT],
 
-    a: [i32; PIXEL_COUNT],
+    a: [i16; PIXEL_COUNT],
 
-    Kv: [i32; PIXEL_COUNT],
+    Kv: [i16; PIXEL_COUNT],
 
-    Kta: [i32; PIXEL_COUNT],
+    Kta: [i16; PIXEL_COUNT],
 
-    GAIN: i32,
+    GAIN: i16,
 
-    KsTa: i32,
+    KsTa: i16,
 
-    Step: i32,
-    CT3: i32,
-    CT4: i32,
+    Step: i16,
+    CT3: i16,
+    CT4: i16,
 
-    Ks_To1: i32,
-    Ks_To2: i32,
-    Ks_To3: i32,
-    Ks_To4: i32,
+    Ks_To1: i16,
+    Ks_To2: i16,
+    Ks_To3: i16,
+    Ks_To4: i16,
 
-    Alpha_corr_1: i32,
-    Alpha_corr_2: i32,
-    Alpha_corr_3: i32,
-    Alpha_corr_4: i32,
+    Alpha_corr_1: i16,
+    Alpha_corr_2: i16,
+    Alpha_corr_3: i16,
+    Alpha_corr_4: i16,
 
-    a_cp_0: i32,
-    a_cp_1: i32,
+    a_cp_0: i16,
+    a_cp_1: i16,
 
-    off_cp_0: i32,
-    off_cp_1: i32,
+    off_cp_0: i16,
+    off_cp_1: i16,
 
-    Kv_cp: i32,
+    Kv_cp: i16,
 
-    K_Ta_cp: i32,
+    K_Ta_cp: i16,
 
-    TGC: i32,
+    TGC: i16,
 
-    Resolution: u32,
+    Resolution: u16,
 }
 
 lazy_static! {
@@ -136,6 +137,12 @@ fn restore() -> eeprom_vars {
     read_eeprom();
 
     // VDD
+    let mut K_Vdd: i16 = ((get_eeprom_val(0x2433) & 0xFF00) / power_of_two!(8) as u16) as i16;
+    if K_Vdd > 127 {
+        K_Vdd = K_Vdd - 256;
+    }
+    let mut VDD: i16 = (get_eeprom_val(0x2433) & 0x00FF) as i16;
+    VDD = (VDD - 256) * power_of_two!(5) as i16 - power_of_two!(13) as i16;
 
     // Ta
 
@@ -168,6 +175,11 @@ fn restore() -> eeprom_vars {
     // TGC
 
     // Resolution control
+
+    return eeprom_vars {
+        K_Vdd: K_Vdd,
+        VDD_25: VDD,
+    }
 }
 
 fn calibrate() {
