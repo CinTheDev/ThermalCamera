@@ -67,9 +67,9 @@ struct eeprom_vars {
     off_cp_0: i16,
     off_cp_1: i16,
 
-    K_V_cp: i16,
+    K_V_CP: i16,
 
-    K_Ta_cp: i16,
+    K_Ta_CP: i16,
 
     TGC: i16,
 
@@ -161,6 +161,7 @@ pub fn restore() -> eeprom_vars {
     calc_Off_CP(&mut Off_CP_0, &mut Off_CP_1);
 
     // Kv CP
+    let K_V_CP = calc_K_V_CP();
 
     // Kta CP
 
@@ -205,6 +206,8 @@ pub fn restore() -> eeprom_vars {
 
         off_cp_0: Off_CP_0,
         off_cp_1: Off_CP_1,
+
+        K_V_CP: K_V_CP,
     }
 }
 
@@ -607,4 +610,16 @@ fn calc_Off_CP(Off_CP_0: &mut i16, Off_CP_1: &mut i16) {
     }
 
     *Off_CP_1 = *Off_CP_0 + Off_CP_1_delta;
+}
+
+fn calc_K_V_CP() -> i16 {
+    let K_V_Scale: u16 = (get_eeprom_val(0x2438) & 0x0F00) as u16 / power_of_two!(8) as u16;
+
+    let mut K_V_CP_EE: i16 = (get_eeprom_val(0x243B) & 0xFF00) / power_of_two!(8) as i16;
+    if K_V_CP_EE > 127 {
+        K_V_CP_EE -= 256;
+    }
+
+    let K_V_CP: i16 = K_V_CP_EE / (2 as i16).pow(K_V_Scale as u32);
+    return K_V_CP;
 }
