@@ -118,6 +118,7 @@ pub fn restore() -> eeprom_vars {
     let pix_os_ref = calc_offset();
 
     // Sensitivity a (i, j)
+    let a = calc_a();
 
     // Kv (i, j)
 
@@ -152,6 +153,8 @@ pub fn restore() -> eeprom_vars {
         T_a: T_a,
 
         pix_os_ref: pix_os_ref,
+
+        a: a,
     }
 }
 
@@ -273,12 +276,78 @@ fn calc_offset() -> [i16; PIXEL_COUNT] {
     let mut pix_os_ref: [i16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
     for i in 0..PIXELS_WIDTH {
         for j in 0..PIXELS_HEIGHT {
-            let index = (i * PIXELS_HEIGHT + j);
+            let index = i * PIXELS_HEIGHT + j;
             pix_os_ref[index] = offset_avg;
             pix_os_ref[index] += OCC_row[i] * (2 as i16).pow(OCC_scale_row.into());
-            pix_os_ref[index] += OCC_column[i] * (2 as i16).pow(OCC_scale_column.into());
+            pix_os_ref[index] += OCC_column[j] * (2 as i16).pow(OCC_scale_column.into());
             pix_os_ref[index] += offset[index] * (2 as i16).pow(OCC_scale_remnant.into());
         }
     }
     return pix_os_ref;
+}
+
+fn calc_a() -> [i16; PIXEL_COUNT] {
+    let a_reference: i16 = get_eeprom_val(0x2421);
+
+    let a_scale: i16 = (get_eeprom_val(0x2420) & 0xF000) / power_of_two!(12) as i16 + 30;
+
+    let mut ACC_row: [i16; PIXELS_HEIGHT] = [0x00; PIXELS_HEIGHT];
+    for row in 0..PIXELS_HEIGHT/4 {
+        let address: u16 = 0x2422 + row as u16;
+
+        ACC_row[row * 4 + 0] = (get_eeprom_val(address) & 0x000F) / power_of_two!(0) as i16;
+        ACC_row[row * 4 + 1] = (get_eeprom_val(address) & 0x00F0) / power_of_two!(4) as i16;
+        ACC_row[row * 4 + 2] = (get_eeprom_val(address) & 0x0F00) / power_of_two!(8) as i16;
+        ACC_row[row * 4 + 3] = (get_eeprom_val(address) & 0xF000) / power_of_two!(12) as i16;
+
+        if ACC_row[row * 4 + 0] > 7 { ACC_row[row * 4 + 0] -= 16 }
+        if ACC_row[row * 4 + 1] > 7 { ACC_row[row * 4 + 1] -= 16 }
+        if ACC_row[row * 4 + 2] > 7 { ACC_row[row * 4 + 2] -= 16 }
+        if ACC_row[row * 4 + 3] > 7 { ACC_row[row * 4 + 3] -= 16 }
+    }
+
+    let ACC_scale_row: u16 = (get_eeprom_val(0x2420) & 0x0F00) as u16 / power_of_two!(8) as u16;
+
+    let mut ACC_column: [i16; PIXELS_WIDTH] = [0x00; PIXELS_WIDTH];
+    for column in 0..PIXELS_WIDTH/4 {
+        let address: u16 = 0x2428 + column as u16;
+
+        ACC_column[column * 4 + 0] = (get_eeprom_val(address) & 0x000F) / power_of_two!(0) as i16;
+        ACC_column[column * 4 + 1] = (get_eeprom_val(address) & 0x00F0) / power_of_two!(4) as i16;
+        ACC_column[column * 4 + 2] = (get_eeprom_val(address) & 0x0F00) / power_of_two!(8) as i16;
+        ACC_column[column * 4 + 3] = (get_eeprom_val(address) & 0xF000) / power_of_two!(12) as i16;
+
+        if ACC_column[column * 4 + 0] > 7 { ACC_column[column * 4 + 0] -= 16 }
+        if ACC_column[column * 4 + 1] > 7 { ACC_column[column * 4 + 1] -= 16 }
+        if ACC_column[column * 4 + 2] > 7 { ACC_column[column * 4 + 2] -= 16 }
+        if ACC_column[column * 4 + 3] > 7 { ACC_column[column * 4 + 3] -= 16 }
+    }
+
+    let ACC_scale_column: u16 = (get_eeprom_val(0x2420) & 0x00F0) as u16 / power_of_two!(4) as u16;
+
+    let mut a_pixel: [i16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
+    for i in 0..PIXEL_COUNT {
+        let address: u16 = 0x2440 + i as u16;
+
+        a_pixel[i] = (get_eeprom_val(address) & 0x03F0) / power_of_two!(4) as i16;
+        if a_pixel[i] > 31 {
+            a_pixel[i] -= 64;
+        }
+    }
+
+    let ACC_scale_remnant: u16 = get_eeprom_val(0x2420) as u16 & 0x000F;
+
+    let mut a: [i16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
+    for i in 0..PIXELS_WIDTH {
+        for j in 0..PIXELS_HEIGHT {
+            let index = i * PIXELS_HEIGHT + j;
+
+            a[index] = a_reference;
+            a[index] += ACC_row[i] * (2 as i16).pow(ACC_scale_row as u32);
+            a[index] += ACC_column[j] * (2 as i16).pow(ACC_scale_column as u32);
+            a[index] += a_pixel[index] * (2 as i16).pow(ACC_scale_remnant as u32);
+            a[index] /= (2 as i16).pow(a_scale as u32);
+        }
+    }
+    return a;
 }
