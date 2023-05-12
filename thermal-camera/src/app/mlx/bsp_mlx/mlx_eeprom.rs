@@ -7,24 +7,24 @@ const PIXEL_COUNT: usize = PIXELS_WIDTH * PIXELS_HEIGHT;
 
 const EEPROM_SIZE: usize = 767;
 
-static mut EEPROM_RAW: [i16; EEPROM_SIZE] = [0x00; EEPROM_SIZE];
+static mut EEPROM_RAW: [u16; EEPROM_SIZE] = [0x00; EEPROM_SIZE];
 
 fn read_eeprom() {
     let mut d: [u8; EEPROM_SIZE * 2] = [0x00; EEPROM_SIZE * 2];
     super::read(0x2440, &mut d);
 
-    let mut converted: [i16; EEPROM_SIZE] = [0x00; EEPROM_SIZE];
+    let mut converted: [u16; EEPROM_SIZE] = [0x00; EEPROM_SIZE];
 
     for i in 0..EEPROM_SIZE {
-        let msb: i16 = d[i * 2 + 0] as i16;
-        let lsb: i16 = d[i * 2 + 1] as i16;
+        let msb: u16 = d[i * 2 + 0] as u16;
+        let lsb: u16 = d[i * 2 + 1] as u16;
         converted[i] = (msb << 8) | lsb;
     }
 
     unsafe { EEPROM_RAW = converted };
 }
 
-fn get_eeprom_val(address: u16) -> i16 {
+fn get_eeprom_val(address: u16) -> u16 {
     let index:usize = (address - 0x2440) as usize;
     return unsafe { EEPROM_RAW[index] };
 }
