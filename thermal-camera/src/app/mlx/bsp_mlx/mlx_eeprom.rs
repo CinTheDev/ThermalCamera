@@ -64,8 +64,8 @@ struct eeprom_vars {
     a_CP_0: i16,
     a_CP_1: i16,
 
-    off_cp_0: i16,
-    off_cp_1: i16,
+    Off_CP_0: i16,
+    Off_CP_1: i16,
 
     K_V_CP: i16,
 
@@ -204,8 +204,8 @@ pub fn restore() -> eeprom_vars {
         a_CP_0: a_CP_0,
         a_CP_1: a_CP_1,
 
-        off_cp_0: Off_CP_0,
-        off_cp_1: Off_CP_1,
+        Off_CP_0: Off_CP_0,
+        Off_CP_1: Off_CP_1,
 
         K_V_CP: K_V_CP,
     }
