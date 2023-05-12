@@ -402,6 +402,3 @@ fn calc_K_V() -> [i16; PIXEL_COUNT] {
     return K_V;
 }
 
-// ---------
-// | Utils |
-// ---------
