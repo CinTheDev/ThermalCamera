@@ -167,6 +167,7 @@ pub fn restore() -> eeprom_vars {
     let K_Ta_CP = calc_K_Ta_CP();
 
     // TGC
+    let TGC = calc_TGC();
 
     // Resolution control
 
@@ -209,6 +210,8 @@ pub fn restore() -> eeprom_vars {
         Off_CP_1: Off_CP_1,
 
         K_V_CP: K_V_CP,
+
+        TGC: TGC,
     }
 }
 
@@ -635,4 +638,14 @@ fn calc_K_Ta_CP() -> i16 {
 
     let K_Ta_CP = K_Ta_CP_EE / (2 as i16).pow(K_Ta_scale_1 as u32);
     return K_Ta_CP;
+}
+
+fn calc_TGC() -> i16 {
+    let mut TGC_EE: i16 = get_eeprom_val(0x243C) & 0x00FF;
+    if TGC_EE > 127 {
+        TGC_EE -= 256;
+    }
+
+    let TGC = TGC_EE / power_of_two!(5) as i16;
+    return TGC;
 }
