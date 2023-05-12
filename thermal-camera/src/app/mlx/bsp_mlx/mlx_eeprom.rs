@@ -156,6 +156,9 @@ pub fn restore() -> eeprom_vars {
     calc_a_CP(&mut a_CP_0, &mut a_CP_1);
 
     // Offset of CP
+    let mut Off_CP_0: i16;
+    let mut Off_CP_1: i16;
+    calc_Off_CP(&mut Off_CP_0, &mut Off_CP_1);
 
     // Kv CP
 
@@ -199,6 +202,9 @@ pub fn restore() -> eeprom_vars {
 
         a_CP_0: a_CP_0,
         a_CP_1: a_CP_1,
+
+        off_cp_0: Off_CP_0,
+        off_cp_1: Off_CP_1,
     }
 }
 
@@ -587,4 +593,18 @@ fn calc_a_CP(a_CP_0: &mut i16, a_CP_1: &mut i16) {
 
     *a_CP_0 = (get_eeprom_val(0x2439) & 0x03FF) / (2 as i16).pow(a_scale_CP as u32);
     *a_CP_1 = *a_CP_0 * (1 + CP_P1_P0_ratio / power_of_two!(7) as i16);
+}
+
+fn calc_Off_CP(Off_CP_0: &mut i16, Off_CP_1: &mut i16) {
+    *Off_CP_0 = get_eeprom_val(0x243A) & 0x03FF;
+    if *Off_CP_0 > 511 {
+        *Off_CP_0 -= 1024;
+    }
+
+    let mut Off_CP_1_delta: i16 = (get_eeprom_val(0x243A) & 0xFC00) / power_of_two!(10) as i16;
+    if Off_CP_1_delta > 31 {
+        Off_CP_1_delta -= 64;
+    }
+
+    *Off_CP_1 = *Off_CP_0 + Off_CP_1_delta;
 }
