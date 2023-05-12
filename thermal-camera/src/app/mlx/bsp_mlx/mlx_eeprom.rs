@@ -127,6 +127,7 @@ pub fn restore() -> eeprom_vars {
     let K_Ta = calc_K_Ta();
 
     // GAIN
+    let gain = calc_gain();
 
     // KsTa
 
@@ -161,6 +162,8 @@ pub fn restore() -> eeprom_vars {
         K_V: K_V,
 
         K_Ta: K_Ta,
+
+        GAIN: gain,
     }
 }
 
@@ -470,4 +473,12 @@ fn calc_K_Ta() -> [i16; PIXEL_COUNT] {
     }
 
     return K_Ta;
+}
+
+fn calc_gain() -> i16 {
+    let mut gain = get_eeprom_val(0x2430);
+    if gain > 32767 {
+        gain -= 65536;
+    }
+    return gain;
 }
