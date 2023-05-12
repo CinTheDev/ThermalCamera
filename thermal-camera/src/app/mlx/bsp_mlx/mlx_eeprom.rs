@@ -133,6 +133,9 @@ pub fn restore() -> eeprom_vars {
     let Ks_Ta = calc_Ks_Ta();
 
     // Corner temperatures
+    let Step = calc_Step();
+    let CT3 = calc_CT3(Step);
+    let CT4 = calc_CT4(Step, CT3);
 
     // KsTo
 
@@ -167,6 +170,10 @@ pub fn restore() -> eeprom_vars {
         GAIN: gain,
 
         Ks_Ta: Ks_Ta,
+
+        Step: Step,
+        CT3: CT3,
+        CT4: CT4,
     }
 }
 
@@ -494,4 +501,16 @@ fn calc_Ks_Ta() -> i16 {
 
     let Ks_Ta: i16 = Ks_Ta_EE / power_of_two!(13) as i16;
     return Ks_Ta;
+}
+
+fn calc_Step() -> i16 {
+    return (get_eeprom_val(0x243F) & 0x3000) / power_of_two!(12) as i16 * 10;
+}
+
+fn calc_CT3(Step: i16) -> i16 {
+    return (get_eeprom_val(0x243F) & 0x00F0) / power_of_two!(4) as i16 * Step;
+}
+
+fn calc_CT4(Step: i16, CT3: i16) -> i16 {
+    return (get_eeprom_val(0x243F) & 0x0F00) / power_of_two!(8) as i16 * Step + CT3;
 }
