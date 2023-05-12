@@ -221,7 +221,7 @@ pub fn restore() -> eeprom_vars {
 }
 
 fn calc_K_Vdd() -> i16 {
-    let mut K_Vdd: i16 = (get_eeprom_val(0x2433) & 0xFF00) / power_of_two!(8) as i16;
+    let mut K_Vdd: i16 = ((get_eeprom_val(0x2433) & 0xFF00) >> 8) as i16;
     if K_Vdd > 127 {
         K_Vdd -= 256;
     }
@@ -229,19 +229,19 @@ fn calc_K_Vdd() -> i16 {
 }
 
 fn calc_VDD_25() -> i16 {
-    let mut VDD_25: i16 = get_eeprom_val(0x2433) & 0x00FF;
+    let mut VDD_25: i16 = (get_eeprom_val(0x2433) & 0x00FF) as i16;
     VDD_25 = (VDD_25 - 256) * power_of_two!(5) as i16 - power_of_two!(13) as i16;
     return VDD_25;
 }
 
 fn calc_T_a(VDD_25: i16) -> i16 {
-    let mut K_V_PTAT: i16 = (get_eeprom_val(0x2432) & 0xFC00) / power_of_two!(10) as i16;
+    let mut K_V_PTAT: i16 = ((get_eeprom_val(0x2432) & 0xFC00) >> 10) as i16;
     if K_V_PTAT > 31 {
         K_V_PTAT -= 64;
     }
     K_V_PTAT /= power_of_two!(12) as i16;
 
-    let mut K_T_PTAT: i16 = get_eeprom_val(0x2432) & 0x3FF;
+    let mut K_T_PTAT: i16 = (get_eeprom_val(0x2432) & 0x3FF) as i16;
     if K_T_PTAT > 511 {
         K_T_PTAT -= 1024;
     }
@@ -249,7 +249,7 @@ fn calc_T_a(VDD_25: i16) -> i16 {
 
     let dV: i16 = (super::read_value(0x072A) as i16 - VDD_25) / K_V_PTAT; // Datasheet just says K_V, i guessed it to be K_V_PTAT
 
-    let mut V_PTAT_25: i16 = get_eeprom_val(0x2431);
+    let mut V_PTAT_25: i16 = get_eeprom_val(0x2431) as i16;
     if V_PTAT_25 > 32767 {
         V_PTAT_25 -= 65536;
     }
@@ -264,7 +264,7 @@ fn calc_T_a(VDD_25: i16) -> i16 {
         V_BE -= 65536;
     }
 
-    let Alpha_PTAT_EE: i16 = (get_eeprom_val(0x2410) & 0xF000) / power_of_two!(12) as i16;
+    let Alpha_PTAT_EE: i16 = ((get_eeprom_val(0x2410) & 0xF000) >> 12) as i16;
     let Alpha_PTAT: i16 = Alpha_PTAT_EE / power_of_two!(2) as i16 + 8;
 
     let V_PTAT_art: i16 = (V_PTAT / (V_PTAT * Alpha_PTAT + V_BE)) * power_of_two!(18) as i16;
@@ -278,7 +278,7 @@ fn calc_T_a(VDD_25: i16) -> i16 {
 }
 
 fn calc_offset() -> [i16; PIXEL_COUNT] {
-    let mut offset_avg: i16 = get_eeprom_val(0x2411);
+    let mut offset_avg: i16 = get_eeprom_val(0x2411) as i16;
     if offset_avg > 32767 {
         offset_avg -= 65536;
     }
@@ -288,10 +288,10 @@ fn calc_offset() -> [i16; PIXEL_COUNT] {
     for row in 0..PIXELS_HEIGHT/4 {
         let address: u16 = (0x2412 + row) as u16;
 
-        OCC_row[row * 4 + 0] = (get_eeprom_val(address) & 0x000F) / power_of_two!(0) as i16;
-        OCC_row[row * 4 + 1] = (get_eeprom_val(address) & 0x00F0) / power_of_two!(4) as i16;
-        OCC_row[row * 4 + 2] = (get_eeprom_val(address) & 0x0F00) / power_of_two!(8) as i16;
-        OCC_row[row * 4 + 3] = (get_eeprom_val(address) & 0xF000) / power_of_two!(12) as i16;
+        OCC_row[row * 4 + 0] = ((get_eeprom_val(address) & 0x000F) >> 0) as i16;
+        OCC_row[row * 4 + 1] = ((get_eeprom_val(address) & 0x00F0) >> 4) as i16;
+        OCC_row[row * 4 + 2] = ((get_eeprom_val(address) & 0x0F00) >> 8) as i16;
+        OCC_row[row * 4 + 3] = ((get_eeprom_val(address) & 0xF000) >> 12) as i16;
 
         if OCC_row[row * 4 + 0] > 7 { OCC_row[row * 4 + 0] -= 16 }
         if OCC_row[row * 4 + 1] > 7 { OCC_row[row * 4 + 1] -= 16 }
@@ -307,10 +307,10 @@ fn calc_offset() -> [i16; PIXEL_COUNT] {
     for column in 0..PIXELS_WIDTH/4 {
         let address: u16 = (0x2418 + column) as u16;
 
-        OCC_column[column * 4 + 0] = (get_eeprom_val(address) & 0x000F) / power_of_two!(0) as i16;
-        OCC_column[column * 4 + 1] = (get_eeprom_val(address) & 0x00F0) / power_of_two!(4) as i16;
-        OCC_column[column * 4 + 2] = (get_eeprom_val(address) & 0x0F00) / power_of_two!(8) as i16;
-        OCC_column[column * 4 + 3] = (get_eeprom_val(address) & 0xF000) / power_of_two!(12) as i16;
+        OCC_column[column * 4 + 0] = ((get_eeprom_val(address) & 0x000F) >> 0) as i16;
+        OCC_column[column * 4 + 1] = ((get_eeprom_val(address) & 0x00F0) >> 4) as i16;
+        OCC_column[column * 4 + 2] = ((get_eeprom_val(address) & 0x0F00) >> 8) as i16;
+        OCC_column[column * 4 + 3] = ((get_eeprom_val(address) & 0xF000) >> 12) as i16;
 
         if OCC_column[column * 4 + 0] > 7 { OCC_column[column * 4 + 0] -= 16 }
         if OCC_column[column * 4 + 1] > 7 { OCC_column[column * 4 + 1] -= 16 }
@@ -326,7 +326,7 @@ fn calc_offset() -> [i16; PIXEL_COUNT] {
     for i in 0..PIXEL_COUNT {
         let address: u16 = (0x2440 + i) as u16;
 
-        offset[i] = (get_eeprom_val(address) & 0xFC00) / power_of_two!(10) as i16;
+        offset[i] = ((get_eeprom_val(address) & 0xFC00) >> 10) as i16;
         if offset[i] > 31 {
             offset[i] -= 64;
         }
@@ -349,18 +349,18 @@ fn calc_offset() -> [i16; PIXEL_COUNT] {
 }
 
 fn calc_a() -> [i16; PIXEL_COUNT] {
-    let a_reference: i16 = get_eeprom_val(0x2421);
+    let a_reference: i16 = get_eeprom_val(0x2421) as i16;
 
-    let a_scale: i16 = (get_eeprom_val(0x2420) & 0xF000) / power_of_two!(12) as i16 + 30;
+    let a_scale: i16 = ((get_eeprom_val(0x2420) & 0xF000) >> 12) as i16 + 30;
 
     let mut ACC_row: [i16; PIXELS_HEIGHT] = [0x00; PIXELS_HEIGHT];
     for row in 0..PIXELS_HEIGHT/4 {
         let address: u16 = 0x2422 + row as u16;
 
-        ACC_row[row * 4 + 0] = (get_eeprom_val(address) & 0x000F) / power_of_two!(0) as i16;
-        ACC_row[row * 4 + 1] = (get_eeprom_val(address) & 0x00F0) / power_of_two!(4) as i16;
-        ACC_row[row * 4 + 2] = (get_eeprom_val(address) & 0x0F00) / power_of_two!(8) as i16;
-        ACC_row[row * 4 + 3] = (get_eeprom_val(address) & 0xF000) / power_of_two!(12) as i16;
+        ACC_row[row * 4 + 0] = ((get_eeprom_val(address) & 0x000F) >> 0) as i16;
+        ACC_row[row * 4 + 1] = ((get_eeprom_val(address) & 0x00F0) >> 4) as i16;
+        ACC_row[row * 4 + 2] = ((get_eeprom_val(address) & 0x0F00) >> 8) as i16;
+        ACC_row[row * 4 + 3] = ((get_eeprom_val(address) & 0xF000) >> 12) as i16;
 
         if ACC_row[row * 4 + 0] > 7 { ACC_row[row * 4 + 0] -= 16 }
         if ACC_row[row * 4 + 1] > 7 { ACC_row[row * 4 + 1] -= 16 }
@@ -374,10 +374,10 @@ fn calc_a() -> [i16; PIXEL_COUNT] {
     for column in 0..PIXELS_WIDTH/4 {
         let address: u16 = 0x2428 + column as u16;
 
-        ACC_column[column * 4 + 0] = (get_eeprom_val(address) & 0x000F) / power_of_two!(0) as i16;
-        ACC_column[column * 4 + 1] = (get_eeprom_val(address) & 0x00F0) / power_of_two!(4) as i16;
-        ACC_column[column * 4 + 2] = (get_eeprom_val(address) & 0x0F00) / power_of_two!(8) as i16;
-        ACC_column[column * 4 + 3] = (get_eeprom_val(address) & 0xF000) / power_of_two!(12) as i16;
+        ACC_column[column * 4 + 0] = ((get_eeprom_val(address) & 0x000F) >> 0) as i16;
+        ACC_column[column * 4 + 1] = ((get_eeprom_val(address) & 0x00F0) >> 4) as i16;
+        ACC_column[column * 4 + 2] = ((get_eeprom_val(address) & 0x0F00) >> 8) as i16;
+        ACC_column[column * 4 + 3] = ((get_eeprom_val(address) & 0xF000) >> 12) as i16;
 
         if ACC_column[column * 4 + 0] > 7 { ACC_column[column * 4 + 0] -= 16 }
         if ACC_column[column * 4 + 1] > 7 { ACC_column[column * 4 + 1] -= 16 }
@@ -391,7 +391,7 @@ fn calc_a() -> [i16; PIXEL_COUNT] {
     for i in 0..PIXEL_COUNT {
         let address: u16 = 0x2440 + i as u16;
 
-        a_pixel[i] = (get_eeprom_val(address) & 0x03F0) / power_of_two!(4) as i16;
+        a_pixel[i] = ((get_eeprom_val(address) & 0x03F0) >> 4) as i16;
         if a_pixel[i] > 31 {
             a_pixel[i] -= 64;
         }
@@ -422,7 +422,7 @@ fn calc_K_V() -> [i16; PIXEL_COUNT] {
     for i in (0..PIXELS_HEIGHT).step_by(2) {
         for j in (0..PIXELS_WIDTH).step_by(2) {
             let index = i * PIXELS_WIDTH + j;
-            K_V[index] = (get_eeprom_val(0x2434) & 0xF000) / power_of_two!(12) as i16;
+            K_V[index] = ((get_eeprom_val(0x2434) & 0xF000) >> 12) as i16;
         }
     }
 
@@ -430,7 +430,7 @@ fn calc_K_V() -> [i16; PIXEL_COUNT] {
     for i in (1..PIXELS_HEIGHT).step_by(2) {
         for j in (0..PIXELS_WIDTH).step_by(2) {
             let index = i * PIXELS_WIDTH + j;
-            K_V[index] = (get_eeprom_val(0x2434) & 0x0F00) / power_of_two!(8) as i16;
+            K_V[index] = ((get_eeprom_val(0x2434) & 0x0F00) >> 8) as i16;
         }
     }
 
@@ -438,7 +438,7 @@ fn calc_K_V() -> [i16; PIXEL_COUNT] {
     for i in (0..PIXELS_HEIGHT).step_by(2) {
         for j in (1..PIXELS_WIDTH).step_by(2) {
             let index = i * PIXELS_WIDTH + j;
-            K_V[index] = (get_eeprom_val(0x2434) & 0x00F0) / power_of_two!(4) as i16;
+            K_V[index] = ((get_eeprom_val(0x2434) & 0x00F0) >> 4) as i16;
         }
     }
 
@@ -446,7 +446,7 @@ fn calc_K_V() -> [i16; PIXEL_COUNT] {
     for i in (1..PIXELS_HEIGHT).step_by(2) {
         for j in (1..PIXELS_WIDTH).step_by(2) {
             let index = i * PIXELS_WIDTH + j;
-            K_V[index] = (get_eeprom_val(0x2434) & 0x000F) / power_of_two!(0) as i16;
+            K_V[index] = ((get_eeprom_val(0x2434) & 0x000F) >> 0) as i16;
         }
     }
 
@@ -467,7 +467,7 @@ fn calc_K_Ta() -> [i16; PIXEL_COUNT] {
     for i in 0..PIXEL_COUNT {
         let address: u16 = 0x2440 + i as u16;
 
-        K_Ta_EE[i] = (get_eeprom_val(address) & 0x000E) / 2;
+        K_Ta_EE[i] = ((get_eeprom_val(address) & 0x000E) >> 1) as i16;
         if K_Ta_EE[i] > 3 {
             K_Ta_EE[i] -= 8;
         }
@@ -479,7 +479,7 @@ fn calc_K_Ta() -> [i16; PIXEL_COUNT] {
     for i in (0..PIXELS_HEIGHT).step_by(2) {
         for j in (0..PIXELS_WIDTH).step_by(2) {
             let index = i * PIXELS_WIDTH + j;
-            K_Ta_RC_EE[index] = (get_eeprom_val(0x2436) & 0xFF00) / power_of_two!(8) as i16;
+            K_Ta_RC_EE[index] = ((get_eeprom_val(0x2436) & 0xFF00) >> 8) as i16;
         }
     }
 
@@ -487,7 +487,7 @@ fn calc_K_Ta() -> [i16; PIXEL_COUNT] {
     for i in (1..PIXELS_HEIGHT).step_by(2) {
         for j in (0..PIXELS_WIDTH).step_by(2) {
             let index = i * PIXELS_WIDTH + j;
-            K_Ta_RC_EE[index] = (get_eeprom_val(0x2436) & 0x00FF) / power_of_two!(0) as i16;
+            K_Ta_RC_EE[index] = ((get_eeprom_val(0x2436) & 0x00FF) >> 0) as i16;
         }
     }
 
@@ -495,7 +495,7 @@ fn calc_K_Ta() -> [i16; PIXEL_COUNT] {
     for i in (0..PIXELS_HEIGHT).step_by(2) {
         for j in (1..PIXELS_WIDTH).step_by(2) {
             let index = i * PIXELS_WIDTH + j;
-            K_Ta_RC_EE[index] = (get_eeprom_val(0x2437) & 0xFF00) / power_of_two!(8) as i16;
+            K_Ta_RC_EE[index] = ((get_eeprom_val(0x2437) & 0xFF00) >> 8) as i16;
         }
     }
 
@@ -503,7 +503,7 @@ fn calc_K_Ta() -> [i16; PIXEL_COUNT] {
     for i in (1..PIXELS_HEIGHT).step_by(2) {
         for j in (1..PIXELS_WIDTH).step_by(2) {
             let index = i * PIXELS_WIDTH + j;
-            K_Ta_RC_EE[index] = (get_eeprom_val(0x2437) & 0x00FF) / power_of_two!(0) as i16;
+            K_Ta_RC_EE[index] = ((get_eeprom_val(0x2437) & 0x00FF) >> 0) as i16;
         }
     }
 
@@ -529,7 +529,7 @@ fn calc_K_Ta() -> [i16; PIXEL_COUNT] {
 }
 
 fn calc_gain() -> i16 {
-    let mut gain = get_eeprom_val(0x2430);
+    let mut gain: i16 = get_eeprom_val(0x2430) as i16;
     if gain > 32767 {
         gain -= 65536;
     }
@@ -537,7 +537,7 @@ fn calc_gain() -> i16 {
 }
 
 fn calc_Ks_Ta() -> i16 {
-    let mut Ks_Ta_EE: i16 = (get_eeprom_val(0x243C) & 0xFF00) / power_of_two!(8) as i16;
+    let mut Ks_Ta_EE: i16 = ((get_eeprom_val(0x243C) & 0xFF00) >> 8) as i16;
     if Ks_Ta_EE > 127 {
         Ks_Ta_EE -= 256;
     }
@@ -547,33 +547,33 @@ fn calc_Ks_Ta() -> i16 {
 }
 
 fn calc_Step() -> i16 {
-    return (get_eeprom_val(0x243F) & 0x3000) / power_of_two!(12) as i16 * 10;
+    return ((get_eeprom_val(0x243F) & 0x3000) >> 12) as i16 * 10;
 }
 
 fn calc_CT3(Step: i16) -> i16 {
-    return (get_eeprom_val(0x243F) & 0x00F0) / power_of_two!(4) as i16 * Step;
+    return ((get_eeprom_val(0x243F) & 0x00F0) >> 4) as i16 * Step;
 }
 
 fn calc_CT4(Step: i16, CT3: i16) -> i16 {
-    return (get_eeprom_val(0x243F) & 0x0F00) / power_of_two!(8) as i16 * Step + CT3;
+    return ((get_eeprom_val(0x243F) & 0x0F00) >> 8) as i16 * Step + CT3;
 }
 
 fn calc_Ks_To(Ks_To1: &mut i16, Ks_To2: & mut i16, Ks_To3: &mut i16, Ks_To4: &mut i16) {
     let Ks_To_scale: u16 = get_eeprom_val(0x243F) as u16 & 0x000F + 8;
 
-    let mut Ks_To1_EE: i16 = get_eeprom_val(0x243D) & 0x00FF;
+    let mut Ks_To1_EE: i16 = (get_eeprom_val(0x243D) & 0x00FF) as i16;
     if Ks_To1_EE > 127 { Ks_To1_EE -= 256 }
     *Ks_To1 = Ks_To1_EE / (2 as i16).pow(Ks_To_scale as u32);
 
-    let mut Ks_To2_EE: i16 = (get_eeprom_val(0x243D) & 0xFF00) / power_of_two!(8) as i16;
+    let mut Ks_To2_EE: i16 = ((get_eeprom_val(0x243D) & 0xFF00) >> 8) as i16;
     if Ks_To2_EE > 127 { Ks_To2_EE -= 256 }
     *Ks_To2 = Ks_To2_EE / (2 as i16).pow(Ks_To_scale as u32);
 
-    let mut Ks_To3_EE: i16 = get_eeprom_val(0x243E) & 0x00FF;
+    let mut Ks_To3_EE: i16 = (get_eeprom_val(0x243E) & 0x00FF) as i16;
     if Ks_To3_EE > 127 { Ks_To3_EE -= 256 }
     *Ks_To3 = Ks_To3_EE / (2 as i16).pow(Ks_To_scale as u32);
 
-    let mut Ks_To4_EE: i16 = (get_eeprom_val(0x243E) & 0xFF00) / power_of_two!(8) as i16;
+    let mut Ks_To4_EE: i16 = ((get_eeprom_val(0x243E) & 0xFF00) >> 8) as i16;
     if Ks_To4_EE > 127 { Ks_To4_EE -= 256 }
     *Ks_To4 = Ks_To4_EE / (2 as i16).pow(Ks_To_scale as u32);
 }
@@ -597,23 +597,23 @@ fn calc_Alpha_corr_range4(Ks_To2: i16, Ks_To3: i16, CT3: i16, CT4: i16) -> i16 {
 }
 
 fn calc_a_CP(a_CP_0: &mut i16, a_CP_1: &mut i16) {
-    let a_scale_CP = (get_eeprom_val(0x2420) & 0xF000) / power_of_two!(12) as i16 + 27;
-    let mut CP_P1_P0_ratio = (get_eeprom_val(0x2439) & 0xFC00) / power_of_two!(10) as i16;
+    let a_scale_CP = ((get_eeprom_val(0x2420) & 0xF000) >> 12) as i16 + 27;
+    let mut CP_P1_P0_ratio = ((get_eeprom_val(0x2439) & 0xFC00) >> 10) as i16;
     if CP_P1_P0_ratio > 31 {
         CP_P1_P0_ratio -= 64;
     }
 
-    *a_CP_0 = (get_eeprom_val(0x2439) & 0x03FF) / (2 as i16).pow(a_scale_CP as u32);
+    *a_CP_0 = ((get_eeprom_val(0x2439) & 0x03FF)) as i16 / (2 as i16).pow(a_scale_CP as u32);
     *a_CP_1 = *a_CP_0 * (1 + CP_P1_P0_ratio / power_of_two!(7) as i16);
 }
 
 fn calc_Off_CP(Off_CP_0: &mut i16, Off_CP_1: &mut i16) {
-    *Off_CP_0 = get_eeprom_val(0x243A) & 0x03FF;
+    *Off_CP_0 = (get_eeprom_val(0x243A) & 0x03FF) as i16;
     if *Off_CP_0 > 511 {
         *Off_CP_0 -= 1024;
     }
 
-    let mut Off_CP_1_delta: i16 = (get_eeprom_val(0x243A) & 0xFC00) / power_of_two!(10) as i16;
+    let mut Off_CP_1_delta: i16 = ((get_eeprom_val(0x243A) & 0xFC00) >> 10) as i16;
     if Off_CP_1_delta > 31 {
         Off_CP_1_delta -= 64;
     }
@@ -624,7 +624,7 @@ fn calc_Off_CP(Off_CP_0: &mut i16, Off_CP_1: &mut i16) {
 fn calc_K_V_CP() -> i16 {
     let K_V_Scale: u16 = (get_eeprom_val(0x2438) & 0x0F00) as u16 / power_of_two!(8) as u16;
 
-    let mut K_V_CP_EE: i16 = (get_eeprom_val(0x243B) & 0xFF00) / power_of_two!(8) as i16;
+    let mut K_V_CP_EE: i16 = ((get_eeprom_val(0x243B) & 0xFF00) >> 8) as i16;
     if K_V_CP_EE > 127 {
         K_V_CP_EE -= 256;
     }
@@ -636,7 +636,7 @@ fn calc_K_V_CP() -> i16 {
 fn calc_K_Ta_CP() -> i16 {
     let K_Ta_scale_1: u16 = (get_eeprom_val(0x2438) & 0x00F0) as u16 / power_of_two!(4) as u16 + 8;
 
-    let mut K_Ta_CP_EE: i16 = get_eeprom_val(0x243B) & 0x00FF;
+    let mut K_Ta_CP_EE: i16 = (get_eeprom_val(0x243B) & 0x00FF) as i16;
     if K_Ta_CP_EE > 127 {
         K_Ta_CP_EE -= 256;
     }
@@ -646,7 +646,7 @@ fn calc_K_Ta_CP() -> i16 {
 }
 
 fn calc_TGC() -> i16 {
-    let mut TGC_EE: i16 = get_eeprom_val(0x243C) & 0x00FF;
+    let mut TGC_EE: i16 = (get_eeprom_val(0x243C) & 0x00FF) as i16;
     if TGC_EE > 127 {
         TGC_EE -= 256;
     }
