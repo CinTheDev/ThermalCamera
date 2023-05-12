@@ -225,7 +225,7 @@ fn calc_offset() -> [i16; PIXEL_COUNT] {
     }
 
     // OCC row i
-    let mut OCC_row: [i16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
+    let mut OCC_row: [i16; PIXELS_HEIGHT] = [0x00; PIXELS_HEIGHT];
     for row in 0..PIXELS_HEIGHT/4 {
         let address: u16 = (0x2412 + row) as u16;
 
@@ -244,7 +244,7 @@ fn calc_offset() -> [i16; PIXEL_COUNT] {
     let OCC_scale_row: u16 = (get_eeprom_val(0x2410) & 0x0F00) as u16 / power_of_two!(8) as u16;
 
     // OCC column
-    let mut OCC_column: [i16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
+    let mut OCC_column: [i16; PIXELS_WIDTH] = [0x00; PIXELS_WIDTH];
     for column in 0..PIXELS_WIDTH/4 {
         let address: u16 = (0x2418 + column) as u16;
 
@@ -277,9 +277,9 @@ fn calc_offset() -> [i16; PIXEL_COUNT] {
     let OCC_scale_remnant: u16 = get_eeprom_val(0x2410) as u16 & 0x000F;
 
     let mut pix_os_ref: [i16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
-    for i in 0..PIXELS_WIDTH {
-        for j in 0..PIXELS_HEIGHT {
-            let index = i * PIXELS_HEIGHT + j;
+    for i in 0..PIXELS_HEIGHT {
+        for j in 0..PIXELS_WIDTH {
+            let index = i * PIXELS_WIDTH + j;
             pix_os_ref[index] = offset_avg;
             pix_os_ref[index] += OCC_row[i] * (2 as i16).pow(OCC_scale_row.into());
             pix_os_ref[index] += OCC_column[j] * (2 as i16).pow(OCC_scale_column.into());
@@ -341,9 +341,9 @@ fn calc_a() -> [i16; PIXEL_COUNT] {
     let ACC_scale_remnant: u16 = get_eeprom_val(0x2420) as u16 & 0x000F;
 
     let mut a: [i16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
-    for i in 0..PIXELS_WIDTH {
-        for j in 0..PIXELS_HEIGHT {
-            let index = i * PIXELS_HEIGHT + j;
+    for i in 0..PIXELS_HEIGHT {
+        for j in 0..PIXELS_WIDTH {
+            let index = i * PIXELS_WIDTH + j;
 
             a[index] = a_reference;
             a[index] += ACC_row[i] * (2 as i16).pow(ACC_scale_row as u32);
@@ -360,33 +360,33 @@ fn calc_K_V() -> [i16; PIXEL_COUNT] {
 
     let mut K_V: [i16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
     // EVEN EVEN
-    for i in (0..PIXELS_WIDTH).step_by(2) {
-        for j in (0..PIXELS_HEIGHT).step_by(2) {
-            let index = i * PIXELS_HEIGHT + j;
+    for i in (0..PIXELS_HEIGHT).step_by(2) {
+        for j in (0..PIXELS_WIDTH).step_by(2) {
+            let index = i * PIXELS_WIDTH + j;
             K_V[index] = (get_eeprom_val(0x2434) & 0xF000) / power_of_two!(12) as i16;
         }
     }
 
     // ODD EVEN
-    for i in (1..PIXELS_WIDTH).step_by(2) {
-        for j in (0..PIXELS_HEIGHT).step_by(2) {
-            let index = i * PIXELS_HEIGHT + j;
+    for i in (1..PIXELS_HEIGHT).step_by(2) {
+        for j in (0..PIXELS_WIDTH).step_by(2) {
+            let index = i * PIXELS_WIDTH + j;
             K_V[index] = (get_eeprom_val(0x2434) & 0x0F00) / power_of_two!(8) as i16;
         }
     }
 
     // EVEN ODD
-    for i in (0..PIXELS_WIDTH).step_by(2) {
-        for j in (1..PIXELS_HEIGHT).step_by(2) {
-            let index = i * PIXELS_HEIGHT + j;
+    for i in (0..PIXELS_HEIGHT).step_by(2) {
+        for j in (1..PIXELS_WIDTH).step_by(2) {
+            let index = i * PIXELS_WIDTH + j;
             K_V[index] = (get_eeprom_val(0x2434) & 0x00F0) / power_of_two!(4) as i16;
         }
     }
 
     // ODD ODD
-    for i in (1..PIXELS_WIDTH).step_by(2) {
+    for i in (1..PIXELS_HEIGHT).step_by(2) {
         for j in (1..PIXELS_WIDTH).step_by(2) {
-            let index = i * PIXELS_HEIGHT + j;
+            let index = i * PIXELS_WIDTH + j;
             K_V[index] = (get_eeprom_val(0x2434) & 0x000F) / power_of_two!(0) as i16;
         }
     }
