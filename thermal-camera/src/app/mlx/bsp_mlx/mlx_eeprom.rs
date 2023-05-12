@@ -29,7 +29,7 @@ fn get_eeprom_val(address: u16) -> i16 {
     return unsafe { EEPROM_RAW[index] };
 }
 
-struct eeprom_vars {
+pub struct eeprom_vars {
     K_Vdd: i16,
     VDD_25: i16,
 
@@ -138,10 +138,10 @@ pub fn restore() -> eeprom_vars {
     let CT4 = calc_CT4(Step, CT3);
 
     // Ks_To
-    let mut Ks_To1: i16;
-    let mut Ks_To2: i16;
-    let mut Ks_To3: i16;
-    let mut Ks_To4: i16;
+    let mut Ks_To1: i16 = 0;
+    let mut Ks_To2: i16 = 0;
+    let mut Ks_To3: i16 = 0;
+    let mut Ks_To4: i16 = 0;
     calc_Ks_To(&mut Ks_To1, &mut Ks_To2, &mut Ks_To3, &mut Ks_To4);
 
     // Ranged sensitivity correction
@@ -151,13 +151,13 @@ pub fn restore() -> eeprom_vars {
     let Alpha_corr_range4 = calc_Alpha_corr_range4(Ks_To2, Ks_To3, CT3, CT4);
 
     // Sensitivity a_CP
-    let mut a_CP_0: i16;
-    let mut a_CP_1: i16;
+    let mut a_CP_0: i16 = 0;
+    let mut a_CP_1: i16 = 0;
     calc_a_CP(&mut a_CP_0, &mut a_CP_1);
 
     // Offset of CP
-    let mut Off_CP_0: i16;
-    let mut Off_CP_1: i16;
+    let mut Off_CP_0: i16 = 0;
+    let mut Off_CP_1: i16 = 0;
     calc_Off_CP(&mut Off_CP_0, &mut Off_CP_1);
 
     // Kv CP
