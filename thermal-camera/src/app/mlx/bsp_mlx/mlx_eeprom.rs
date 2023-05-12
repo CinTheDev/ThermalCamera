@@ -39,9 +39,9 @@ struct eeprom_vars {
 
     a: [i16; PIXEL_COUNT],
 
-    Kv: [i16; PIXEL_COUNT],
+    K_V: [i16; PIXEL_COUNT],
 
-    Kta: [i16; PIXEL_COUNT],
+    K_Ta: [i16; PIXEL_COUNT],
 
     GAIN: i16,
 
@@ -67,7 +67,7 @@ struct eeprom_vars {
     off_cp_0: i16,
     off_cp_1: i16,
 
-    Kv_cp: i16,
+    K_V_cp: i16,
 
     K_Ta_cp: i16,
 
@@ -120,7 +120,8 @@ pub fn restore() -> eeprom_vars {
     // Sensitivity a (i, j)
     let a = calc_a();
 
-    // Kv (i, j)
+    // K_V (i, j)
+    let K_V = calc_K_V();
 
     // Kta (i, j)
 
@@ -155,6 +156,8 @@ pub fn restore() -> eeprom_vars {
         pix_os_ref: pix_os_ref,
 
         a: a,
+
+        K_V: K_V,
     }
 }
 
@@ -351,3 +354,54 @@ fn calc_a() -> [i16; PIXEL_COUNT] {
     }
     return a;
 }
+
+fn calc_K_V() -> [i16; PIXEL_COUNT] {
+    let K_V_scale: u16 = (get_eeprom_val(0x2438) & 0x0F00) as u16 / power_of_two!(8) as u16;
+
+    let mut K_V: [i16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
+    // EVEN EVEN
+    for i in (0..PIXELS_WIDTH).step_by(2) {
+        for j in (0..PIXELS_HEIGHT).step_by(2) {
+            let index = i * PIXELS_HEIGHT + j;
+            K_V[index] = (get_eeprom_val(0x2434) & 0xF000) / power_of_two!(12) as i16;
+        }
+    }
+
+    // ODD EVEN
+    for i in (1..PIXELS_WIDTH).step_by(2) {
+        for j in (0..PIXELS_HEIGHT).step_by(2) {
+            let index = i * PIXELS_HEIGHT + j;
+            K_V[index] = (get_eeprom_val(0x2434) & 0x0F00) / power_of_two!(8) as i16;
+        }
+    }
+
+    // EVEN ODD
+    for i in (0..PIXELS_WIDTH).step_by(2) {
+        for j in (1..PIXELS_HEIGHT).step_by(2) {
+            let index = i * PIXELS_HEIGHT + j;
+            K_V[index] = (get_eeprom_val(0x2434) & 0x00F0) / power_of_two!(4) as i16;
+        }
+    }
+
+    // ODD ODD
+    for i in (1..PIXELS_WIDTH).step_by(2) {
+        for j in (1..PIXELS_WIDTH).step_by(2) {
+            let index = i * PIXELS_HEIGHT + j;
+            K_V[index] = (get_eeprom_val(0x2434) & 0x000F) / power_of_two!(0) as i16;
+        }
+    }
+
+    for i in 0..PIXEL_COUNT {
+        if K_V[i] > 7 {
+            K_V[i] -= 16;
+        }
+
+        K_V[i] /= (2 as i16).pow(K_V_scale as u32);
+    }
+
+    return K_V;
+}
+
+// ---------
+// | Utils |
+// ---------
