@@ -80,57 +80,39 @@ lazy_static! {
     static ref EEPROM_VARS: eeprom_vars = restore();
 }
 
+// ----------------------------
+// | Temperature Calculations |
+// ----------------------------
+
+pub fn calibrate() {
+    // Calculate Voltage
+
+    // Calculate Ambient temperature
+
+    // Compensate for gain
+
+    // Offset, VDD and Ta
+
+    // Emissivity compensation
+
+    // Gradient compensation
+
+    // Normalize to sensitivity
+
+    // Calculate To
+}
+
+
 pub fn restore() -> eeprom_vars {
     // Read eeprom data
     read_eeprom();
 
     // VDD
-    let mut K_Vdd: i16 = (get_eeprom_val(0x2433) & 0xFF00) / power_of_two!(8) as i16;
-    if K_Vdd > 127 {
-        K_Vdd -= 256;
-    }
-    let mut VDD_25: i16 = get_eeprom_val(0x2433) & 0x00FF;
-    VDD_25 = (VDD_25 - 256) * power_of_two!(5) as i16 - power_of_two!(13) as i16;
+    let K_Vdd = calc_K_Vdd();
+    let VDD_25 = calc_VDD_25();
 
     // Ta
-    let mut K_V_PTAT: i16 = (get_eeprom_val(0x2432) & 0xFC00) / power_of_two!(10) as i16;
-    if K_V_PTAT > 31 {
-        K_V_PTAT -= 64;
-    }
-    K_V_PTAT /= power_of_two!(12) as i16;
-
-    let mut K_T_PTAT: i16 = get_eeprom_val(0x2432) & 0x3FF;
-    if K_T_PTAT > 511 {
-        K_T_PTAT -= 1024;
-    }
-    K_T_PTAT /= power_of_two!(3) as i16;
-
-    let dV: i16 = (super::read_value(0x072A) as i16 - VDD_25) / K_V_PTAT; // Datasheet just says K_V, i guessed it to be K_V_PTAT
-
-    let mut V_PTAT_25: i16 = get_eeprom_val(0x2431);
-    if V_PTAT_25 > 32767 {
-        V_PTAT_25 -= 65536;
-    }
-
-    let mut V_PTAT: i16 = super::read_value(0x0720) as i16;
-    if V_PTAT > 32767 {
-        V_PTAT -= 65536;
-    }
-
-    let mut V_BE: i16 = super::read_value(0x0700) as i16;
-    if V_BE > 32767 {
-        V_BE -= 65536;
-    }
-
-    let Alpha_PTAT_EE: i16 = (get_eeprom_val(0x2410) & 0xF000) / power_of_two!(12) as i16;
-    let Alpha_PTAT: i16 = Alpha_PTAT_EE / power_of_two!(2) as i16 + 8;
-
-    let V_PTAT_art: i16 = (V_PTAT / (V_PTAT * Alpha_PTAT + V_BE)) * power_of_two!(18) as i16;
-
-    let mut T_a: i16 = V_PTAT_art / (1 + K_V_PTAT * dV);
-    T_a -= V_PTAT_25;
-    T_a /= K_T_PTAT;
-    T_a += 25;
+    let T_a = calc_T_a(VDD_25);
 
     // Offset
 
@@ -170,20 +152,59 @@ pub fn restore() -> eeprom_vars {
     }
 }
 
-fn calibrate() {
-    // Calculate Voltage
+fn calc_K_Vdd() -> i16 {
+    let mut K_Vdd: i16 = (get_eeprom_val(0x2433) & 0xFF00) / power_of_two!(8) as i16;
+    if K_Vdd > 127 {
+        K_Vdd -= 256;
+    }
+    return K_Vdd;
+}
 
-    // Calculate Ambient temperature
+fn calc_VDD_25() -> i16 {
+    let mut VDD_25: i16 = get_eeprom_val(0x2433) & 0x00FF;
+    VDD_25 = (VDD_25 - 256) * power_of_two!(5) as i16 - power_of_two!(13) as i16;
+    return VDD_25;
+}
 
-    // Compensate for gain
+fn calc_T_a(VDD_25: i16) -> i16 {
+    let mut K_V_PTAT: i16 = (get_eeprom_val(0x2432) & 0xFC00) / power_of_two!(10) as i16;
+    if K_V_PTAT > 31 {
+        K_V_PTAT -= 64;
+    }
+    K_V_PTAT /= power_of_two!(12) as i16;
 
-    // Offset, VDD and Ta
+    let mut K_T_PTAT: i16 = get_eeprom_val(0x2432) & 0x3FF;
+    if K_T_PTAT > 511 {
+        K_T_PTAT -= 1024;
+    }
+    K_T_PTAT /= power_of_two!(3) as i16;
 
-    // Emissivity compensation
+    let dV: i16 = (super::read_value(0x072A) as i16 - VDD_25) / K_V_PTAT; // Datasheet just says K_V, i guessed it to be K_V_PTAT
 
-    // Gradient compensation
+    let mut V_PTAT_25: i16 = get_eeprom_val(0x2431);
+    if V_PTAT_25 > 32767 {
+        V_PTAT_25 -= 65536;
+    }
 
-    // Normalize to sensitivity
+    let mut V_PTAT: i16 = super::read_value(0x0720) as i16;
+    if V_PTAT > 32767 {
+        V_PTAT -= 65536;
+    }
 
-    // Calculate To
+    let mut V_BE: i16 = super::read_value(0x0700) as i16;
+    if V_BE > 32767 {
+        V_BE -= 65536;
+    }
+
+    let Alpha_PTAT_EE: i16 = (get_eeprom_val(0x2410) & 0xF000) / power_of_two!(12) as i16;
+    let Alpha_PTAT: i16 = Alpha_PTAT_EE / power_of_two!(2) as i16 + 8;
+
+    let V_PTAT_art: i16 = (V_PTAT / (V_PTAT * Alpha_PTAT + V_BE)) * power_of_two!(18) as i16;
+
+    let mut T_a: i16 = V_PTAT_art / (1 + K_V_PTAT * dV);
+    T_a -= V_PTAT_25;
+    T_a /= K_T_PTAT;
+    T_a += 25;
+
+    return T_a;
 }
