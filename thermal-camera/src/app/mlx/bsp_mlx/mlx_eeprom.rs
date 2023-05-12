@@ -1,7 +1,6 @@
 #![allow(non_snake_case)]
 
 use lazy_static::lazy_static;
-use power_of_two::power_of_two;
 
 const PIXELS_WIDTH: usize = 32;
 const PIXELS_HEIGHT: usize = 24;
@@ -232,7 +231,7 @@ fn calc_K_Vdd() -> i16 {
 
 fn calc_VDD_25() -> i16 {
     let mut VDD_25: i16 = (get_eeprom_val(0x2433) & 0x00FF) as i16;
-    VDD_25 = (VDD_25 - 256) * power_of_two!(5) as i16 - power_of_two!(13) as i16;
+    VDD_25 = ((VDD_25 - 256) << 5) - (2 as i16).pow(13);
     return VDD_25;
 }
 
@@ -241,13 +240,13 @@ fn calc_T_a(VDD_25: i16) -> i16 {
     if K_V_PTAT > 31 {
         K_V_PTAT -= 64;
     }
-    K_V_PTAT /= power_of_two!(12) as i16;
+    K_V_PTAT >>= 12;
 
     let mut K_T_PTAT: i16 = (get_eeprom_val(0x2432) & 0x3FF) as i16;
     if K_T_PTAT > 511 {
         K_T_PTAT -= 1024;
     }
-    K_T_PTAT /= power_of_two!(3) as i16;
+    K_T_PTAT >>= 3;
 
     let dV: i16 = (super::read_value(0x072A) as i16 - VDD_25) / K_V_PTAT; // Datasheet just says K_V, i guessed it to be K_V_PTAT
 
@@ -267,9 +266,9 @@ fn calc_T_a(VDD_25: i16) -> i16 {
     //}
 
     let Alpha_PTAT_EE: i16 = ((get_eeprom_val(0x2410) & 0xF000) >> 12) as i16;
-    let Alpha_PTAT: i16 = Alpha_PTAT_EE / power_of_two!(2) as i16 + 8;
+    let Alpha_PTAT: i16 = (Alpha_PTAT_EE >> 2) + 8;
 
-    let V_PTAT_art: i16 = (V_PTAT / (V_PTAT * Alpha_PTAT + V_BE)) * power_of_two!(18) as i16;
+    let V_PTAT_art: i16 = (V_PTAT / (V_PTAT * Alpha_PTAT + V_BE)) << 18;
 
     let mut T_a: i16 = V_PTAT_art / (1 + K_V_PTAT * dV);
     T_a -= V_PTAT_25;
@@ -302,7 +301,7 @@ fn calc_offset() -> [i16; PIXEL_COUNT] {
     }
 
     // OCC scale row
-    let OCC_scale_row: u16 = (get_eeprom_val(0x2410) & 0x0F00) as u16 / power_of_two!(8) as u16;
+    let OCC_scale_row: u16 = (get_eeprom_val(0x2410) & 0x0F00) as u16 >> 8;
 
     // OCC column
     let mut OCC_column: [i16; PIXELS_WIDTH] = [0x00; PIXELS_WIDTH];
@@ -321,7 +320,7 @@ fn calc_offset() -> [i16; PIXEL_COUNT] {
     }
 
     // OCC scale column
-    let OCC_scale_column: u16 = (get_eeprom_val(0x2410) & 0x00F0) as u16 / power_of_two!(4) as u16;
+    let OCC_scale_column: u16 = (get_eeprom_val(0x2410) & 0x00F0) as u16 >> 4;
 
     // offset
     let mut offset: [i16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
@@ -370,7 +369,7 @@ fn calc_a() -> [i16; PIXEL_COUNT] {
         if ACC_row[row * 4 + 3] > 7 { ACC_row[row * 4 + 3] -= 16 }
     }
 
-    let ACC_scale_row: u16 = (get_eeprom_val(0x2420) & 0x0F00) as u16 / power_of_two!(8) as u16;
+    let ACC_scale_row: u16 = (get_eeprom_val(0x2420) & 0x0F00) as u16 >> 8;
 
     let mut ACC_column: [i16; PIXELS_WIDTH] = [0x00; PIXELS_WIDTH];
     for column in 0..PIXELS_WIDTH/4 {
@@ -387,7 +386,7 @@ fn calc_a() -> [i16; PIXEL_COUNT] {
         if ACC_column[column * 4 + 3] > 7 { ACC_column[column * 4 + 3] -= 16 }
     }
 
-    let ACC_scale_column: u16 = (get_eeprom_val(0x2420) & 0x00F0) as u16 / power_of_two!(4) as u16;
+    let ACC_scale_column: u16 = (get_eeprom_val(0x2420) & 0x00F0) as u16 >> 4;
 
     let mut a_pixel: [i16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
     for i in 0..PIXEL_COUNT {
@@ -417,7 +416,7 @@ fn calc_a() -> [i16; PIXEL_COUNT] {
 }
 
 fn calc_K_V() -> [i16; PIXEL_COUNT] {
-    let K_V_scale: u16 = (get_eeprom_val(0x2438) & 0x0F00) as u16 / power_of_two!(8) as u16;
+    let K_V_scale: u16 = (get_eeprom_val(0x2438) & 0x0F00) as u16 >> 8;
 
     let mut K_V: [i16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
     // EVEN EVEN
@@ -515,7 +514,7 @@ fn calc_K_Ta() -> [i16; PIXEL_COUNT] {
         }
     }
 
-    let K_Ta_scale1: u16 = (get_eeprom_val(0x2438) & 0x00F0) as u16 / power_of_two!(4) as u16 + 8;
+    let K_Ta_scale1: u16 = ((get_eeprom_val(0x2438) & 0x00F0) as u16 >> 4) + 8;
 
     let K_Ta_scale2: u16 = (get_eeprom_val(0x2438) & 0x000F) as u16;
 
@@ -544,7 +543,7 @@ fn calc_Ks_Ta() -> i16 {
         Ks_Ta_EE -= 256;
     }
 
-    let Ks_Ta: i16 = Ks_Ta_EE / power_of_two!(13) as i16;
+    let Ks_Ta: i16 = Ks_Ta_EE >> 13;
     return Ks_Ta;
 }
 
@@ -606,7 +605,7 @@ fn calc_a_CP(a_CP_0: &mut i16, a_CP_1: &mut i16) {
     }
 
     *a_CP_0 = ((get_eeprom_val(0x2439) & 0x03FF)) as i16 / (2 as i16).pow(a_scale_CP as u32);
-    *a_CP_1 = *a_CP_0 * (1 + CP_P1_P0_ratio / power_of_two!(7) as i16);
+    *a_CP_1 = *a_CP_0 * (1 + (CP_P1_P0_ratio >> 7));
 }
 
 fn calc_Off_CP(Off_CP_0: &mut i16, Off_CP_1: &mut i16) {
@@ -624,7 +623,7 @@ fn calc_Off_CP(Off_CP_0: &mut i16, Off_CP_1: &mut i16) {
 }
 
 fn calc_K_V_CP() -> i16 {
-    let K_V_Scale: u16 = (get_eeprom_val(0x2438) & 0x0F00) as u16 / power_of_two!(8) as u16;
+    let K_V_Scale: u16 = (get_eeprom_val(0x2438) & 0x0F00) as u16 >> 8;
 
     let mut K_V_CP_EE: i16 = ((get_eeprom_val(0x243B) & 0xFF00) >> 8) as i16;
     if K_V_CP_EE > 127 {
@@ -636,7 +635,7 @@ fn calc_K_V_CP() -> i16 {
 }
 
 fn calc_K_Ta_CP() -> i16 {
-    let K_Ta_scale_1: u16 = (get_eeprom_val(0x2438) & 0x00F0) as u16 / power_of_two!(4) as u16 + 8;
+    let K_Ta_scale_1: u16 = ((get_eeprom_val(0x2438) & 0x00F0) as u16 >> 4) + 8;
 
     let mut K_Ta_CP_EE: i16 = (get_eeprom_val(0x243B) & 0x00FF) as i16;
     if K_Ta_CP_EE > 127 {
@@ -653,10 +652,10 @@ fn calc_TGC() -> i16 {
         TGC_EE -= 256;
     }
 
-    let TGC = TGC_EE / power_of_two!(5) as i16;
+    let TGC = TGC_EE >> 5;
     return TGC;
 }
 
 fn calc_Resolution() -> u16 {
-    return (get_eeprom_val(0x2438) & 0x3000) as u16 / power_of_two!(12) as u16;
+    return (get_eeprom_val(0x2438) & 0x3000) as u16 >> 12;
 }
