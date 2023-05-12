@@ -137,7 +137,12 @@ pub fn restore() -> eeprom_vars {
     let CT3 = calc_CT3(Step);
     let CT4 = calc_CT4(Step, CT3);
 
-    // KsTo
+    // Ks_To
+    let mut Ks_To1: i16;
+    let mut Ks_To2: i16;
+    let mut Ks_To3: i16;
+    let mut Ks_To4: i16;
+    calc_Ks_To(&mut Ks_To1, &mut Ks_To2, &mut Ks_To3, &mut Ks_To4);
 
     // Ranged sensitivity correction
 
@@ -174,6 +179,11 @@ pub fn restore() -> eeprom_vars {
         Step: Step,
         CT3: CT3,
         CT4: CT4,
+
+        Ks_To1: Ks_To1,
+        Ks_To2: Ks_To2,
+        Ks_To3: Ks_To3,
+        Ks_To4: Ks_To4,
     }
 }
 
@@ -513,4 +523,24 @@ fn calc_CT3(Step: i16) -> i16 {
 
 fn calc_CT4(Step: i16, CT3: i16) -> i16 {
     return (get_eeprom_val(0x243F) & 0x0F00) / power_of_two!(8) as i16 * Step + CT3;
+}
+
+fn calc_Ks_To(Ks_To1: &mut i16, Ks_To2: & mut i16, Ks_To3: &mut i16, Ks_To4: &mut i16) {
+    let Ks_To_scale: u16 = get_eeprom_val(0x243F) as u16 & 0x000F + 8;
+
+    let mut Ks_To1_EE: i16 = get_eeprom_val(0x243D) & 0x00FF;
+    if Ks_To1_EE > 127 { Ks_To1_EE -= 256 }
+    *Ks_To1 = Ks_To1_EE / (2 as i16).pow(Ks_To_scale as u32);
+
+    let mut Ks_To2_EE: i16 = (get_eeprom_val(0x243D) & 0xFF00) / power_of_two!(8) as i16;
+    if Ks_To2_EE > 127 { Ks_To2_EE -= 256 }
+    *Ks_To2 = Ks_To2_EE / (2 as i16).pow(Ks_To_scale as u32);
+
+    let mut Ks_To3_EE: i16 = get_eeprom_val(0x243E) & 0x00FF;
+    if Ks_To3_EE > 127 { Ks_To3_EE -= 256 }
+    *Ks_To3 = Ks_To3_EE / (2 as i16).pow(Ks_To_scale as u32);
+
+    let mut Ks_To4_EE: i16 = (get_eeprom_val(0x243E) & 0xFF00) / power_of_two!(8) as i16;
+    if Ks_To4_EE > 127 { Ks_To4_EE -= 256 }
+    *Ks_To4 = Ks_To4_EE / (2 as i16).pow(Ks_To_scale as u32);
 }
