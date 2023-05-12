@@ -164,6 +164,7 @@ pub fn restore() -> eeprom_vars {
     let K_V_CP = calc_K_V_CP();
 
     // Kta CP
+    let K_Ta_CP = calc_K_Ta_CP();
 
     // TGC
 
@@ -622,4 +623,16 @@ fn calc_K_V_CP() -> i16 {
 
     let K_V_CP: i16 = K_V_CP_EE / (2 as i16).pow(K_V_Scale as u32);
     return K_V_CP;
+}
+
+fn calc_K_Ta_CP() -> i16 {
+    let K_Ta_scale_1: u16 = (get_eeprom_val(0x2438) & 0x00F0) as u16 / power_of_two!(4) as u16 + 8;
+
+    let mut K_Ta_CP_EE: i16 = get_eeprom_val(0x243B) & 0x00FF;
+    if K_Ta_CP_EE > 127 {
+        K_Ta_CP_EE -= 256;
+    }
+
+    let K_Ta_CP = K_Ta_CP_EE / (2 as i16).pow(K_Ta_scale_1 as u32);
+    return K_Ta_CP;
 }
