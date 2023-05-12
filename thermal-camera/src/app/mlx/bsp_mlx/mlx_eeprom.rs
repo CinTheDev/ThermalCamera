@@ -61,8 +61,8 @@ struct eeprom_vars {
     Alpha_corr_3: i16,
     Alpha_corr_4: i16,
 
-    a_cp_0: i16,
-    a_cp_1: i16,
+    a_CP_0: i16,
+    a_CP_1: i16,
 
     off_cp_0: i16,
     off_cp_1: i16,
@@ -151,6 +151,9 @@ pub fn restore() -> eeprom_vars {
     let Alpha_corr_range4 = calc_Alpha_corr_range4(Ks_To2, Ks_To3, CT3, CT4);
 
     // Sensitivity a_CP
+    let mut a_CP_0: i16;
+    let mut a_CP_1: i16;
+    calc_a_CP(&mut a_CP_0, &mut a_CP_1);
 
     // Offset of CP
 
@@ -193,6 +196,9 @@ pub fn restore() -> eeprom_vars {
         Alpha_corr_2: Alpha_corr_range2,
         Alpha_corr_3: Alpha_corr_range3,
         Alpha_corr_4: Alpha_corr_range4,
+
+        a_CP_0: a_CP_0,
+        a_CP_1: a_CP_1,
     }
 }
 
@@ -570,4 +576,15 @@ fn calc_Alpha_corr_range3(Ks_To2: i16, CT3: i16) -> i16 {
 
 fn calc_Alpha_corr_range4(Ks_To2: i16, Ks_To3: i16, CT3: i16, CT4: i16) -> i16 {
     return (1 + Ks_To2 * CT3) * (1 + Ks_To3 * (CT4 - CT3));
+}
+
+fn calc_a_CP(a_CP_0: &mut i16, a_CP_1: &mut i16) {
+    let a_scale_CP = (get_eeprom_val(0x2420) & 0xF000) / power_of_two!(12) as i16 + 27;
+    let mut CP_P1_P0_ratio = (get_eeprom_val(0x2439) & 0xFC00) / power_of_two!(10) as i16;
+    if CP_P1_P0_ratio > 31 {
+        CP_P1_P0_ratio -= 64;
+    }
+
+    *a_CP_0 = (get_eeprom_val(0x2439) & 0x03FF) / (2 as i16).pow(a_scale_CP as u32);
+    *a_CP_1 = *a_CP_0 * (1 + CP_P1_P0_ratio / power_of_two!(7) as i16);
 }
