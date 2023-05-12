@@ -123,7 +123,8 @@ pub fn restore() -> eeprom_vars {
     // K_V (i, j)
     let K_V = calc_K_V();
 
-    // Kta (i, j)
+    // K_Ta (i, j)
+    let K_Ta = calc_K_Ta();
 
     // GAIN
 
@@ -158,6 +159,8 @@ pub fn restore() -> eeprom_vars {
         a: a,
 
         K_V: K_V,
+
+        K_Ta: K_Ta,
     }
 }
 
@@ -402,3 +405,69 @@ fn calc_K_V() -> [i16; PIXEL_COUNT] {
     return K_V;
 }
 
+fn calc_K_Ta() -> [i16; PIXEL_COUNT] {
+    let mut K_Ta_EE: [i16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
+
+    for i in 0..PIXEL_COUNT {
+        let address: u16 = 0x2440 + i as u16;
+
+        K_Ta_EE[i] = (get_eeprom_val(address) & 0x000E) / 2;
+        if K_Ta_EE[i] > 3 {
+            K_Ta_EE[i] -= 8;
+        }
+    }
+
+    let mut K_Ta_RC_EE: [i16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
+
+    // EVEN EVEN
+    for i in (0..PIXELS_HEIGHT).step_by(2) {
+        for j in (0..PIXELS_WIDTH).step_by(2) {
+            let index = i * PIXELS_WIDTH + j;
+            K_Ta_RC_EE[index] = (get_eeprom_val(0x2436) & 0xFF00) / power_of_two!(8) as i16;
+        }
+    }
+
+    // ODD EVEN
+    for i in (1..PIXELS_HEIGHT).step_by(2) {
+        for j in (0..PIXELS_WIDTH).step_by(2) {
+            let index = i * PIXELS_WIDTH + j;
+            K_Ta_RC_EE[index] = (get_eeprom_val(0x2436) & 0x00FF) / power_of_two!(0) as i16;
+        }
+    }
+
+    // EVEN ODD
+    for i in (0..PIXELS_HEIGHT).step_by(2) {
+        for j in (1..PIXELS_WIDTH).step_by(2) {
+            let index = i * PIXELS_WIDTH + j;
+            K_Ta_RC_EE[index] = (get_eeprom_val(0x2437) & 0xFF00) / power_of_two!(8) as i16;
+        }
+    }
+
+    // ODD ODD
+    for i in (1..PIXELS_HEIGHT).step_by(2) {
+        for j in (1..PIXELS_WIDTH).step_by(2) {
+            let index = i * PIXELS_WIDTH + j;
+            K_Ta_RC_EE[index] = (get_eeprom_val(0x2437) & 0x00FF) / power_of_two!(0) as i16;
+        }
+    }
+
+    for i in 0..PIXEL_COUNT {
+        if K_Ta_RC_EE[i] > 127 {
+            K_Ta_RC_EE[i] -= 256;
+        }
+    }
+
+    let K_Ta_scale1: u16 = (get_eeprom_val(0x2438) & 0x00F0) as u16 / power_of_two!(4) as u16 + 8;
+
+    let K_Ta_scale2: u16 = (get_eeprom_val(0x2438) & 0x000F) as u16;
+
+    let mut K_Ta: [i16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
+
+    for i in 0..PIXEL_COUNT {
+        K_Ta[i] = K_Ta_RC_EE[i];
+        K_Ta[i] += K_Ta_EE[i] * (2 as i16).pow(K_Ta_scale2 as u32);
+        K_Ta[i] /= (2 as i16).pow(K_Ta_scale1 as u32);
+    }
+
+    return K_Ta;
+}
