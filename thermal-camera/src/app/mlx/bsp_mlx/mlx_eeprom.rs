@@ -45,7 +45,7 @@ struct eeprom_vars {
 
     GAIN: i16,
 
-    KsTa: i16,
+    Ks_Ta: i16,
 
     Step: i16,
     CT3: i16,
@@ -129,7 +129,8 @@ pub fn restore() -> eeprom_vars {
     // GAIN
     let gain = calc_gain();
 
-    // KsTa
+    // Ks_Ta
+    let Ks_Ta = calc_Ks_Ta();
 
     // Corner temperatures
 
@@ -164,6 +165,8 @@ pub fn restore() -> eeprom_vars {
         K_Ta: K_Ta,
 
         GAIN: gain,
+
+        Ks_Ta: Ks_Ta,
     }
 }
 
@@ -481,4 +484,14 @@ fn calc_gain() -> i16 {
         gain -= 65536;
     }
     return gain;
+}
+
+fn calc_Ks_Ta() -> i16 {
+    let mut Ks_Ta_EE: i16 = (get_eeprom_val(0x243C) & 0xFF00) / power_of_two!(8) as i16;
+    if Ks_Ta_EE > 127 {
+        Ks_Ta_EE -= 256;
+    }
+
+    let Ks_Ta: i16 = Ks_Ta_EE / power_of_two!(13) as i16;
+    return Ks_Ta;
 }
