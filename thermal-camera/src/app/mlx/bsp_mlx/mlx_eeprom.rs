@@ -170,6 +170,7 @@ pub fn restore() -> eeprom_vars {
     let TGC = calc_TGC();
 
     // Resolution control
+    let Resolution = calc_Resolution();
 
     return eeprom_vars {
         K_Vdd: K_Vdd,
@@ -212,6 +213,8 @@ pub fn restore() -> eeprom_vars {
         K_V_CP: K_V_CP,
 
         TGC: TGC,
+
+        Resolution: Resolution,
     }
 }
 
@@ -648,4 +651,8 @@ fn calc_TGC() -> i16 {
 
     let TGC = TGC_EE / power_of_two!(5) as i16;
     return TGC;
+}
+
+fn calc_Resolution() -> u16 {
+    return (get_eeprom_val(0x2438) & 0x3000) as u16 / power_of_two!(12) as u16;
 }
