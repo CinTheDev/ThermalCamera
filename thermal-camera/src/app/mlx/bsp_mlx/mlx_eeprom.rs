@@ -212,6 +212,8 @@ pub fn restore() -> eeprom_vars {
 
         K_V_CP: K_V_CP,
 
+        K_Ta_CP: K_Ta_CP,
+
         TGC: TGC,
 
         Resolution: Resolution,
