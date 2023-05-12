@@ -145,6 +145,10 @@ pub fn restore() -> eeprom_vars {
     calc_Ks_To(&mut Ks_To1, &mut Ks_To2, &mut Ks_To3, &mut Ks_To4);
 
     // Ranged sensitivity correction
+    let Alpha_corr_range1 = calc_Alpha_corr_range1(Ks_To1);
+    let Alpha_corr_range2 = calc_Alpha_corr_range2();
+    let Alpha_corr_range3 = calc_Alpha_corr_range3(Ks_To2, CT3);
+    let Alpha_corr_range4 = calc_Alpha_corr_range4(Ks_To2, Ks_To3, CT3, CT4);
 
     // Sensitivity a_CP
 
@@ -184,6 +188,11 @@ pub fn restore() -> eeprom_vars {
         Ks_To2: Ks_To2,
         Ks_To3: Ks_To3,
         Ks_To4: Ks_To4,
+
+        Alpha_corr_1: Alpha_corr_range1,
+        Alpha_corr_2: Alpha_corr_range2,
+        Alpha_corr_3: Alpha_corr_range3,
+        Alpha_corr_4: Alpha_corr_range4,
     }
 }
 
@@ -543,4 +552,22 @@ fn calc_Ks_To(Ks_To1: &mut i16, Ks_To2: & mut i16, Ks_To3: &mut i16, Ks_To4: &mu
     let mut Ks_To4_EE: i16 = (get_eeprom_val(0x243E) & 0xFF00) / power_of_two!(8) as i16;
     if Ks_To4_EE > 127 { Ks_To4_EE -= 256 }
     *Ks_To4 = Ks_To4_EE / (2 as i16).pow(Ks_To_scale as u32);
+}
+
+fn calc_Alpha_corr_range1(Ks_To1: i16) -> i16 {
+    // TODO
+    // The inversion seems weird
+    return 1 / (1 + Ks_To1 * 40);
+}
+
+fn calc_Alpha_corr_range2() -> i16 {
+    return 1;
+}
+
+fn calc_Alpha_corr_range3(Ks_To2: i16, CT3: i16) -> i16 {
+    return 1 + Ks_To2 * CT3;
+}
+
+fn calc_Alpha_corr_range4(Ks_To2: i16, Ks_To3: i16, CT3: i16, CT4: i16) -> i16 {
+    return (1 + Ks_To2 * CT3) * (1 + Ks_To3 * (CT4 - CT3));
 }
