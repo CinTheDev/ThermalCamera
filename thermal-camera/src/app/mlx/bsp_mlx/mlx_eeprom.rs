@@ -1,3 +1,5 @@
+#![allow(non_snake_case)]
+
 use lazy_static::lazy_static;
 use power_of_two::power_of_two;
 
