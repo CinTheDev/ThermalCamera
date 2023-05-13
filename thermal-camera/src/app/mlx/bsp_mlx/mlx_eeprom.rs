@@ -436,9 +436,9 @@ fn calc_offset() -> [i16; PIXEL_COUNT] {
         for j in 0..PIXELS_WIDTH {
             let index = i * PIXELS_WIDTH + j;
             pix_os_ref[index] = offset_avg;
-            pix_os_ref[index] += OCC_row[i] * (2 as i16).pow(OCC_scale_row.into());
-            pix_os_ref[index] += OCC_column[j] * (2 as i16).pow(OCC_scale_column.into());
-            pix_os_ref[index] += offset[index] * (2 as i16).pow(OCC_scale_remnant.into());
+            pix_os_ref[index] += OCC_row[i] << OCC_scale_row;
+            pix_os_ref[index] += OCC_column[j] << OCC_scale_column;
+            pix_os_ref[index] += offset[index] << OCC_scale_remnant;
         }
     }
     return pix_os_ref;
