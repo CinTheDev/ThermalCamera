@@ -98,13 +98,13 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
     // Compensate for gain
     let K_gain:f32 = EEPROM_VARS.GAIN as f32 / (super::read_value(0x070A) as i16) as f32;
 
-    let mut pix_gain: [f32; PIXEL_COUNT];
+    let mut pix_gain: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
     for i in 0..PIXEL_COUNT {
         pix_gain[i] = pix_data[i] as f32 * K_gain;
     }
 
     // Offset, VDD and Ta
-    let mut pix_os: [f32; PIXEL_COUNT];
+    let mut pix_os: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
     for i in 0..PIXEL_COUNT {
         pix_os[i] = pix_gain[i];
 
@@ -117,7 +117,7 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
     // Emissivity compensation
     // In example the result is divided by 1, so I'm leaving this step out
     // TODO: Maybe add emissivity in the future
-    let mut V_IR_Em_compensated: [f32; PIXEL_COUNT];
+    let mut V_IR_Em_compensated: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
     for i in 0..PIXEL_COUNT {
         V_IR_Em_compensated[i] = pix_os[i] / 1.0;
     }
@@ -126,8 +126,8 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
     let pix_gain_CP_SP0: f32 = super::read_value(0x0708) as i16 as f32 * K_gain;
     let pix_gain_CP_SP1: f32 = super::read_value(0x0728) as i16 as f32 * K_gain;
 
-    let mut pix_OS_CP_SP0: [f32; PIXEL_COUNT];
-    let mut pix_OS_CP_SP1: [f32; PIXEL_COUNT];
+    let mut pix_OS_CP_SP0: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
+    let mut pix_OS_CP_SP1: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
     for i in 0..PIXEL_COUNT {
         pix_OS_CP_SP0[i] = pix_gain_CP_SP0;
         pix_OS_CP_SP1[i] = pix_gain_CP_SP1;
@@ -140,7 +140,7 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
     }
 
     // Gradient compensation
-    let mut pattern: [u16; PIXEL_COUNT];
+    let mut pattern: [u16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
 
     for i in 0..PIXEL_COUNT {
         pattern[i] = (i as u16 - 1) / 32;
@@ -152,7 +152,7 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
         pattern[i] = pattern[i] ^ v;
     }
 
-    let mut V_IR_compensated: [f32; PIXEL_COUNT];
+    let mut V_IR_compensated: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
     for i in 0..PIXEL_COUNT {
         V_IR_compensated[i] = V_IR_Em_compensated[i];
 
@@ -160,7 +160,7 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
     }
 
     // Normalize to sensitivity
-    let mut a_comp: [f32; PIXEL_COUNT];
+    let mut a_comp: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
     for i in 0..PIXEL_COUNT {
         a_comp[i] = EEPROM_VARS.a[i];
 
@@ -176,7 +176,7 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
 
     let T_a_r = T_rK4 - (T_rK4 - T_aK4) / 1.0; // 1.0 is emissivity
 
-    let mut S_x: [f32; PIXEL_COUNT];
+    let mut S_x: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
     for i in 0..PIXEL_COUNT {
         S_x[i] = EEPROM_VARS.Ks_To2;
 
@@ -184,7 +184,7 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
         S_x[i] *= (a_comp[i].powi(3) * V_IR_compensated[i] + a_comp[i].powi(4) * T_a_r).powf(1.0 / 4.0);
     }
 
-    let mut T_o: [f32; PIXEL_COUNT];
+    let mut T_o: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
     for i in 0..PIXEL_COUNT {
         T_o[i] = V_IR_compensated[i];
         T_o[i] /= a_comp[i] * (1.0 - EEPROM_VARS.Ks_To2 * 273.15) + S_x[i];
