@@ -85,7 +85,10 @@ fn get_eeprom_val(address: u16) -> u16 {
 // | Temperature Calculations |
 // ----------------------------
 
-pub fn calibrate() {
+pub fn evaluate() {
+    // We keep Resolution at default, so the coefficient will be just 1
+    let Resolution_corr = 1;
+
     // Calculate Voltage
 
     // Calculate Ambient temperature
