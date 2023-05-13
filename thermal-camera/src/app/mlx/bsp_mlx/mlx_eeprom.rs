@@ -18,7 +18,7 @@ pub struct EepromVars {
 
     a: [i16; PIXEL_COUNT],
 
-    K_V: [i16; PIXEL_COUNT],
+    K_V: [f32; PIXEL_COUNT],
 
     K_Ta: [f32; PIXEL_COUNT],
 
@@ -510,15 +510,15 @@ fn calc_a() -> [i16; PIXEL_COUNT] {
     return a;
 }
 
-fn calc_K_V() -> [i16; PIXEL_COUNT] {
+fn calc_K_V() -> [f32; PIXEL_COUNT] {
     let K_V_scale: u16 = (get_eeprom_val(0x2438) & 0x0F00) as u16 >> 8;
 
-    let mut K_V: [i16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
+    let mut K_V: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
     // EVEN EVEN
     for i in (0..PIXELS_HEIGHT).step_by(2) {
         for j in (0..PIXELS_WIDTH).step_by(2) {
             let index = i * PIXELS_WIDTH + j;
-            K_V[index] = ((get_eeprom_val(0x2434) & 0xF000) >> 12) as i16;
+            K_V[index] = ((get_eeprom_val(0x2434) & 0xF000) >> 12) as i16 as f32;
         }
     }
 
@@ -526,7 +526,7 @@ fn calc_K_V() -> [i16; PIXEL_COUNT] {
     for i in (1..PIXELS_HEIGHT).step_by(2) {
         for j in (0..PIXELS_WIDTH).step_by(2) {
             let index = i * PIXELS_WIDTH + j;
-            K_V[index] = ((get_eeprom_val(0x2434) & 0x0F00) >> 8) as i16;
+            K_V[index] = ((get_eeprom_val(0x2434) & 0x0F00) >> 8) as i16 as f32;
         }
     }
 
@@ -534,7 +534,7 @@ fn calc_K_V() -> [i16; PIXEL_COUNT] {
     for i in (0..PIXELS_HEIGHT).step_by(2) {
         for j in (1..PIXELS_WIDTH).step_by(2) {
             let index = i * PIXELS_WIDTH + j;
-            K_V[index] = ((get_eeprom_val(0x2434) & 0x00F0) >> 4) as i16;
+            K_V[index] = ((get_eeprom_val(0x2434) & 0x00F0) >> 4) as i16 as f32;
         }
     }
 
@@ -542,16 +542,16 @@ fn calc_K_V() -> [i16; PIXEL_COUNT] {
     for i in (1..PIXELS_HEIGHT).step_by(2) {
         for j in (1..PIXELS_WIDTH).step_by(2) {
             let index = i * PIXELS_WIDTH + j;
-            K_V[index] = ((get_eeprom_val(0x2434) & 0x000F) >> 0) as i16;
+            K_V[index] = ((get_eeprom_val(0x2434) & 0x000F) >> 0) as i16 as f32;
         }
     }
 
     for i in 0..PIXEL_COUNT {
-        if K_V[i] > 7 {
-            K_V[i] -= 16;
+        if K_V[i] > 7.0 {
+            K_V[i] -= 16.0;
         }
 
-        K_V[i] /= (2 as i16).pow(K_V_scale as u32);
+        K_V[i] /= (2.0 as f32).powi(K_V_scale as i32);
     }
 
     return K_V;
