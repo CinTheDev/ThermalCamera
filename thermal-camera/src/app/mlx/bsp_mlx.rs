@@ -55,6 +55,6 @@ pub fn write_image(path: &str, img: &[u8], width: usize, height: usize) {
     file.write(img).expect(err_msg);
 }
 
-pub fn evaluate_image(pix_data: [u16; PIXEL_COUNT]) -> f32 {
+pub fn evaluate_image(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
     return mlx_eeprom::evaluate(pix_data);
 }

@@ -69,7 +69,7 @@ fn take_image() -> [u8; PIXEL_COUNT] {
     // Let 0°C be black, and 50°C be white
     let mut res: [u8; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
     for i in 0..PIXEL_COUNT {
-        res[i] = ((grid_eval * (255.0/50.0)).round() as u8).max(0).min(255);
+        res[i] = ((grid_eval[i] * (255.0/50.0)).round() as u8).max(0).min(255);
     }
     return res;
 }
