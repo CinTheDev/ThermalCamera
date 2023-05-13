@@ -16,7 +16,7 @@ pub struct EepromVars {
 
     pix_os_ref: [i16; PIXEL_COUNT],
 
-    a: [i16; PIXEL_COUNT],
+    a: [f32; PIXEL_COUNT],
 
     K_V: [f32; PIXEL_COUNT],
 
@@ -24,33 +24,33 @@ pub struct EepromVars {
 
     GAIN: i16,
 
-    Ks_Ta: i16,
+    Ks_Ta: f32,
 
     Step: i16,
     CT3: i16,
     CT4: i16,
 
-    Ks_To1: i16,
-    Ks_To2: i16,
-    Ks_To3: i16,
-    Ks_To4: i16,
+    Ks_To1: f32,
+    Ks_To2: f32,
+    Ks_To3: f32,
+    Ks_To4: f32,
 
     Alpha_corr_1: f32,
     Alpha_corr_2: f32,
     Alpha_corr_3: f32,
     Alpha_corr_4: f32,
 
-    a_CP_0: i16,
-    a_CP_1: i16,
+    a_CP_0: f32,
+    a_CP_1: f32,
 
     Off_CP_0: i16,
     Off_CP_1: i16,
 
-    K_V_CP: i16,
+    K_V_CP: f32,
 
-    K_Ta_CP: i16,
+    K_Ta_CP: f32,
 
-    TGC: i16,
+    TGC: f32,
 
     Resolution: u16,
 }
@@ -85,7 +85,7 @@ fn get_eeprom_val(address: u16) -> u16 {
 // | Temperature Calculations |
 // ----------------------------
 
-pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> f32 {
+pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
     // We keep Resolution at default, so the coefficient will be just 1
     let Resolution_corr = 1;
 
@@ -111,7 +111,7 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> f32 {
         let coef_1: f32 = 1.0 + EEPROM_VARS.K_Ta[i] * (T_a - 25.0);
         let coef_2: f32 = 1.0 + EEPROM_VARS.K_V[i] * (V_dd - 3.3);
 
-        pix_os[i] -= EEPROM_VARS.pix_os_ref[i] * coef_1 * coef_2;
+        pix_os[i] -= EEPROM_VARS.pix_os_ref[i] as f32 * coef_1 * coef_2;
     }
 
     // Emissivity compensation
@@ -123,8 +123,8 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> f32 {
     }
 
     // CP gain compensation
-    let pix_gain_CP_SP0: f32 = super::read_value(0x0708) as i16 * K_gain;
-    let pix_gain_CP_SP1: f32 = super::read_value(0x0728) as i16 * K_gain;
+    let pix_gain_CP_SP0: f32 = super::read_value(0x0708) as i16 as f32 * K_gain;
+    let pix_gain_CP_SP1: f32 = super::read_value(0x0728) as i16 as f32 * K_gain;
 
     let mut pix_OS_CP_SP0: [f32; PIXEL_COUNT];
     let mut pix_OS_CP_SP1: [f32; PIXEL_COUNT];
@@ -132,22 +132,22 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> f32 {
         pix_OS_CP_SP0[i] = pix_gain_CP_SP0;
         pix_OS_CP_SP1[i] = pix_gain_CP_SP1;
 
-        let coef_1: f32 = (1 + EEPROM_VARS.K_Ta_CP * (EEPROM_VARS.T_a - 25.0));
-        let coef_2: f32 = (1 + EEPROM_VARS.K_V_CP * (V_dd - 3.3));
+        let coef_1: f32 = 1.0 + EEPROM_VARS.K_Ta_CP * (EEPROM_VARS.T_a - 25.0);
+        let coef_2: f32 = 1.0 + EEPROM_VARS.K_V_CP * (V_dd - 3.3);
 
-        pix_OS_CP_SP0[i] -= EEPROM_VARS.Off_CP_0 * coef_1 * coef_2;
-        pix_OS_CP_SP1[i] -= EEPROM_VARS.Off_CP_1 * coef_1 * coef_2;
+        pix_OS_CP_SP0[i] -= EEPROM_VARS.Off_CP_0 as f32 * coef_1 * coef_2;
+        pix_OS_CP_SP1[i] -= EEPROM_VARS.Off_CP_1 as f32 * coef_1 * coef_2;
     }
 
     // Gradient compensation
     let mut pattern: [u16; PIXEL_COUNT];
 
     for i in 0..PIXEL_COUNT {
-        pattern[i] = (i - 1) >> 5;
+        pattern[i] = (i as u16 - 1) / 32;
         pattern[i] -= pattern[i] & !0x0001;
 
-        let mut v: u16 = i - 1;
-        v -= (i - 1) & !0x0001;
+        let mut v: u16 = i as u16 - 1;
+        v -= (i as u16 - 1) & !0x0001;
 
         pattern[i] = pattern[i] ^ v;
     }
@@ -156,7 +156,7 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> f32 {
     for i in 0..PIXEL_COUNT {
         V_IR_compensated[i] = V_IR_Em_compensated[i];
 
-        V_IR_compensated[i] -= EEPROM_VARS.TGC * ((1 - pattern[i]) * pix_OS_CP_SP0[i] + pattern[i] * pix_OS_CP_SP1[i]);
+        V_IR_compensated[i] -= EEPROM_VARS.TGC * ((1 - pattern[i]) as f32 * pix_OS_CP_SP0[i] + pattern[i] as f32 * pix_OS_CP_SP1[i]);
     }
 
     // Normalize to sensitivity
@@ -164,9 +164,9 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> f32 {
     for i in 0..PIXEL_COUNT {
         a_comp[i] = EEPROM_VARS.a[i];
 
-        a_comp[i] -= EEPROM_VARS.TGC * ((1 - pattern[i] * EEPROM_VARS.a_CP_0 + pattern * EEPROM_VARS.a_CP_1));
+        a_comp[i] -= EEPROM_VARS.TGC * ((1 - pattern[i]) as f32 * EEPROM_VARS.a_CP_0 + pattern[i] as f32 * EEPROM_VARS.a_CP_1);
 
-        a_comp[i] *= 1 + EEPROM_VARS.Ks_Ta * (EEPROM_VARS.T_a - 25.0);
+        a_comp[i] *= 1.0 + EEPROM_VARS.Ks_Ta * (EEPROM_VARS.T_a - 25.0);
     }
 
     // Calculate To
@@ -181,13 +181,13 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> f32 {
         S_x[i] = EEPROM_VARS.Ks_To2;
 
         // This is fourth root
-        S_x *= (a_comp[i].powi(3) * V_IR_compensated[i] + a_comp[i].powi(4) * T_a_r).powf(1.0 / 4.0);
+        S_x[i] *= (a_comp[i].powi(3) * V_IR_compensated[i] + a_comp[i].powi(4) * T_a_r).powf(1.0 / 4.0);
     }
 
     let T_o: [f32; PIXEL_COUNT];
     for i in 0..PIXEL_COUNT {
         T_o[i] = V_IR_compensated[i];
-        T_o[i] /= a_comp[i] * (1 - EEPROM_VARS.Ks_To2 * 273.15) + S_x[i];
+        T_o[i] /= a_comp[i] * (1.0 - EEPROM_VARS.Ks_To2 * 273.15) + S_x[i];
         T_o[i] += T_a_r;
         T_o[i] = T_o[i].powf(1.0 / 4.0);
         T_o[i] -= 273.15;
@@ -233,10 +233,10 @@ pub fn restore() -> EepromVars {
     let CT4 = calc_CT4(Step, CT3);
 
     // Ks_To
-    let mut Ks_To1: i16 = 0;
-    let mut Ks_To2: i16 = 0;
-    let mut Ks_To3: i16 = 0;
-    let mut Ks_To4: i16 = 0;
+    let mut Ks_To1: f32 = 0.0;
+    let mut Ks_To2: f32 = 0.0;
+    let mut Ks_To3: f32 = 0.0;
+    let mut Ks_To4: f32 = 0.0;
     calc_Ks_To(&mut Ks_To1, &mut Ks_To2, &mut Ks_To3, &mut Ks_To4);
 
     // Ranged sensitivity correction
@@ -246,8 +246,8 @@ pub fn restore() -> EepromVars {
     let Alpha_corr_range4 = calc_Alpha_corr_range4(Ks_To2, Ks_To3, CT3, CT4);
 
     // Sensitivity a_CP
-    let mut a_CP_0: i16 = 0;
-    let mut a_CP_1: i16 = 0;
+    let mut a_CP_0: f32 = 0.0;
+    let mut a_CP_1: f32 = 0.0;
     calc_a_CP(&mut a_CP_0, &mut a_CP_1);
 
     // Offset of CP
@@ -335,7 +335,7 @@ fn calc_T_a(VDD_25: i16) -> f32 {
     if K_V_PTAT > 31.0 {
         K_V_PTAT -= 64.0;
     }
-    K_V_PTAT /= (2 as f32).powi(12);
+    K_V_PTAT /= (2.0 as f32).powi(12);
 
     let mut K_T_PTAT: f32 = (get_eeprom_val(0x2432) & 0x3FF) as f32;
     if K_T_PTAT > 511.0 {
@@ -345,25 +345,25 @@ fn calc_T_a(VDD_25: i16) -> f32 {
 
     let dV: f32 = (super::read_value(0x072A) as i16 - VDD_25) as f32 / K_V_PTAT; // Datasheet just says K_V, i guessed it to be K_V_PTAT
 
-    let V_PTAT_25: i16 = get_eeprom_val(0x2431) as i16;
+    let V_PTAT_25: f32 = get_eeprom_val(0x2431) as i16 as f32;
     //if V_PTAT_25 > 32767 {
     //    V_PTAT_25 -= 65536;
     //}
 
-    let V_PTAT: i16 = super::read_value(0x0720) as i16;
+    let V_PTAT: f32 = super::read_value(0x0720) as i16 as f32;
     //if V_PTAT > 32767 {
     //    V_PTAT -= 65536;
     //}
 
-    let V_BE: i16 = super::read_value(0x0700) as i16;
+    let V_BE: f32 = super::read_value(0x0700) as i16 as f32;
     //if V_BE > 32767 {
     //    V_BE -= 65536;
     //}
 
     let Alpha_PTAT_EE: i16 = ((get_eeprom_val(0x2410) & 0xF000) >> 12) as i16;
-    let Alpha_PTAT: i16 = (Alpha_PTAT_EE >> 2) + 8;
+    let Alpha_PTAT: f32 = (Alpha_PTAT_EE as f32 / 4.0) + 8.0;
 
-    let V_PTAT_art: f32 = (V_PTAT as f32 / (V_PTAT * Alpha_PTAT + V_BE) as f32) * (2.0 as f32).powi(18);
+    let V_PTAT_art: f32 = (V_PTAT as f32 / (V_PTAT * Alpha_PTAT + V_BE)) * (2.0 as f32).powi(18);
 
     let mut T_a: f32 = V_PTAT_art / (1.0 + K_V_PTAT * dV);
     T_a -= V_PTAT_25 as f32;
@@ -444,7 +444,7 @@ fn calc_offset() -> [i16; PIXEL_COUNT] {
     return pix_os_ref;
 }
 
-fn calc_a() -> [i16; PIXEL_COUNT] {
+fn calc_a() -> [f32; PIXEL_COUNT] {
     let a_reference: i16 = get_eeprom_val(0x2421) as i16;
 
     let a_scale: i16 = ((get_eeprom_val(0x2420) & 0xF000) >> 12) as i16 + 30;
@@ -495,16 +495,16 @@ fn calc_a() -> [i16; PIXEL_COUNT] {
 
     let ACC_scale_remnant: u16 = get_eeprom_val(0x2420) as u16 & 0x000F;
 
-    let mut a: [i16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
+    let mut a: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
     for i in 0..PIXELS_HEIGHT {
         for j in 0..PIXELS_WIDTH {
             let index = i * PIXELS_WIDTH + j;
 
-            a[index] = a_reference;
-            a[index] += ACC_row[i] * (2 as i16).pow(ACC_scale_row as u32);
-            a[index] += ACC_column[j] * (2 as i16).pow(ACC_scale_column as u32);
-            a[index] += a_pixel[index] * (2 as i16).pow(ACC_scale_remnant as u32);
-            a[index] /= (2 as i16).pow(a_scale as u32);
+            a[index] = a_reference as f32;
+            a[index] += ACC_row[i] as f32 * (2.0 as f32).powi(ACC_scale_row as i32);
+            a[index] += ACC_column[j] as f32 * (2.0 as f32).powi(ACC_scale_column as i32);
+            a[index] += a_pixel[index] as f32 * (2.0 as f32).powi(ACC_scale_remnant as i32);
+            a[index] /= (2.0 as f32).powi(a_scale as i32);
         }
     }
     return a;
@@ -632,13 +632,13 @@ fn calc_gain() -> i16 {
     return gain;
 }
 
-fn calc_Ks_Ta() -> i16 {
+fn calc_Ks_Ta() -> f32 {
     let mut Ks_Ta_EE: i16 = ((get_eeprom_val(0x243C) & 0xFF00) >> 8) as i16;
     if Ks_Ta_EE > 127 {
         Ks_Ta_EE -= 256;
     }
 
-    let Ks_Ta: i16 = Ks_Ta_EE >> 13;
+    let Ks_Ta: f32 = Ks_Ta_EE as f32 / (2.0 as f32).powi(13);
     return Ks_Ta;
 }
 
@@ -654,27 +654,27 @@ fn calc_CT4(Step: i16, CT3: i16) -> i16 {
     return ((get_eeprom_val(0x243F) & 0x0F00) >> 8) as i16 * Step + CT3;
 }
 
-fn calc_Ks_To(Ks_To1: &mut i16, Ks_To2: & mut i16, Ks_To3: &mut i16, Ks_To4: &mut i16) {
-    let Ks_To_scale: u16 = get_eeprom_val(0x243F) as u16 & 0x000F + 8;
+fn calc_Ks_To(Ks_To1: &mut f32, Ks_To2: & mut f32, Ks_To3: &mut f32, Ks_To4: &mut f32) {
+    let Ks_To_scale: f32 = (get_eeprom_val(0x243F) as u16 & 0x000F + 8) as f32;
 
     let mut Ks_To1_EE: i16 = (get_eeprom_val(0x243D) & 0x00FF) as i16;
     if Ks_To1_EE > 127 { Ks_To1_EE -= 256 }
-    *Ks_To1 = Ks_To1_EE >> Ks_To_scale;
+    *Ks_To1 = Ks_To1_EE as f32 / Ks_To_scale;
 
     let mut Ks_To2_EE: i16 = ((get_eeprom_val(0x243D) & 0xFF00) >> 8) as i16;
     if Ks_To2_EE > 127 { Ks_To2_EE -= 256 }
-    *Ks_To2 = Ks_To2_EE >> Ks_To_scale;
+    *Ks_To2 = Ks_To2_EE as f32 / Ks_To_scale;
 
     let mut Ks_To3_EE: i16 = (get_eeprom_val(0x243E) & 0x00FF) as i16;
     if Ks_To3_EE > 127 { Ks_To3_EE -= 256 }
-    *Ks_To3 = Ks_To3_EE >> Ks_To_scale;
+    *Ks_To3 = Ks_To3_EE as f32 / Ks_To_scale;
 
     let mut Ks_To4_EE: i16 = ((get_eeprom_val(0x243E) & 0xFF00) >> 8) as i16;
     if Ks_To4_EE > 127 { Ks_To4_EE -= 256 }
-    *Ks_To4 = Ks_To4_EE >> Ks_To_scale;
+    *Ks_To4 = Ks_To4_EE as f32 / Ks_To_scale;
 }
 
-fn calc_Alpha_corr_range1(Ks_To1: i16) -> f32 {
+fn calc_Alpha_corr_range1(Ks_To1: f32) -> f32 {
     return 1.0 / (1.0 + Ks_To1 * 40.0);
 }
 
@@ -682,23 +682,23 @@ fn calc_Alpha_corr_range2() -> f32 {
     return 1.0;
 }
 
-fn calc_Alpha_corr_range3(Ks_To2: i16, CT3: i16) -> f32 {
-    return 1.0 + Ks_To2 * CT3;
+fn calc_Alpha_corr_range3(Ks_To2: f32, CT3: i16) -> f32 {
+    return 1.0 + Ks_To2 * CT3 as f32;
 }
 
-fn calc_Alpha_corr_range4(Ks_To2: i16, Ks_To3: i16, CT3: i16, CT4: i16) -> f32 {
-    return (1.0 + Ks_To2 * CT3) * (1.0 + Ks_To3 * (CT4 - CT3));
+fn calc_Alpha_corr_range4(Ks_To2: f32, Ks_To3: f32, CT3: i16, CT4: i16) -> f32 {
+    return (1.0 + Ks_To2 * CT3 as f32) * (1.0 + Ks_To3 * (CT4 - CT3) as f32);
 }
 
-fn calc_a_CP(a_CP_0: &mut i16, a_CP_1: &mut i16) {
+fn calc_a_CP(a_CP_0: &mut f32, a_CP_1: &mut f32) {
     let a_scale_CP = ((get_eeprom_val(0x2420) & 0xF000) >> 12) as i16 + 27;
     let mut CP_P1_P0_ratio = ((get_eeprom_val(0x2439) & 0xFC00) >> 10) as i16;
     if CP_P1_P0_ratio > 31 {
         CP_P1_P0_ratio -= 64;
     }
 
-    *a_CP_0 = ((get_eeprom_val(0x2439) & 0x03FF)) as i16 >> a_scale_CP;
-    *a_CP_1 = *a_CP_0 * (1 + (CP_P1_P0_ratio >> 7));
+    *a_CP_0 = ((get_eeprom_val(0x2439) & 0x03FF)) as i16 as f32 / (2.0 as f32).powi(a_scale_CP as i32);
+    *a_CP_1 = *a_CP_0 * (1.0 + (CP_P1_P0_ratio as f32 / (2.0 as f32).powi(7)));
 }
 
 fn calc_Off_CP(Off_CP_0: &mut i16, Off_CP_1: &mut i16) {
@@ -715,7 +715,7 @@ fn calc_Off_CP(Off_CP_0: &mut i16, Off_CP_1: &mut i16) {
     *Off_CP_1 = *Off_CP_0 + Off_CP_1_delta;
 }
 
-fn calc_K_V_CP() -> i16 {
+fn calc_K_V_CP() -> f32 {
     let K_V_Scale: u16 = (get_eeprom_val(0x2438) & 0x0F00) as u16 >> 8;
 
     let mut K_V_CP_EE: i16 = ((get_eeprom_val(0x243B) & 0xFF00) >> 8) as i16;
@@ -723,11 +723,11 @@ fn calc_K_V_CP() -> i16 {
         K_V_CP_EE -= 256;
     }
 
-    let K_V_CP: i16 = K_V_CP_EE >> K_V_Scale;
+    let K_V_CP: f32 = K_V_CP_EE as f32 / (2.0 as f32).powi(K_V_Scale as i32);
     return K_V_CP;
 }
 
-fn calc_K_Ta_CP() -> i16 {
+fn calc_K_Ta_CP() -> f32 {
     let K_Ta_scale_1: u16 = ((get_eeprom_val(0x2438) & 0x00F0) as u16 >> 4) + 8;
 
     let mut K_Ta_CP_EE: i16 = (get_eeprom_val(0x243B) & 0x00FF) as i16;
@@ -735,17 +735,17 @@ fn calc_K_Ta_CP() -> i16 {
         K_Ta_CP_EE -= 256;
     }
 
-    let K_Ta_CP = K_Ta_CP_EE >> K_Ta_scale_1;
+    let K_Ta_CP = K_Ta_CP_EE as f32 / (2.0 as f32).powi(K_Ta_scale_1 as i32);
     return K_Ta_CP;
 }
 
-fn calc_TGC() -> i16 {
+fn calc_TGC() -> f32 {
     let mut TGC_EE: i16 = (get_eeprom_val(0x243C) & 0x00FF) as i16;
     if TGC_EE > 127 {
         TGC_EE -= 256;
     }
 
-    let TGC = TGC_EE >> 5;
+    let TGC = TGC_EE as f32 / (2.0 as f32).powi(5);
     return TGC;
 }
 
