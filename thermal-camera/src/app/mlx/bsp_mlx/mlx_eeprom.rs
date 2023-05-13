@@ -85,7 +85,7 @@ fn get_eeprom_val(address: u16) -> u16 {
 // | Temperature Calculations |
 // ----------------------------
 
-pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) {
+pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> f32 {
     // We keep Resolution at default, so the coefficient will be just 1
     let Resolution_corr = 1;
 
@@ -170,6 +170,31 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) {
     }
 
     // Calculate To
+    let T_r = T_a - 8.0;
+    let T_aK4 = (T_a + 273.15).powi(4);
+    let T_rK4 = (T_r + 273.15).powi(4);
+
+    let T_a_r = T_rK4 - (T_rK4 - T_aK4) / 1.0; // 1.0 is emissivity
+
+    let S_x: [f32; PIXEL_COUNT];
+    for i in 0..PIXEL_COUNT {
+        S_x[i] = EEPROM_VARS.Ks_To2;
+
+        // This is fourth root
+        S_x *= (a_comp[i].powi(3) * V_IR_compensated[i] + a_comp[i].powi(4) * T_a_r).powf(1.0 / 4.0);
+    }
+
+    let T_o: [f32; PIXEL_COUNT];
+    for i in 0..PIXEL_COUNT {
+        T_o[i] = V_IR_compensated[i];
+        T_o[i] /= a_comp[i] * (1 - EEPROM_VARS.Ks_To2 * 273.15) + S_x[i];
+        T_o[i] += T_a_r;
+        T_o[i] = T_o[i].powf(1.0 / 4.0);
+        T_o[i] -= 273.15;
+    }
+
+    // TODO: do additional temperature ranges
+    return T_o;
 }
 
 
