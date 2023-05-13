@@ -2,6 +2,8 @@ use std::io::Write;
 use std::fs::File;
 use rppal::i2c::I2c;
 
+use super::PIXEL_COUNT;
+
 mod mlx_eeprom;
 
 const CAM_ADDR: u8 = 0x33;
@@ -51,4 +53,8 @@ pub fn write_image(path: &str, img: &[u8], width: usize, height: usize) {
 
     // Write image contents in binary format
     file.write(img).expect(err_msg);
+}
+
+pub fn evaluate_image(pix_data: [u16; PIXEL_COUNT]) -> f32 {
+    return mlx_eeprom::evaluate(pix_data);
 }

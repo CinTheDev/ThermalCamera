@@ -14,7 +14,7 @@ pub fn test() {
     bsp_mlx::write(0x800D, control_reg);
 
 
-    let img = read_image();
+    let img = take_image();
     bsp_mlx::write_image("./test.pgm", &img, PIXELS_WIDTH, PIXELS_HEIGHT);
 }
 
@@ -34,8 +34,8 @@ fn wait_for_data() {
     bsp_mlx::write(0x8000, status_reg);
 }
 
-fn read_image() -> [u8; PIXEL_COUNT] {
-    let mut img: [u8; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
+fn read_image() -> [u16; PIXEL_COUNT] {
+    let mut img: [u16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
 
     let subpage = bsp_mlx::read_value(0x8000) & 0x1;
     let mut offset = subpage;
@@ -52,7 +52,7 @@ fn read_image() -> [u8; PIXEL_COUNT] {
     
                 let meas = bsp_mlx::read_value(0x0400 + addr);
     
-                img[addr as usize] = (meas) as u8;
+                img[addr as usize] = meas;
             }
         }
 
@@ -60,4 +60,16 @@ fn read_image() -> [u8; PIXEL_COUNT] {
     }
 
     return img;
+}
+
+fn take_image() -> [u8; PIXEL_COUNT] {
+    let image_raw = read_image();
+    let grid_eval = bsp_mlx::evaluate_image(image_raw);
+
+    // Let 0°C be black, and 50°C be white
+    let mut res: [u8; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
+    for i in 0..PIXEL_COUNT {
+        res[i] = ((grid_eval * (255.0/50.0)).round() as u8).max(0).min(255);
+    }
+    return res;
 }

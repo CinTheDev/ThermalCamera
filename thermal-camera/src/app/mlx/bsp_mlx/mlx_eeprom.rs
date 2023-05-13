@@ -198,7 +198,7 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> f32 {
 }
 
 
-pub fn restore() -> EepromVars {
+pub fn restore() {
     // Read eeprom data
     read_eeprom();
 
@@ -267,7 +267,7 @@ pub fn restore() -> EepromVars {
     // Resolution control
     let Resolution = calc_Resolution();
 
-    return EepromVars {
+    let e_vars = EepromVars {
         K_Vdd: K_Vdd,
         VDD_25: VDD_25,
 
@@ -312,7 +312,9 @@ pub fn restore() -> EepromVars {
         TGC: TGC,
 
         Resolution: Resolution,
-    }
+    };
+
+    EEPROM_VARS = e_vars;
 }
 
 fn calc_K_Vdd() -> i16 {
