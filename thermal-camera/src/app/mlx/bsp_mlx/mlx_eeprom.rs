@@ -136,6 +136,17 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) {
     }
 
     // Gradient compensation
+    let mut pattern: [u16; PIXEL_COUNT];
+
+    for i in 0..PIXEL_COUNT {
+        pattern[i] = (i - 1) >> 5;
+        pattern[i] -= pattern[i] & !0x0001;
+
+        let mut v: u16 = i - 1;
+        v -= (i - 1) & !0x0001;
+
+        pattern[i] = pattern[i] ^ v;
+    }
 
     // Normalize to sensitivity
 
