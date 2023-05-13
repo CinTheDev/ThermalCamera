@@ -9,12 +9,12 @@ const PIXEL_COUNT: usize = PIXELS_WIDTH * PIXELS_HEIGHT;
 const EEPROM_SIZE: usize = 816;
 
 pub struct EepromVars {
-    K_Vdd: i16,
-    VDD_25: i16,
+    K_Vdd: i32,
+    VDD_25: i32,
 
     T_a: f32,
 
-    pix_os_ref: [i16; PIXEL_COUNT],
+    pix_os_ref: [i32; PIXEL_COUNT],
 
     a: [f32; PIXEL_COUNT],
 
@@ -22,13 +22,13 @@ pub struct EepromVars {
 
     K_Ta: [f32; PIXEL_COUNT],
 
-    GAIN: i16,
+    GAIN: i32,
 
     Ks_Ta: f32,
 
-    Step: i16,
-    CT3: i16,
-    CT4: i16,
+    Step: i32,
+    CT3: i32,
+    CT4: i32,
 
     Ks_To1: f32,
     Ks_To2: f32,
@@ -43,8 +43,8 @@ pub struct EepromVars {
     a_CP_0: f32,
     a_CP_1: f32,
 
-    Off_CP_0: i16,
-    Off_CP_1: i16,
+    Off_CP_0: i32,
+    Off_CP_1: i32,
 
     K_V_CP: f32,
 
@@ -90,13 +90,13 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
     let Resolution_corr = 1;
 
     // Calculate Voltage
-    let V_dd:f32 = (Resolution_corr * super::read_value(0x072A) as i16 - EEPROM_VARS.VDD_25) as f32 / (EEPROM_VARS.K_Vdd as f32 + 3.3);
+    let V_dd:f32 = (Resolution_corr * super::read_value(0x072A) as i32 - EEPROM_VARS.VDD_25) as f32 / (EEPROM_VARS.K_Vdd as f32 + 3.3);
 
     // Calculate Ambient temperature
     let T_a: f32 = EEPROM_VARS.T_a;
 
     // Compensate for gain
-    let K_gain:f32 = EEPROM_VARS.GAIN as f32 / (super::read_value(0x070A) as i16) as f32;
+    let K_gain:f32 = EEPROM_VARS.GAIN as f32 / (super::read_value(0x070A) as i32) as f32;
 
     let mut pix_gain: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
     for i in 0..PIXEL_COUNT {
@@ -123,8 +123,8 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
     }
 
     // CP gain compensation
-    let pix_gain_CP_SP0: f32 = super::read_value(0x0708) as i16 as f32 * K_gain;
-    let pix_gain_CP_SP1: f32 = super::read_value(0x0728) as i16 as f32 * K_gain;
+    let pix_gain_CP_SP0: f32 = super::read_value(0x0708) as i32 as f32 * K_gain;
+    let pix_gain_CP_SP1: f32 = super::read_value(0x0728) as i32 as f32 * K_gain;
 
     let mut pix_OS_CP_SP0: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
     let mut pix_OS_CP_SP1: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
@@ -251,8 +251,8 @@ pub fn restore() -> EepromVars {
     calc_a_CP(&mut a_CP_0, &mut a_CP_1);
 
     // Offset of CP
-    let mut Off_CP_0: i16 = 0;
-    let mut Off_CP_1: i16 = 0;
+    let mut Off_CP_0: i32 = 0;
+    let mut Off_CP_1: i32 = 0;
     calc_Off_CP(&mut Off_CP_0, &mut Off_CP_1);
 
     // Kv CP
@@ -315,8 +315,8 @@ pub fn restore() -> EepromVars {
     };
 }
 
-fn calc_K_Vdd() -> i16 {
-    let mut K_Vdd: i16 = ((get_eeprom_val(0x2433) & 0xFF00) >> 8) as i16;
+fn calc_K_Vdd() -> i32 {
+    let mut K_Vdd: i32 = ((get_eeprom_val(0x2433) & 0xFF00) >> 8) as i32;
     if K_Vdd > 127 {
         K_Vdd -= 256;
     }
@@ -324,13 +324,13 @@ fn calc_K_Vdd() -> i16 {
     return K_Vdd;
 }
 
-fn calc_VDD_25() -> i16 {
-    let mut VDD_25: i16 = (get_eeprom_val(0x2433) & 0x00FF) as i16;
-    VDD_25 = ((VDD_25 - 256) << 5) - (2 as i16).pow(13);
+fn calc_VDD_25() -> i32 {
+    let mut VDD_25: i32 = (get_eeprom_val(0x2433) & 0x00FF) as i32;
+    VDD_25 = ((VDD_25 - 256) << 5) - (2 as i32).pow(13);
     return VDD_25;
 }
 
-fn calc_T_a(VDD_25: i16) -> f32 {
+fn calc_T_a(VDD_25: i32) -> f32 {
     let mut K_V_PTAT: f32 = ((get_eeprom_val(0x2432) & 0xFC00) >> 10) as f32;
     if K_V_PTAT > 31.0 {
         K_V_PTAT -= 64.0;
@@ -343,24 +343,24 @@ fn calc_T_a(VDD_25: i16) -> f32 {
     }
     K_T_PTAT /= (2.0 as f32).powi(3);
 
-    let dV: f32 = (super::read_value(0x072A) as i16 - VDD_25) as f32 / K_V_PTAT; // Datasheet just says K_V, i guessed it to be K_V_PTAT
+    let dV: f32 = (super::read_value(0x072A) as i32 - VDD_25) as f32 / K_V_PTAT; // Datasheet just says K_V, i guessed it to be K_V_PTAT
 
-    let V_PTAT_25: f32 = get_eeprom_val(0x2431) as i16 as f32;
+    let V_PTAT_25: f32 = get_eeprom_val(0x2431) as i32 as f32;
     //if V_PTAT_25 > 32767 {
     //    V_PTAT_25 -= 65536;
     //}
 
-    let V_PTAT: f32 = super::read_value(0x0720) as i16 as f32;
+    let V_PTAT: f32 = super::read_value(0x0720) as i32 as f32;
     //if V_PTAT > 32767 {
     //    V_PTAT -= 65536;
     //}
 
-    let V_BE: f32 = super::read_value(0x0700) as i16 as f32;
+    let V_BE: f32 = super::read_value(0x0700) as i32 as f32;
     //if V_BE > 32767 {
     //    V_BE -= 65536;
     //}
 
-    let Alpha_PTAT_EE: i16 = ((get_eeprom_val(0x2410) & 0xF000) >> 12) as i16;
+    let Alpha_PTAT_EE: i32 = ((get_eeprom_val(0x2410) & 0xF000) >> 12) as i32;
     let Alpha_PTAT: f32 = (Alpha_PTAT_EE as f32 / 4.0) + 8.0;
 
     let V_PTAT_art: f32 = (V_PTAT as f32 / (V_PTAT * Alpha_PTAT + V_BE)) * (2.0 as f32).powi(18);
@@ -373,21 +373,21 @@ fn calc_T_a(VDD_25: i16) -> f32 {
     return T_a;
 }
 
-fn calc_offset() -> [i16; PIXEL_COUNT] {
-    let offset_avg: i16 = get_eeprom_val(0x2411) as i16;
+fn calc_offset() -> [i32; PIXEL_COUNT] {
+    let offset_avg: i32 = get_eeprom_val(0x2411) as i32;
     //if offset_avg > 32767 {
     //    offset_avg -= 65536;
     //}
 
     // OCC row i
-    let mut OCC_row: [i16; PIXELS_HEIGHT] = [0x00; PIXELS_HEIGHT];
+    let mut OCC_row: [i32; PIXELS_HEIGHT] = [0x00; PIXELS_HEIGHT];
     for row in 0..PIXELS_HEIGHT/4 {
         let address: u16 = (0x2412 + row) as u16;
 
-        OCC_row[row * 4 + 0] = ((get_eeprom_val(address) & 0x000F) >> 0) as i16;
-        OCC_row[row * 4 + 1] = ((get_eeprom_val(address) & 0x00F0) >> 4) as i16;
-        OCC_row[row * 4 + 2] = ((get_eeprom_val(address) & 0x0F00) >> 8) as i16;
-        OCC_row[row * 4 + 3] = ((get_eeprom_val(address) & 0xF000) >> 12) as i16;
+        OCC_row[row * 4 + 0] = ((get_eeprom_val(address) & 0x000F) >> 0) as i32;
+        OCC_row[row * 4 + 1] = ((get_eeprom_val(address) & 0x00F0) >> 4) as i32;
+        OCC_row[row * 4 + 2] = ((get_eeprom_val(address) & 0x0F00) >> 8) as i32;
+        OCC_row[row * 4 + 3] = ((get_eeprom_val(address) & 0xF000) >> 12) as i32;
 
         if OCC_row[row * 4 + 0] > 7 { OCC_row[row * 4 + 0] -= 16 }
         if OCC_row[row * 4 + 1] > 7 { OCC_row[row * 4 + 1] -= 16 }
@@ -399,14 +399,14 @@ fn calc_offset() -> [i16; PIXEL_COUNT] {
     let OCC_scale_row: u16 = (get_eeprom_val(0x2410) & 0x0F00) as u16 >> 8;
 
     // OCC column
-    let mut OCC_column: [i16; PIXELS_WIDTH] = [0x00; PIXELS_WIDTH];
+    let mut OCC_column: [i32; PIXELS_WIDTH] = [0x00; PIXELS_WIDTH];
     for column in 0..PIXELS_WIDTH/4 {
         let address: u16 = (0x2418 + column) as u16;
 
-        OCC_column[column * 4 + 0] = ((get_eeprom_val(address) & 0x000F) >> 0) as i16;
-        OCC_column[column * 4 + 1] = ((get_eeprom_val(address) & 0x00F0) >> 4) as i16;
-        OCC_column[column * 4 + 2] = ((get_eeprom_val(address) & 0x0F00) >> 8) as i16;
-        OCC_column[column * 4 + 3] = ((get_eeprom_val(address) & 0xF000) >> 12) as i16;
+        OCC_column[column * 4 + 0] = ((get_eeprom_val(address) & 0x000F) >> 0) as i32;
+        OCC_column[column * 4 + 1] = ((get_eeprom_val(address) & 0x00F0) >> 4) as i32;
+        OCC_column[column * 4 + 2] = ((get_eeprom_val(address) & 0x0F00) >> 8) as i32;
+        OCC_column[column * 4 + 3] = ((get_eeprom_val(address) & 0xF000) >> 12) as i32;
 
         if OCC_column[column * 4 + 0] > 7 { OCC_column[column * 4 + 0] -= 16 }
         if OCC_column[column * 4 + 1] > 7 { OCC_column[column * 4 + 1] -= 16 }
@@ -418,11 +418,11 @@ fn calc_offset() -> [i16; PIXEL_COUNT] {
     let OCC_scale_column: u16 = (get_eeprom_val(0x2410) & 0x00F0) as u16 >> 4;
 
     // offset
-    let mut offset: [i16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
+    let mut offset: [i32; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
     for i in 0..PIXEL_COUNT {
         let address: u16 = (0x2440 + i) as u16;
 
-        offset[i] = ((get_eeprom_val(address) & 0xFC00) >> 10) as i16;
+        offset[i] = ((get_eeprom_val(address) & 0xFC00) >> 10) as i32;
         if offset[i] > 31 {
             offset[i] -= 64;
         }
@@ -431,7 +431,7 @@ fn calc_offset() -> [i16; PIXEL_COUNT] {
     // OCC scale remnant
     let OCC_scale_remnant: u16 = get_eeprom_val(0x2410) as u16 & 0x000F;
 
-    let mut pix_os_ref: [i16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
+    let mut pix_os_ref: [i32; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
     for i in 0..PIXELS_HEIGHT {
         for j in 0..PIXELS_WIDTH {
             let index = i * PIXELS_WIDTH + j;
@@ -445,18 +445,18 @@ fn calc_offset() -> [i16; PIXEL_COUNT] {
 }
 
 fn calc_a() -> [f32; PIXEL_COUNT] {
-    let a_reference: i16 = get_eeprom_val(0x2421) as i16;
+    let a_reference: i32 = get_eeprom_val(0x2421) as i32;
 
-    let a_scale: i16 = ((get_eeprom_val(0x2420) & 0xF000) >> 12) as i16 + 30;
+    let a_scale: i32 = ((get_eeprom_val(0x2420) & 0xF000) >> 12) as i32 + 30;
 
-    let mut ACC_row: [i16; PIXELS_HEIGHT] = [0x00; PIXELS_HEIGHT];
+    let mut ACC_row: [i32; PIXELS_HEIGHT] = [0x00; PIXELS_HEIGHT];
     for row in 0..PIXELS_HEIGHT/4 {
         let address: u16 = 0x2422 + row as u16;
 
-        ACC_row[row * 4 + 0] = ((get_eeprom_val(address) & 0x000F) >> 0) as i16;
-        ACC_row[row * 4 + 1] = ((get_eeprom_val(address) & 0x00F0) >> 4) as i16;
-        ACC_row[row * 4 + 2] = ((get_eeprom_val(address) & 0x0F00) >> 8) as i16;
-        ACC_row[row * 4 + 3] = ((get_eeprom_val(address) & 0xF000) >> 12) as i16;
+        ACC_row[row * 4 + 0] = ((get_eeprom_val(address) & 0x000F) >> 0) as i32;
+        ACC_row[row * 4 + 1] = ((get_eeprom_val(address) & 0x00F0) >> 4) as i32;
+        ACC_row[row * 4 + 2] = ((get_eeprom_val(address) & 0x0F00) >> 8) as i32;
+        ACC_row[row * 4 + 3] = ((get_eeprom_val(address) & 0xF000) >> 12) as i32;
 
         if ACC_row[row * 4 + 0] > 7 { ACC_row[row * 4 + 0] -= 16 }
         if ACC_row[row * 4 + 1] > 7 { ACC_row[row * 4 + 1] -= 16 }
@@ -466,14 +466,14 @@ fn calc_a() -> [f32; PIXEL_COUNT] {
 
     let ACC_scale_row: u16 = (get_eeprom_val(0x2420) & 0x0F00) as u16 >> 8;
 
-    let mut ACC_column: [i16; PIXELS_WIDTH] = [0x00; PIXELS_WIDTH];
+    let mut ACC_column: [i32; PIXELS_WIDTH] = [0x00; PIXELS_WIDTH];
     for column in 0..PIXELS_WIDTH/4 {
         let address: u16 = 0x2428 + column as u16;
 
-        ACC_column[column * 4 + 0] = ((get_eeprom_val(address) & 0x000F) >> 0) as i16;
-        ACC_column[column * 4 + 1] = ((get_eeprom_val(address) & 0x00F0) >> 4) as i16;
-        ACC_column[column * 4 + 2] = ((get_eeprom_val(address) & 0x0F00) >> 8) as i16;
-        ACC_column[column * 4 + 3] = ((get_eeprom_val(address) & 0xF000) >> 12) as i16;
+        ACC_column[column * 4 + 0] = ((get_eeprom_val(address) & 0x000F) >> 0) as i32;
+        ACC_column[column * 4 + 1] = ((get_eeprom_val(address) & 0x00F0) >> 4) as i32;
+        ACC_column[column * 4 + 2] = ((get_eeprom_val(address) & 0x0F00) >> 8) as i32;
+        ACC_column[column * 4 + 3] = ((get_eeprom_val(address) & 0xF000) >> 12) as i32;
 
         if ACC_column[column * 4 + 0] > 7 { ACC_column[column * 4 + 0] -= 16 }
         if ACC_column[column * 4 + 1] > 7 { ACC_column[column * 4 + 1] -= 16 }
@@ -483,11 +483,11 @@ fn calc_a() -> [f32; PIXEL_COUNT] {
 
     let ACC_scale_column: u16 = (get_eeprom_val(0x2420) & 0x00F0) as u16 >> 4;
 
-    let mut a_pixel: [i16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
+    let mut a_pixel: [i32; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
     for i in 0..PIXEL_COUNT {
         let address: u16 = 0x2440 + i as u16;
 
-        a_pixel[i] = ((get_eeprom_val(address) & 0x03F0) >> 4) as i16;
+        a_pixel[i] = ((get_eeprom_val(address) & 0x03F0) >> 4) as i32;
         if a_pixel[i] > 31 {
             a_pixel[i] -= 64;
         }
@@ -518,7 +518,7 @@ fn calc_K_V() -> [f32; PIXEL_COUNT] {
     for i in (0..PIXELS_HEIGHT).step_by(2) {
         for j in (0..PIXELS_WIDTH).step_by(2) {
             let index = i * PIXELS_WIDTH + j;
-            K_V[index] = ((get_eeprom_val(0x2434) & 0xF000) >> 12) as i16 as f32;
+            K_V[index] = ((get_eeprom_val(0x2434) & 0xF000) >> 12) as i32 as f32;
         }
     }
 
@@ -526,7 +526,7 @@ fn calc_K_V() -> [f32; PIXEL_COUNT] {
     for i in (1..PIXELS_HEIGHT).step_by(2) {
         for j in (0..PIXELS_WIDTH).step_by(2) {
             let index = i * PIXELS_WIDTH + j;
-            K_V[index] = ((get_eeprom_val(0x2434) & 0x0F00) >> 8) as i16 as f32;
+            K_V[index] = ((get_eeprom_val(0x2434) & 0x0F00) >> 8) as i32 as f32;
         }
     }
 
@@ -534,7 +534,7 @@ fn calc_K_V() -> [f32; PIXEL_COUNT] {
     for i in (0..PIXELS_HEIGHT).step_by(2) {
         for j in (1..PIXELS_WIDTH).step_by(2) {
             let index = i * PIXELS_WIDTH + j;
-            K_V[index] = ((get_eeprom_val(0x2434) & 0x00F0) >> 4) as i16 as f32;
+            K_V[index] = ((get_eeprom_val(0x2434) & 0x00F0) >> 4) as i32 as f32;
         }
     }
 
@@ -542,7 +542,7 @@ fn calc_K_V() -> [f32; PIXEL_COUNT] {
     for i in (1..PIXELS_HEIGHT).step_by(2) {
         for j in (1..PIXELS_WIDTH).step_by(2) {
             let index = i * PIXELS_WIDTH + j;
-            K_V[index] = ((get_eeprom_val(0x2434) & 0x000F) >> 0) as i16 as f32;
+            K_V[index] = ((get_eeprom_val(0x2434) & 0x000F) >> 0) as i32 as f32;
         }
     }
 
@@ -558,24 +558,24 @@ fn calc_K_V() -> [f32; PIXEL_COUNT] {
 }
 
 fn calc_K_Ta() -> [f32; PIXEL_COUNT] {
-    let mut K_Ta_EE: [i16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
+    let mut K_Ta_EE: [i32; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
 
     for i in 0..PIXEL_COUNT {
         let address: u16 = 0x2440 + i as u16;
 
-        K_Ta_EE[i] = ((get_eeprom_val(address) & 0x000E) >> 1) as i16;
+        K_Ta_EE[i] = ((get_eeprom_val(address) & 0x000E) >> 1) as i32;
         if K_Ta_EE[i] > 3 {
             K_Ta_EE[i] -= 8;
         }
     }
 
-    let mut K_Ta_RC_EE: [i16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
+    let mut K_Ta_RC_EE: [i32; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
 
     // EVEN EVEN
     for i in (0..PIXELS_HEIGHT).step_by(2) {
         for j in (0..PIXELS_WIDTH).step_by(2) {
             let index = i * PIXELS_WIDTH + j;
-            K_Ta_RC_EE[index] = ((get_eeprom_val(0x2436) & 0xFF00) >> 8) as i16;
+            K_Ta_RC_EE[index] = ((get_eeprom_val(0x2436) & 0xFF00) >> 8) as i32;
         }
     }
 
@@ -583,7 +583,7 @@ fn calc_K_Ta() -> [f32; PIXEL_COUNT] {
     for i in (1..PIXELS_HEIGHT).step_by(2) {
         for j in (0..PIXELS_WIDTH).step_by(2) {
             let index = i * PIXELS_WIDTH + j;
-            K_Ta_RC_EE[index] = ((get_eeprom_val(0x2436) & 0x00FF) >> 0) as i16;
+            K_Ta_RC_EE[index] = ((get_eeprom_val(0x2436) & 0x00FF) >> 0) as i32;
         }
     }
 
@@ -591,7 +591,7 @@ fn calc_K_Ta() -> [f32; PIXEL_COUNT] {
     for i in (0..PIXELS_HEIGHT).step_by(2) {
         for j in (1..PIXELS_WIDTH).step_by(2) {
             let index = i * PIXELS_WIDTH + j;
-            K_Ta_RC_EE[index] = ((get_eeprom_val(0x2437) & 0xFF00) >> 8) as i16;
+            K_Ta_RC_EE[index] = ((get_eeprom_val(0x2437) & 0xFF00) >> 8) as i32;
         }
     }
 
@@ -599,7 +599,7 @@ fn calc_K_Ta() -> [f32; PIXEL_COUNT] {
     for i in (1..PIXELS_HEIGHT).step_by(2) {
         for j in (1..PIXELS_WIDTH).step_by(2) {
             let index = i * PIXELS_WIDTH + j;
-            K_Ta_RC_EE[index] = ((get_eeprom_val(0x2437) & 0x00FF) >> 0) as i16;
+            K_Ta_RC_EE[index] = ((get_eeprom_val(0x2437) & 0x00FF) >> 0) as i32;
         }
     }
 
@@ -624,8 +624,8 @@ fn calc_K_Ta() -> [f32; PIXEL_COUNT] {
     return K_Ta;
 }
 
-fn calc_gain() -> i16 {
-    let gain: i16 = get_eeprom_val(0x2430) as i16;
+fn calc_gain() -> i32 {
+    let gain: i32 = get_eeprom_val(0x2430) as i32;
     //if gain > 32767 {
     //    gain -= 65536;
     //}
@@ -633,7 +633,7 @@ fn calc_gain() -> i16 {
 }
 
 fn calc_Ks_Ta() -> f32 {
-    let mut Ks_Ta_EE: i16 = ((get_eeprom_val(0x243C) & 0xFF00) >> 8) as i16;
+    let mut Ks_Ta_EE: i32 = ((get_eeprom_val(0x243C) & 0xFF00) >> 8) as i32;
     if Ks_Ta_EE > 127 {
         Ks_Ta_EE -= 256;
     }
@@ -642,34 +642,34 @@ fn calc_Ks_Ta() -> f32 {
     return Ks_Ta;
 }
 
-fn calc_Step() -> i16 {
-    return ((get_eeprom_val(0x243F) & 0x3000) >> 12) as i16 * 10;
+fn calc_Step() -> i32 {
+    return ((get_eeprom_val(0x243F) & 0x3000) >> 12) as i32 * 10;
 }
 
-fn calc_CT3(Step: i16) -> i16 {
-    return ((get_eeprom_val(0x243F) & 0x00F0) >> 4) as i16 * Step;
+fn calc_CT3(Step: i32) -> i32 {
+    return ((get_eeprom_val(0x243F) & 0x00F0) >> 4) as i32 * Step;
 }
 
-fn calc_CT4(Step: i16, CT3: i16) -> i16 {
-    return ((get_eeprom_val(0x243F) & 0x0F00) >> 8) as i16 * Step + CT3;
+fn calc_CT4(Step: i32, CT3: i32) -> i32 {
+    return ((get_eeprom_val(0x243F) & 0x0F00) >> 8) as i32 * Step + CT3;
 }
 
 fn calc_Ks_To(Ks_To1: &mut f32, Ks_To2: & mut f32, Ks_To3: &mut f32, Ks_To4: &mut f32) {
     let Ks_To_scale: f32 = (get_eeprom_val(0x243F) as u16 & 0x000F + 8) as f32;
 
-    let mut Ks_To1_EE: i16 = (get_eeprom_val(0x243D) & 0x00FF) as i16;
+    let mut Ks_To1_EE: i32 = (get_eeprom_val(0x243D) & 0x00FF) as i32;
     if Ks_To1_EE > 127 { Ks_To1_EE -= 256 }
     *Ks_To1 = Ks_To1_EE as f32 / Ks_To_scale;
 
-    let mut Ks_To2_EE: i16 = ((get_eeprom_val(0x243D) & 0xFF00) >> 8) as i16;
+    let mut Ks_To2_EE: i32 = ((get_eeprom_val(0x243D) & 0xFF00) >> 8) as i32;
     if Ks_To2_EE > 127 { Ks_To2_EE -= 256 }
     *Ks_To2 = Ks_To2_EE as f32 / Ks_To_scale;
 
-    let mut Ks_To3_EE: i16 = (get_eeprom_val(0x243E) & 0x00FF) as i16;
+    let mut Ks_To3_EE: i32 = (get_eeprom_val(0x243E) & 0x00FF) as i32;
     if Ks_To3_EE > 127 { Ks_To3_EE -= 256 }
     *Ks_To3 = Ks_To3_EE as f32 / Ks_To_scale;
 
-    let mut Ks_To4_EE: i16 = ((get_eeprom_val(0x243E) & 0xFF00) >> 8) as i16;
+    let mut Ks_To4_EE: i32 = ((get_eeprom_val(0x243E) & 0xFF00) >> 8) as i32;
     if Ks_To4_EE > 127 { Ks_To4_EE -= 256 }
     *Ks_To4 = Ks_To4_EE as f32 / Ks_To_scale;
 }
@@ -682,32 +682,32 @@ fn calc_Alpha_corr_range2() -> f32 {
     return 1.0;
 }
 
-fn calc_Alpha_corr_range3(Ks_To2: f32, CT3: i16) -> f32 {
+fn calc_Alpha_corr_range3(Ks_To2: f32, CT3: i32) -> f32 {
     return 1.0 + Ks_To2 * CT3 as f32;
 }
 
-fn calc_Alpha_corr_range4(Ks_To2: f32, Ks_To3: f32, CT3: i16, CT4: i16) -> f32 {
+fn calc_Alpha_corr_range4(Ks_To2: f32, Ks_To3: f32, CT3: i32, CT4: i32) -> f32 {
     return (1.0 + Ks_To2 * CT3 as f32) * (1.0 + Ks_To3 * (CT4 - CT3) as f32);
 }
 
 fn calc_a_CP(a_CP_0: &mut f32, a_CP_1: &mut f32) {
-    let a_scale_CP = ((get_eeprom_val(0x2420) & 0xF000) >> 12) as i16 + 27;
-    let mut CP_P1_P0_ratio = ((get_eeprom_val(0x2439) & 0xFC00) >> 10) as i16;
+    let a_scale_CP = ((get_eeprom_val(0x2420) & 0xF000) >> 12) as i32 + 27;
+    let mut CP_P1_P0_ratio = ((get_eeprom_val(0x2439) & 0xFC00) >> 10) as i32;
     if CP_P1_P0_ratio > 31 {
         CP_P1_P0_ratio -= 64;
     }
 
-    *a_CP_0 = ((get_eeprom_val(0x2439) & 0x03FF)) as i16 as f32 / (2.0 as f32).powi(a_scale_CP as i32);
+    *a_CP_0 = ((get_eeprom_val(0x2439) & 0x03FF)) as i32 as f32 / (2.0 as f32).powi(a_scale_CP as i32);
     *a_CP_1 = *a_CP_0 * (1.0 + (CP_P1_P0_ratio as f32 / (2.0 as f32).powi(7)));
 }
 
-fn calc_Off_CP(Off_CP_0: &mut i16, Off_CP_1: &mut i16) {
-    *Off_CP_0 = (get_eeprom_val(0x243A) & 0x03FF) as i16;
+fn calc_Off_CP(Off_CP_0: &mut i32, Off_CP_1: &mut i32) {
+    *Off_CP_0 = (get_eeprom_val(0x243A) & 0x03FF) as i32;
     if *Off_CP_0 > 511 {
         *Off_CP_0 -= 1024;
     }
 
-    let mut Off_CP_1_delta: i16 = ((get_eeprom_val(0x243A) & 0xFC00) >> 10) as i16;
+    let mut Off_CP_1_delta: i32 = ((get_eeprom_val(0x243A) & 0xFC00) >> 10) as i32;
     if Off_CP_1_delta > 31 {
         Off_CP_1_delta -= 64;
     }
@@ -718,7 +718,7 @@ fn calc_Off_CP(Off_CP_0: &mut i16, Off_CP_1: &mut i16) {
 fn calc_K_V_CP() -> f32 {
     let K_V_Scale: u16 = (get_eeprom_val(0x2438) & 0x0F00) as u16 >> 8;
 
-    let mut K_V_CP_EE: i16 = ((get_eeprom_val(0x243B) & 0xFF00) >> 8) as i16;
+    let mut K_V_CP_EE: i32 = ((get_eeprom_val(0x243B) & 0xFF00) >> 8) as i32;
     if K_V_CP_EE > 127 {
         K_V_CP_EE -= 256;
     }
@@ -730,7 +730,7 @@ fn calc_K_V_CP() -> f32 {
 fn calc_K_Ta_CP() -> f32 {
     let K_Ta_scale_1: u16 = ((get_eeprom_val(0x2438) & 0x00F0) as u16 >> 4) + 8;
 
-    let mut K_Ta_CP_EE: i16 = (get_eeprom_val(0x243B) & 0x00FF) as i16;
+    let mut K_Ta_CP_EE: i32 = (get_eeprom_val(0x243B) & 0x00FF) as i32;
     if K_Ta_CP_EE > 127 {
         K_Ta_CP_EE -= 256;
     }
@@ -740,7 +740,7 @@ fn calc_K_Ta_CP() -> f32 {
 }
 
 fn calc_TGC() -> f32 {
-    let mut TGC_EE: i16 = (get_eeprom_val(0x243C) & 0x00FF) as i16;
+    let mut TGC_EE: i32 = (get_eeprom_val(0x243C) & 0x00FF) as i32;
     if TGC_EE > 127 {
         TGC_EE -= 256;
     }
