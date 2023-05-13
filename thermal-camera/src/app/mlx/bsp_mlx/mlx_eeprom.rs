@@ -118,6 +118,23 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) {
     // In example the result is divided by 1, so I'm leaving this step out
     // TODO: Maybe add emissivity in the future
 
+    // CP gain compensation
+    let pix_gain_CP_SP0: f32 = super::read_value(0x0708) as i16 * K_gain;
+    let pix_gain_CP_SP1: f32 = super::read_value(0x0728) as i16 * K_gain;
+
+    let mut pix_OS_CP_SP0: [f32; PIXEL_COUNT];
+    let mut pix_OS_CP_SP1: [f32; PIXEL_COUNT];
+    for i in 0..PIXEL_COUNT {
+        pix_OS_CP_SP0[i] = pix_gain_CP_SP0;
+        pix_OS_CP_SP1[i] = pix_gain_CP_SP1;
+
+        let coef_1: f32 = (1 + EEPROM_VARS.K_Ta_CP * (EEPROM_VARS.T_a - 25.0));
+        let coef_2: f32 = (1 + EEPROM_VARS.K_V_CP * (V_dd - 3.3));
+
+        pix_OS_CP_SP0[i] -= EEPROM_VARS.Off_CP_0 * coef_1 * coef_2;
+        pix_OS_CP_SP1[i] -= EEPROM_VARS.Off_CP_1 * coef_1 * coef_2;
+    }
+
     // Gradient compensation
 
     // Normalize to sensitivity
