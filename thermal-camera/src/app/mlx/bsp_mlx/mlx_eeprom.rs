@@ -6,7 +6,7 @@ const PIXELS_WIDTH: usize = 32;
 const PIXELS_HEIGHT: usize = 24;
 const PIXEL_COUNT: usize = PIXELS_WIDTH * PIXELS_HEIGHT;
 
-const EEPROM_SIZE: usize = 767;
+const EEPROM_SIZE: usize = 816;
 
 pub struct EepromVars {
     K_Vdd: i16,
@@ -77,7 +77,7 @@ fn read_eeprom() {
 }
 
 fn get_eeprom_val(address: u16) -> u16 {
-    let index:usize = (address - 0x2440) as usize;
+    let index:usize = (address - 0x2410) as usize;
     return unsafe { EEPROM_RAW[index] };
 }
 
