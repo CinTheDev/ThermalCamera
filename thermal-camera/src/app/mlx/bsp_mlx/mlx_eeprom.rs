@@ -8,29 +8,7 @@ const PIXEL_COUNT: usize = PIXELS_WIDTH * PIXELS_HEIGHT;
 
 const EEPROM_SIZE: usize = 767;
 
-static mut EEPROM_RAW: [u16; EEPROM_SIZE] = [0x00; EEPROM_SIZE];
-
-fn read_eeprom() {
-    let mut d: [u8; EEPROM_SIZE * 2] = [0x00; EEPROM_SIZE * 2];
-    super::read(0x2440, &mut d);
-
-    let mut converted: [u16; EEPROM_SIZE] = [0x00; EEPROM_SIZE];
-
-    for i in 0..EEPROM_SIZE {
-        let msb: u16 = d[i * 2 + 0] as u16;
-        let lsb: u16 = d[i * 2 + 1] as u16;
-        converted[i] = (msb << 8) | lsb;
-    }
-
-    unsafe { EEPROM_RAW = converted };
-}
-
-fn get_eeprom_val(address: u16) -> u16 {
-    let index:usize = (address - 0x2440) as usize;
-    return unsafe { EEPROM_RAW[index] };
-}
-
-pub struct eeprom_vars {
+pub struct EepromVars {
     K_Vdd: i16,
     VDD_25: i16,
 
@@ -78,7 +56,29 @@ pub struct eeprom_vars {
 }
 
 lazy_static! {
-    static ref EEPROM_VARS: eeprom_vars = restore();
+    static ref EEPROM_VARS: EepromVars = restore();
+}
+
+static mut EEPROM_RAW: [u16; EEPROM_SIZE] = [0x00; EEPROM_SIZE];
+
+fn read_eeprom() {
+    let mut d: [u8; EEPROM_SIZE * 2] = [0x00; EEPROM_SIZE * 2];
+    super::read(0x2440, &mut d);
+
+    let mut converted: [u16; EEPROM_SIZE] = [0x00; EEPROM_SIZE];
+
+    for i in 0..EEPROM_SIZE {
+        let msb: u16 = d[i * 2 + 0] as u16;
+        let lsb: u16 = d[i * 2 + 1] as u16;
+        converted[i] = (msb << 8) | lsb;
+    }
+
+    unsafe { EEPROM_RAW = converted };
+}
+
+fn get_eeprom_val(address: u16) -> u16 {
+    let index:usize = (address - 0x2440) as usize;
+    return unsafe { EEPROM_RAW[index] };
 }
 
 // ----------------------------
@@ -104,7 +104,7 @@ pub fn calibrate() {
 }
 
 
-pub fn restore() -> eeprom_vars {
+pub fn restore() -> EepromVars {
     // Read eeprom data
     read_eeprom();
 
@@ -173,7 +173,7 @@ pub fn restore() -> eeprom_vars {
     // Resolution control
     let Resolution = calc_Resolution();
 
-    return eeprom_vars {
+    return EepromVars {
         K_Vdd: K_Vdd,
         VDD_25: VDD_25,
 
