@@ -20,7 +20,7 @@ pub struct EepromVars {
 
     K_V: [i16; PIXEL_COUNT],
 
-    K_Ta: [i16; PIXEL_COUNT],
+    K_Ta: [f32; PIXEL_COUNT],
 
     GAIN: i16,
 
@@ -90,17 +90,17 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> f32 {
     let Resolution_corr = 1;
 
     // Calculate Voltage
-    let V_dd:f32 = (Resolution_corr * super::read_value(0x072A) as i16 - EEPROM_VARS.VDD_25) as f32 / EEPROM_VARS.K_Vdd + 3.3;
+    let V_dd:f32 = (Resolution_corr * super::read_value(0x072A) as i16 - EEPROM_VARS.VDD_25) as f32 / (EEPROM_VARS.K_Vdd as f32 + 3.3);
 
     // Calculate Ambient temperature
     let T_a: f32 = EEPROM_VARS.T_a;
 
     // Compensate for gain
-    let K_gain:f32 = EEPROM_VARS.GAIN as f32 / super::read_value(0x070A) as i16;
+    let K_gain:f32 = EEPROM_VARS.GAIN as f32 / (super::read_value(0x070A) as i16) as f32;
 
     let pix_gain: [f32; PIXEL_COUNT];
     for i in 0..PIXEL_COUNT {
-        pix_gain[i] = pix_data[i] * K_gain;
+        pix_gain[i] = pix_data[i] as f32 * K_gain;
     }
 
     // Offset, VDD and Ta
@@ -108,8 +108,8 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> f32 {
     for i in 0..PIXEL_COUNT {
         pix_os[i] = pix_gain[i];
 
-        let coef_1: f32 = (1 + EEPROM_VARS.K_Ta[i] * (T_a - 25));
-        let coef_2: f32 = (1 + EEPROM_VARS.K_V[i] * (V_dd - 3.3));
+        let coef_1: f32 = 1.0 + EEPROM_VARS.K_Ta[i] * (T_a - 25.0);
+        let coef_2: f32 = 1.0 + EEPROM_VARS.K_V[i] * (V_dd - 3.3);
 
         pix_os[i] -= EEPROM_VARS.pix_os_ref[i] * coef_1 * coef_2;
     }
@@ -557,7 +557,7 @@ fn calc_K_V() -> [i16; PIXEL_COUNT] {
     return K_V;
 }
 
-fn calc_K_Ta() -> [i16; PIXEL_COUNT] {
+fn calc_K_Ta() -> [f32; PIXEL_COUNT] {
     let mut K_Ta_EE: [i16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
 
     for i in 0..PIXEL_COUNT {
@@ -613,12 +613,12 @@ fn calc_K_Ta() -> [i16; PIXEL_COUNT] {
 
     let K_Ta_scale2: u16 = (get_eeprom_val(0x2438) & 0x000F) as u16;
 
-    let mut K_Ta: [i16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
+    let mut K_Ta: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
 
     for i in 0..PIXEL_COUNT {
-        K_Ta[i] = K_Ta_RC_EE[i];
-        K_Ta[i] += K_Ta_EE[i] * (2 as i16).pow(K_Ta_scale2 as u32);
-        K_Ta[i] /= (2 as i16).pow(K_Ta_scale1 as u32);
+        K_Ta[i] = K_Ta_RC_EE[i] as f32;
+        K_Ta[i] += K_Ta_EE[i] as f32 * (2.0 as f32).powi(K_Ta_scale2 as i32);
+        K_Ta[i] /= (2.0 as f32).powi(K_Ta_scale1 as i32);
     }
 
     return K_Ta;
