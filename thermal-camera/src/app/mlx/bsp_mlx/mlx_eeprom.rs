@@ -345,20 +345,20 @@ fn calc_T_a(VDD_25: i32) -> f32 {
 
     let dV: f32 = (super::read_value(0x072A) as i32 - VDD_25) as f32 / K_V_PTAT; // Datasheet just says K_V, i guessed it to be K_V_PTAT
 
-    let V_PTAT_25: f32 = get_eeprom_val(0x2431) as i32 as f32;
-    //if V_PTAT_25 > 32767 {
-    //    V_PTAT_25 -= 65536;
-    //}
+    let mut V_PTAT_25: f32 = get_eeprom_val(0x2431) as i32 as f32;
+    if V_PTAT_25 > 32767.0 {
+        V_PTAT_25 -= 65536.0;
+    }
 
-    let V_PTAT: f32 = super::read_value(0x0720) as i32 as f32;
-    //if V_PTAT > 32767 {
-    //    V_PTAT -= 65536;
-    //}
+    let mut V_PTAT: f32 = super::read_value(0x0720) as i32 as f32;
+    if V_PTAT > 32767.0 {
+        V_PTAT -= 65536.0;
+    }
 
-    let V_BE: f32 = super::read_value(0x0700) as i32 as f32;
-    //if V_BE > 32767 {
-    //    V_BE -= 65536;
-    //}
+    let mut V_BE: f32 = super::read_value(0x0700) as i32 as f32;
+    if V_BE > 32767.0 {
+        V_BE -= 65536.0;
+    }
 
     let Alpha_PTAT_EE: i32 = ((get_eeprom_val(0x2410) & 0xF000) >> 12) as i32;
     let Alpha_PTAT: f32 = (Alpha_PTAT_EE as f32 / 4.0) + 8.0;
@@ -374,10 +374,10 @@ fn calc_T_a(VDD_25: i32) -> f32 {
 }
 
 fn calc_offset() -> [i32; PIXEL_COUNT] {
-    let offset_avg: i32 = get_eeprom_val(0x2411) as i32;
-    //if offset_avg > 32767 {
-    //    offset_avg -= 65536;
-    //}
+    let mut offset_avg: i32 = get_eeprom_val(0x2411) as i32;
+    if offset_avg > 32767 {
+        offset_avg -= 65536;
+    }
 
     // OCC row i
     let mut OCC_row: [i32; PIXELS_HEIGHT] = [0x00; PIXELS_HEIGHT];
@@ -625,10 +625,10 @@ fn calc_K_Ta() -> [f32; PIXEL_COUNT] {
 }
 
 fn calc_gain() -> i32 {
-    let gain: i32 = get_eeprom_val(0x2430) as i32;
-    //if gain > 32767 {
-    //    gain -= 65536;
-    //}
+    let mut gain: i32 = get_eeprom_val(0x2430) as i32;
+    if gain > 32767 {
+        gain -= 65536;
+    }
     return gain;
 }
 
