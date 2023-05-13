@@ -98,13 +98,22 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) {
 
     // Compensate for gain
     let K_gain:f32 = EEPROM_VARS.GAIN / super::read_value(0x070A) as i16;
-    
+
     let pix_gain: [f32; PIXEL_COUNT];
     for i in 0..PIXEL_COUNT {
         pix_gain[i] = pix_data[i] * K_gain;
     }
 
     // Offset, VDD and Ta
+    let pix_os: [f32; PIXEL_COUNT];
+    for i in 0..PIXEL_COUNT {
+        pix_os[i] = pix_gain[i];
+
+        let coef_1: f32 = (1 + EEPROM_VARS.K_Ta[i] * (T_a - 25));
+        let coef_2: f32 = (1 + EEPROM_VARS.K_V[i] * (V_dd - 3.3));
+
+        pix_os[i] -= EEPROM_VARS.pix_os_ref[i] * coef_1 * coef_2;
+    }
 
     // Emissivity compensation
 
