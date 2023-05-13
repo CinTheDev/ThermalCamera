@@ -85,7 +85,7 @@ fn get_eeprom_val(address: u16) -> u16 {
 // | Temperature Calculations |
 // ----------------------------
 
-pub fn evaluate() {
+pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) {
     // We keep Resolution at default, so the coefficient will be just 1
     let Resolution_corr = 1;
 
@@ -97,6 +97,12 @@ pub fn evaluate() {
     let T_a = EEPROM_VARS.T_a;
 
     // Compensate for gain
+    let K_gain:f32 = EEPROM_VARS.GAIN / super::read_value(0x070A) as i16;
+    
+    let pix_gain: [f32; PIXEL_COUNT];
+    for i in 0..PIXEL_COUNT {
+        pix_gain[i] = pix_data[i] * K_gain;
+    }
 
     // Offset, VDD and Ta
 
