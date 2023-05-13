@@ -143,11 +143,11 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
     let mut pattern: [u16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
 
     for i in 0..PIXEL_COUNT {
-        pattern[i] = (i as u16 - 1) / 32;
+        pattern[i] = i as u16 / 32;
         pattern[i] -= pattern[i] & !0x0001;
 
-        let mut v: u16 = i as u16 - 1;
-        v -= (i as u16 - 1) & !0x0001;
+        let mut v: u16 = i as u16;
+        v -= i as u16 & !0x0001;
 
         pattern[i] = pattern[i] ^ v;
     }
