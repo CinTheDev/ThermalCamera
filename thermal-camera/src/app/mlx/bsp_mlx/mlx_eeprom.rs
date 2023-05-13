@@ -90,14 +90,13 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) {
     let Resolution_corr = 1;
 
     // Calculate Voltage
-    let V_dd:f32 = (Resolution_corr * super::read_value(0x072A) as i16 - EEPROM_VARS.VDD_25) / EEPROM_VARS.K_Vdd + 3.3;
+    let V_dd:f32 = (Resolution_corr * super::read_value(0x072A) as i16 - EEPROM_VARS.VDD_25) as f32 / EEPROM_VARS.K_Vdd + 3.3;
 
     // Calculate Ambient temperature
-    // TODO: This should be a float
-    let T_a = EEPROM_VARS.T_a;
+    let T_a: f32 = EEPROM_VARS.T_a;
 
     // Compensate for gain
-    let K_gain:f32 = EEPROM_VARS.GAIN / super::read_value(0x070A) as i16;
+    let K_gain:f32 = EEPROM_VARS.GAIN as f32 / super::read_value(0x070A) as i16;
 
     let pix_gain: [f32; PIXEL_COUNT];
     for i in 0..PIXEL_COUNT {
@@ -588,19 +587,19 @@ fn calc_Ks_To(Ks_To1: &mut i16, Ks_To2: & mut i16, Ks_To3: &mut i16, Ks_To4: &mu
 
     let mut Ks_To1_EE: i16 = (get_eeprom_val(0x243D) & 0x00FF) as i16;
     if Ks_To1_EE > 127 { Ks_To1_EE -= 256 }
-    *Ks_To1 = Ks_To1_EE / (2 as i16).pow(Ks_To_scale as u32);
+    *Ks_To1 = Ks_To1_EE >> Ks_To_scale;
 
     let mut Ks_To2_EE: i16 = ((get_eeprom_val(0x243D) & 0xFF00) >> 8) as i16;
     if Ks_To2_EE > 127 { Ks_To2_EE -= 256 }
-    *Ks_To2 = Ks_To2_EE / (2 as i16).pow(Ks_To_scale as u32);
+    *Ks_To2 = Ks_To2_EE >> Ks_To_scale;
 
     let mut Ks_To3_EE: i16 = (get_eeprom_val(0x243E) & 0x00FF) as i16;
     if Ks_To3_EE > 127 { Ks_To3_EE -= 256 }
-    *Ks_To3 = Ks_To3_EE / (2 as i16).pow(Ks_To_scale as u32);
+    *Ks_To3 = Ks_To3_EE >> Ks_To_scale;
 
     let mut Ks_To4_EE: i16 = ((get_eeprom_val(0x243E) & 0xFF00) >> 8) as i16;
     if Ks_To4_EE > 127 { Ks_To4_EE -= 256 }
-    *Ks_To4 = Ks_To4_EE / (2 as i16).pow(Ks_To_scale as u32);
+    *Ks_To4 = Ks_To4_EE >> Ks_To_scale;
 }
 
 fn calc_Alpha_corr_range1(Ks_To1: i16) -> f32 {
@@ -626,7 +625,7 @@ fn calc_a_CP(a_CP_0: &mut i16, a_CP_1: &mut i16) {
         CP_P1_P0_ratio -= 64;
     }
 
-    *a_CP_0 = ((get_eeprom_val(0x2439) & 0x03FF)) as i16 / (2 as i16).pow(a_scale_CP as u32);
+    *a_CP_0 = ((get_eeprom_val(0x2439) & 0x03FF)) as i16 >> a_scale_CP;
     *a_CP_1 = *a_CP_0 * (1 + (CP_P1_P0_ratio >> 7));
 }
 
@@ -652,7 +651,7 @@ fn calc_K_V_CP() -> i16 {
         K_V_CP_EE -= 256;
     }
 
-    let K_V_CP: i16 = K_V_CP_EE / (2 as i16).pow(K_V_Scale as u32);
+    let K_V_CP: i16 = K_V_CP_EE >> K_V_Scale;
     return K_V_CP;
 }
 
@@ -664,7 +663,7 @@ fn calc_K_Ta_CP() -> i16 {
         K_Ta_CP_EE -= 256;
     }
 
-    let K_Ta_CP = K_Ta_CP_EE / (2 as i16).pow(K_Ta_scale_1 as u32);
+    let K_Ta_CP = K_Ta_CP_EE >> K_Ta_scale_1;
     return K_Ta_CP;
 }
 
