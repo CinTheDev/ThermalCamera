@@ -12,7 +12,7 @@ pub struct EepromVars {
     K_Vdd: i16,
     VDD_25: i16,
 
-    T_a: i16,
+    T_a: f32,
 
     pix_os_ref: [i16; PIXEL_COUNT],
 
@@ -35,10 +35,10 @@ pub struct EepromVars {
     Ks_To3: i16,
     Ks_To4: i16,
 
-    Alpha_corr_1: i16,
-    Alpha_corr_2: i16,
-    Alpha_corr_3: i16,
-    Alpha_corr_4: i16,
+    Alpha_corr_1: f32,
+    Alpha_corr_2: f32,
+    Alpha_corr_3: f32,
+    Alpha_corr_4: f32,
 
     a_CP_0: i16,
     a_CP_1: i16,
@@ -116,6 +116,8 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) {
     }
 
     // Emissivity compensation
+    // In example the result is divided by 1, so I'm leaving this step out
+    // TODO: Maybe add emissivity in the future
 
     // Gradient compensation
 
@@ -247,6 +249,7 @@ fn calc_K_Vdd() -> i16 {
     if K_Vdd > 127 {
         K_Vdd -= 256;
     }
+    K_Vdd <<= 5;
     return K_Vdd;
 }
 
@@ -256,20 +259,20 @@ fn calc_VDD_25() -> i16 {
     return VDD_25;
 }
 
-fn calc_T_a(VDD_25: i16) -> i16 {
-    let mut K_V_PTAT: i16 = ((get_eeprom_val(0x2432) & 0xFC00) >> 10) as i16;
+fn calc_T_a(VDD_25: i16) -> f32 {
+    let mut K_V_PTAT: f32 = ((get_eeprom_val(0x2432) & 0xFC00) >> 10) as f32;
     if K_V_PTAT > 31 {
         K_V_PTAT -= 64;
     }
-    K_V_PTAT >>= 12;
+    K_V_PTAT /= 2.pow(12);
 
-    let mut K_T_PTAT: i16 = (get_eeprom_val(0x2432) & 0x3FF) as i16;
+    let mut K_T_PTAT: f32 = (get_eeprom_val(0x2432) & 0x3FF) as f32;
     if K_T_PTAT > 511 {
         K_T_PTAT -= 1024;
     }
-    K_T_PTAT >>= 3;
+    K_T_PTAT /= 2.pow(3);
 
-    let dV: i16 = (super::read_value(0x072A) as i16 - VDD_25) / K_V_PTAT; // Datasheet just says K_V, i guessed it to be K_V_PTAT
+    let dV: f32 = (super::read_value(0x072A) as i16 - VDD_25) / K_V_PTAT; // Datasheet just says K_V, i guessed it to be K_V_PTAT
 
     let V_PTAT_25: i16 = get_eeprom_val(0x2431) as i16;
     //if V_PTAT_25 > 32767 {
@@ -289,9 +292,9 @@ fn calc_T_a(VDD_25: i16) -> i16 {
     let Alpha_PTAT_EE: i16 = ((get_eeprom_val(0x2410) & 0xF000) >> 12) as i16;
     let Alpha_PTAT: i16 = (Alpha_PTAT_EE >> 2) + 8;
 
-    let V_PTAT_art: i16 = (V_PTAT / (V_PTAT * Alpha_PTAT + V_BE)) << 18;
+    let V_PTAT_art: f32 = (V_PTAT as f32 / (V_PTAT * Alpha_PTAT + V_BE)) * 2.pow(18);
 
-    let mut T_a: i16 = V_PTAT_art / (1 + K_V_PTAT * dV);
+    let mut T_a: f32 = V_PTAT_art / (1 + K_V_PTAT * dV);
     T_a -= V_PTAT_25;
     T_a /= K_T_PTAT;
     T_a += 25;
@@ -600,22 +603,20 @@ fn calc_Ks_To(Ks_To1: &mut i16, Ks_To2: & mut i16, Ks_To3: &mut i16, Ks_To4: &mu
     *Ks_To4 = Ks_To4_EE / (2 as i16).pow(Ks_To_scale as u32);
 }
 
-fn calc_Alpha_corr_range1(Ks_To1: i16) -> i16 {
-    // TODO
-    // The inversion seems weird
-    return 1 / (1 + Ks_To1 * 40);
+fn calc_Alpha_corr_range1(Ks_To1: i16) -> f32 {
+    return 1.0 / (1.0 + Ks_To1 * 40.0);
 }
 
-fn calc_Alpha_corr_range2() -> i16 {
-    return 1;
+fn calc_Alpha_corr_range2() -> f32 {
+    return 1.0;
 }
 
-fn calc_Alpha_corr_range3(Ks_To2: i16, CT3: i16) -> i16 {
-    return 1 + Ks_To2 * CT3;
+fn calc_Alpha_corr_range3(Ks_To2: i16, CT3: i16) -> f32 {
+    return 1.0 + Ks_To2 * CT3;
 }
 
-fn calc_Alpha_corr_range4(Ks_To2: i16, Ks_To3: i16, CT3: i16, CT4: i16) -> i16 {
-    return (1 + Ks_To2 * CT3) * (1 + Ks_To3 * (CT4 - CT3));
+fn calc_Alpha_corr_range4(Ks_To2: i16, Ks_To3: i16, CT3: i16, CT4: i16) -> f32 {
+    return (1.0 + Ks_To2 * CT3) * (1.0 + Ks_To3 * (CT4 - CT3));
 }
 
 fn calc_a_CP(a_CP_0: &mut i16, a_CP_1: &mut i16) {
