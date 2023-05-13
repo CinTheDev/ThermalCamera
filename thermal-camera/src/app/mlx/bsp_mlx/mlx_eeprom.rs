@@ -117,6 +117,10 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) {
     // Emissivity compensation
     // In example the result is divided by 1, so I'm leaving this step out
     // TODO: Maybe add emissivity in the future
+    let mut V_IR_Em_compensated: [f32; PIXEL_COUNT];
+    for i in 0..PIXEL_COUNT {
+        V_IR_Em_compensated[i] = pix_os[i] / 1.0;
+    }
 
     // CP gain compensation
     let pix_gain_CP_SP0: f32 = super::read_value(0x0708) as i16 * K_gain;
@@ -146,6 +150,13 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) {
         v -= (i - 1) & !0x0001;
 
         pattern[i] = pattern[i] ^ v;
+    }
+
+    let V_IR_compensated: [f32; PIXEL_COUNT];
+    for i in 0..PIXEL_COUNT {
+        V_IR_compensated[i] = V_IR_Em_compensated[i];
+
+        V_IR_compensated[i] -= EEPROM_VARS.TGC * ((1 - pattern[i]) * pix_OS_CP_SP0[i] + pattern[i] * pix_OS_CP_SP1[i]);
     }
 
     // Normalize to sensitivity
