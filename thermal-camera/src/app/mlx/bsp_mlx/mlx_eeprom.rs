@@ -332,18 +332,18 @@ fn calc_VDD_25() -> i16 {
 
 fn calc_T_a(VDD_25: i16) -> f32 {
     let mut K_V_PTAT: f32 = ((get_eeprom_val(0x2432) & 0xFC00) >> 10) as f32;
-    if K_V_PTAT > 31 {
-        K_V_PTAT -= 64;
+    if K_V_PTAT > 31.0 {
+        K_V_PTAT -= 64.0;
     }
-    K_V_PTAT /= 2.pow(12);
+    K_V_PTAT /= (2 as f32).powi(12);
 
     let mut K_T_PTAT: f32 = (get_eeprom_val(0x2432) & 0x3FF) as f32;
-    if K_T_PTAT > 511 {
-        K_T_PTAT -= 1024;
+    if K_T_PTAT > 511.0 {
+        K_T_PTAT -= 1024.0;
     }
-    K_T_PTAT /= 2.pow(3);
+    K_T_PTAT /= (2.0 as f32).powi(3);
 
-    let dV: f32 = (super::read_value(0x072A) as i16 - VDD_25) / K_V_PTAT; // Datasheet just says K_V, i guessed it to be K_V_PTAT
+    let dV: f32 = (super::read_value(0x072A) as i16 - VDD_25) as f32 / K_V_PTAT; // Datasheet just says K_V, i guessed it to be K_V_PTAT
 
     let V_PTAT_25: i16 = get_eeprom_val(0x2431) as i16;
     //if V_PTAT_25 > 32767 {
@@ -363,12 +363,12 @@ fn calc_T_a(VDD_25: i16) -> f32 {
     let Alpha_PTAT_EE: i16 = ((get_eeprom_val(0x2410) & 0xF000) >> 12) as i16;
     let Alpha_PTAT: i16 = (Alpha_PTAT_EE >> 2) + 8;
 
-    let V_PTAT_art: f32 = (V_PTAT as f32 / (V_PTAT * Alpha_PTAT + V_BE)) * 2.pow(18);
+    let V_PTAT_art: f32 = (V_PTAT as f32 / (V_PTAT * Alpha_PTAT + V_BE) as f32) * (2.0 as f32).powi(18);
 
-    let mut T_a: f32 = V_PTAT_art / (1 + K_V_PTAT * dV);
-    T_a -= V_PTAT_25;
+    let mut T_a: f32 = V_PTAT_art / (1.0 + K_V_PTAT * dV);
+    T_a -= V_PTAT_25 as f32;
     T_a /= K_T_PTAT;
-    T_a += 25;
+    T_a += 25.0;
 
     return T_a;
 }
