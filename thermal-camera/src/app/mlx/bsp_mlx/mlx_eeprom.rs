@@ -160,6 +160,14 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) {
     }
 
     // Normalize to sensitivity
+    let mut a_comp: [f32; PIXEL_COUNT];
+    for i in 0..PIXEL_COUNT {
+        a_comp[i] = EEPROM_VARS.a[i];
+
+        a_comp[i] -= EEPROM_VARS.TGC * ((1 - pattern[i] * EEPROM_VARS.a_CP_0 + pattern * EEPROM_VARS.a_CP_1));
+
+        a_comp[i] *= 1 + EEPROM_VARS.Ks_Ta * (EEPROM_VARS.T_a - 25.0);
+    }
 
     // Calculate To
 }
