@@ -93,6 +93,8 @@ pub fn evaluate() {
     let V_dd:f32 = (Resolution_corr * super::read_value(0x072A) as i16 - EEPROM_VARS.VDD_25) / EEPROM_VARS.K_Vdd + 3.3;
 
     // Calculate Ambient temperature
+    // TODO: This should be a float
+    let T_a = EEPROM_VARS.T_a;
 
     // Compensate for gain
 
