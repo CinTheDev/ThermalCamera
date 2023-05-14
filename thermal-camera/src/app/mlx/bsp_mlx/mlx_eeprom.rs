@@ -12,7 +12,7 @@ pub struct EepromVars {
     K_Vdd: i32,
     VDD_25: i32,
 
-    T_a: f32,
+    //T_a: f32,
 
     pix_os_ref: [i32; PIXEL_COUNT],
 
@@ -174,7 +174,7 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
 
         a_comp[i] -= EEPROM_VARS.TGC * ((1 - pattern[i]) as f32 * EEPROM_VARS.a_CP_0 + pattern[i] as f32 * EEPROM_VARS.a_CP_1);
 
-        a_comp[i] *= 1.0 + EEPROM_VARS.Ks_Ta * (EEPROM_VARS.T_a - 25.0);
+        a_comp[i] *= 1.0 + EEPROM_VARS.Ks_Ta * (T_a - 25.0);
     }
 
     // Calculate To
@@ -215,7 +215,7 @@ pub fn restore() -> EepromVars {
     let VDD_25 = calc_VDD_25();
 
     // Ta
-    let T_a = calc_T_a(K_Vdd, VDD_25);
+    //let T_a = calc_T_a(K_Vdd, VDD_25);
 
     // Offset
     let pix_os_ref = calc_offset();
@@ -279,7 +279,7 @@ pub fn restore() -> EepromVars {
         K_Vdd: K_Vdd,
         VDD_25: VDD_25,
 
-        T_a: T_a,
+        //T_a: T_a,
 
         pix_os_ref: pix_os_ref,
 
