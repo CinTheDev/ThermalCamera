@@ -9,11 +9,6 @@ pub fn init() {
 }
 
 pub fn test() {
-    let mut control_reg = bsp_mlx::read_value(0x800D);
-    control_reg &= !(0x80 | 0x100 | 0x200); // Reduce refresh rate to 0.5Hz
-    bsp_mlx::write(0x800D, control_reg);
-
-
     let img = take_image();
     bsp_mlx::write_image("./test.pgm", &img, PIXELS_WIDTH, PIXELS_HEIGHT);
 }
@@ -30,7 +25,7 @@ fn wait_for_data() {
 
     let mut status_reg = bsp_mlx::read_value(0x8000);
     status_reg &= !0x8; // Clear that bit
-
+    
     bsp_mlx::write(0x8000, status_reg);
 }
 
@@ -66,10 +61,10 @@ fn take_image() -> [u8; PIXEL_COUNT] {
     let image_raw = read_image();
     let grid_eval = bsp_mlx::evaluate_image(image_raw);
 
-    // Let 0°C be black, and 50°C be white
+    // Let 20°C be black, and 40°C be white
     let mut res: [u8; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
     for i in 0..PIXEL_COUNT {
-        res[i] = ((grid_eval[i] * (255.0/50.0)).round() as u8).max(0).min(255);
+        res[i] = (((grid_eval[i] - 20.0) * (255.0/40.0)).round() as u8).max(0).min(255);
     }
     return res;
 }
