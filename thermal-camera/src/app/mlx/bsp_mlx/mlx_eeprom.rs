@@ -93,27 +93,22 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
     let mut V_ram = super::read_value(0x072A) as i32;
     if V_ram > 32767 { V_ram -= 65536 }
     let V_dd:f32 = (Resolution_corr * V_ram - EEPROM_VARS.VDD_25) as f32 / EEPROM_VARS.K_Vdd as f32 + 3.3;
-    println!("Voltage: {}", V_dd);
 
     // Calculate Ambient temperature
     // TODO: Improve this to do less calculations, more things should be stored
     let T_a: f32 = calc_T_a(EEPROM_VARS.K_Vdd, EEPROM_VARS.VDD_25);
-    println!("Ambient Temp: {}", T_a);
 
     // Compensate for gain
     let mut gain_ram: i32 = super::read_value(0x070A) as i32;
     if gain_ram > 32767 { gain_ram -= 65536 }
     let K_gain:f32 = EEPROM_VARS.GAIN as f32 / gain_ram as f32;
-    //println!("Gain compensation: {}", K_gain);
 
     let mut pix_gain: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
     for i in 0..PIXEL_COUNT {
         let mut p: i32 = pix_data[i] as i32;
-        //println!("Pixel data[{}]: {}", i, p);
         if p > 32767 { p -= 65536 }
         pix_gain[i] = p as f32 * K_gain;
     }
-    println!("Pixel Gain sample: {}", pix_gain[107]);
 
     // Offset, VDD and Ta
     let mut pix_os: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
@@ -170,7 +165,6 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
         V_IR_compensated[i] = V_IR_Em_compensated[i];
 
         V_IR_compensated[i] -= EEPROM_VARS.TGC * ((1 - pattern[i]) as f32 * pix_OS_CP_SP0 + pattern[i] as f32 * pix_OS_CP_SP1);
-        //println!("V_IR_compensated[{}]: {}", i, V_IR_Em_compensated[i]);
     }
 
     // Normalize to sensitivity
