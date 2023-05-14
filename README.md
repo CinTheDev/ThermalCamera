@@ -74,5 +74,5 @@ The Thermal Camera is connected in the following fashion:
 
 ## TODOs
 
-- Finish temperature calculation (Emissivity, Resolution, ...)
+- Improve code by storing correct values, and maybe do some refactoring
 - Add extended temperature range
