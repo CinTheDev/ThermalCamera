@@ -86,6 +86,8 @@ fn get_eeprom_val(address: u16) -> u16 {
 // ----------------------------
 
 pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
+    const EMISSIVITY: f32 = 1.0;
+
     let Resolution_corr = 2_f32.powi(EEPROM_VARS.Resolution as i32) / 2_f32.powi((super::read_value(0x800D) as i32 & 0x0C00) >> 10);
 
     // Calculate Voltage
@@ -121,11 +123,9 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
     }
 
     // Emissivity compensation
-    // In example the result is divided by 1, so I'm leaving this step out
-    // TODO: Maybe add emissivity in the future
     let mut V_IR_Em_compensated: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
     for i in 0..PIXEL_COUNT {
-        V_IR_Em_compensated[i] = pix_os[i] / 1.0;
+        V_IR_Em_compensated[i] = pix_os[i] / EMISSIVITY;
     }
 
     // CP gain compensation
@@ -181,7 +181,7 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
     let T_aK4 = (T_a + 273.15).powi(4);
     let T_rK4 = (T_r + 273.15).powi(4);
 
-    let T_a_r = T_rK4 - (T_rK4 - T_aK4) / 1.0; // 1.0 is emissivity
+    let T_a_r = T_rK4 - (T_rK4 - T_aK4) / EMISSIVITY;
 
     let mut S_x: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
     for i in 0..PIXEL_COUNT {
