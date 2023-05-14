@@ -42,6 +42,9 @@ Lastly, increase the speed of the I2C peripheral for images to be read much quic
 - `sudo nano boot/config.txt`
 - Look for `dtparam=i2c_arm=on`
 - Append `,i2c_arm_baudrate=400000` or whatever speed should be used
+- Save
+
+And restart again.
 
 ## Development setup
 
