@@ -29,17 +29,19 @@ Optional:
 
 Later, when enabling the I2C peripheral:
 
-`sudo raspi-config`
-
--> Interfacing Options
-
--> I2C
-
--> "Yes" to enable
-
--> Finish
+- `sudo raspi-config`
+- -> Interfacing Options
+- -> I2C
+- -> "Yes" to enable
+- -> Finish
 
 Restart so I2C can be activated.
+
+Lastly, increase the speed of the I2C peripheral for images to be read much quicker:
+
+- `sudo nano boot/config.txt`
+- Look for `dtparam=i2c_arm=on`
+- Append `,i2c_arm_baudrate=400000` or whatever speed should be used
 
 ## Development setup
 
@@ -60,17 +62,14 @@ Verify the installation by running `cargo clean` (if there's some build files al
 The Thermal Camera is connected in the following fashion:
 
 - [Camera Pin] > [Raspi Pin]
-- 3vo > 3.3V
+- VIN > 3.3V
 - GND > Ground
 - SCL > GPIO 3 (I2C SCL)
 - SDA > GPIO 2 (I2C SDA)
 
 **Make sure not to switch up 3.3V and 5V!! Doing so could damage the camera!**
 
-## Remaining Problems
+## TODOs
 
-### Captured image has grid-like appearance
-
-The output data seems to be a little weird still, especially a visible "grid" which I don't know where it comes from.
-
-I think I might need to dig further into the Datasheet, as there are some interesting formulas inside there. All of these procedures have to be implemented.
+- Finish temperature calculation (Emissivity, Resolution, ...)
+- Add extended temperature range
