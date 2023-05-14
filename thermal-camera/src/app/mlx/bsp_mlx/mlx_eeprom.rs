@@ -86,13 +86,12 @@ fn get_eeprom_val(address: u16) -> u16 {
 // ----------------------------
 
 pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
-    // We keep Resolution at default, so the coefficient will be just 1
-    let Resolution_corr = 1;
+    let Resolution_corr = 2_f32.powi(EEPROM_VARS.Resolution as i32) / 2_f32.powi((super::read_value(0x800D) as i32 & 0x0C00) >> 10);
 
     // Calculate Voltage
     let mut V_ram = super::read_value(0x072A) as i32;
     if V_ram > 32767 { V_ram -= 65536 }
-    let V_dd:f32 = (Resolution_corr * V_ram - EEPROM_VARS.VDD_25) as f32 / EEPROM_VARS.K_Vdd as f32 + 3.3;
+    let V_dd:f32 = (Resolution_corr * V_ram as f32 - EEPROM_VARS.VDD_25 as f32) / EEPROM_VARS.K_Vdd as f32 + 3.3;
 
     // Calculate Ambient temperature
     // TODO: Improve this to do less calculations, more things should be stored
