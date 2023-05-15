@@ -57,6 +57,8 @@ pub struct EepromVars {
     TGC: f32,
 
     Resolution: u16,
+
+    pattern: [u16; PIXEL_COUNT],
 }
 
 lazy_static! {
@@ -115,14 +117,7 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
     let pix_OS_CP_SP = calc_pix_OS_CP_SPX(V_dd, T_a, K_gain);
 
     // Gradient compensation
-    let pattern = calc_pattern();
-
-    let mut V_IR_compensated: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
-    for i in 0..PIXEL_COUNT {
-        V_IR_compensated[i] = V_IR_Em_compensated[i];
-
-        V_IR_compensated[i] -= EEPROM_VARS.TGC * ((1 - pattern[i]) as f32 * pix_OS_CP_SP.0 + pattern[i] as f32 * pix_OS_CP_SP.1);
-    }
+    let V_IR_compensated = calc_V_IR_compensated(V_IR_Em_compensated, pix_OS_CP_SP);
 
     // Normalize to sensitivity
     let mut a_comp: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
@@ -236,6 +231,8 @@ pub fn restore() -> EepromVars {
     // Resolution control
     let Resolution = restore_Resolution();
 
+    let pattern = restore_pattern();
+
     return EepromVars {
         K_Vdd: K_Vdd,
         VDD_25: VDD_25,
@@ -284,6 +281,8 @@ pub fn restore() -> EepromVars {
         TGC: TGC,
 
         Resolution: Resolution,
+
+        pattern: pattern,
     };
 }
 
@@ -406,20 +405,16 @@ fn calc_pix_OS_CP_SPX(V_dd: f32, T_a: f32, K_gain: f32) -> (f32, f32) {
     return (pix_OS_CP_SP0, pix_OS_CP_SP1);
 }
 
-fn calc_pattern() -> [u16; PIXEL_COUNT] {
-    let mut pattern: [u16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
+fn calc_V_IR_compensated(V_IR_Em_compensated: [f32; PIXEL_COUNT], pix_OS_CP_SP: (f32, f32)) -> [f32; PIXEL_COUNT] {
+    let TGC = EEPROM_VARS.TGC;
+    let pattern = EEPROM_VARS.pattern;
 
+    let mut V_IR_compensated: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
     for i in 0..PIXEL_COUNT {
-        pattern[i] = i as u16 / 32;
-        pattern[i] -= pattern[i] & !0x0001;
-
-        let mut v = i as u16;
-        v -= i as u16 & !0x0001;
-
-        pattern[i] = pattern[i] ^ v;
+        V_IR_compensated[i] = V_IR_Em_compensated[i];
+        V_IR_compensated[i] -= TGC * ((1 - pattern[i]) as f32 * pix_OS_CP_SP.0 + pattern[i] as f32 * pix_OS_CP_SP.1);
     }
-
-    return pattern;
+    return V_IR_compensated;
 }
 
 // ----------------------------
@@ -841,4 +836,20 @@ fn restore_TGC() -> f32 {
 
 fn restore_Resolution() -> u16 {
     return (get_eeprom_val(0x2438) & 0x3000) as u16 >> 12;
+}
+
+fn restore_pattern() -> [u16; PIXEL_COUNT] {
+    let mut pattern: [u16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
+
+    for i in 0..PIXEL_COUNT {
+        pattern[i] = i as u16 / 32;
+        pattern[i] -= pattern[i] & !0x0001;
+
+        let mut v = i as u16;
+        v -= i as u16 & !0x0001;
+
+        pattern[i] = pattern[i] ^ v;
+    }
+
+    return pattern;
 }
