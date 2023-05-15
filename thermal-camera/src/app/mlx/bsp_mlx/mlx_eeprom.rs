@@ -95,9 +95,7 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
     let Resolution_corr = 2_f32.powi(EEPROM_VARS.Resolution as i32) / 2_f32.powi((super::read_value(0x800D) as i32 & 0x0C00) >> 10);
 
     // Calculate Voltage
-    let mut V_ram = super::read_value(0x072A) as i32;
-    if V_ram > 32767 { V_ram -= 65536 }
-    let V_dd:f32 = (Resolution_corr * V_ram as f32 - EEPROM_VARS.VDD_25 as f32) / EEPROM_VARS.K_Vdd as f32 + 3.3;
+    let V_dd: f32 = calc_V_dd(Resolution_corr);
 
     // Calculate Ambient temperature
     let T_a: f32 = calc_T_a();
@@ -331,11 +329,21 @@ pub fn restore() -> EepromVars {
         Resolution: Resolution,
     };
 }
+
 // -------------------------------------
 // | Temperature calculation functions |
 // -------------------------------------
 
-// TODO: Fill this
+fn calc_V_dd(Resolution_corr: f32) -> f32 {
+    let VDD_25: f32 = EEPROM_VARS.VDD_25 as f32;
+    let K_Vdd: f32 = EEPROM_VARS.K_Vdd as f32;
+
+    let mut V_ram: f32 = super::read_value(0x072A) as f32;
+    if V_ram > 32767.0 { V_ram -= 65536.0 }
+    let V_dd: f32 = (Resolution_corr * V_ram - VDD_25) / K_Vdd + 3.3;
+    return V_dd;
+}
+
 fn calc_T_a() -> f32 {
     let VDD_25 = EEPROM_VARS.VDD_25;
     let K_Vdd = EEPROM_VARS.K_Vdd;
