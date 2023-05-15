@@ -36,10 +36,7 @@ pub struct EepromVars {
 
     Ks_To: (f32, f32, f32, f32),
 
-    Alpha_corr_1: f32,
-    Alpha_corr_2: f32,
-    Alpha_corr_3: f32,
-    Alpha_corr_4: f32,
+    Alpha_corr: (f32, f32, f32, f32),
 
     a_CP_0: f32,
     a_CP_1: f32,
@@ -169,10 +166,7 @@ pub fn restore() -> EepromVars {
     let Ks_To = restore_Ks_To();
 
     // Ranged sensitivity correction
-    let Alpha_corr_1 = restore_Alpha_corr_range1(Ks_To.1);
-    let Alpha_corr_2 = restore_Alpha_corr_range2();
-    let Alpha_corr_3 = restore_Alpha_corr_range3(Ks_To.2, CT3);
-    let Alpha_corr_4 = restore_Alpha_corr_range4(Ks_To.2, Ks_To.3, CT3, CT4);
+    let Alpha_corr = restore_Alpha_corr(Ks_To, CT3, CT4);
 
     // Sensitivity a_CP
     let mut a_CP_0: f32 = 0.0;
@@ -225,10 +219,7 @@ pub fn restore() -> EepromVars {
 
         Ks_To,
 
-        Alpha_corr_1,
-        Alpha_corr_2,
-        Alpha_corr_3,
-        Alpha_corr_4,
+        Alpha_corr,
 
         a_CP_0,
         a_CP_1,
@@ -771,20 +762,13 @@ fn restore_Ks_To() -> (f32, f32, f32, f32) {
     return (Ks_To1, Ks_To2, Ks_To3, Ks_To4);
 }
 
-fn restore_Alpha_corr_range1(Ks_To1: f32) -> f32 {
-    return 1.0 / (1.0 + Ks_To1 * 40.0);
-}
+fn restore_Alpha_corr(Ks_To: (f32, f32, f32, f32), CT3: i32, CT4: i32) -> (f32, f32, f32, f32) {
+    let Alpha_corr_range1: f32 = 1.0 / (1.0 + Ks_To.1 * 40.0);
+    let Alpha_corr_range2: f32 = 1.0;
+    let Alpha_corr_range3: f32 = 1.0 + Ks_To.2 * CT3 as f32;
+    let Alpha_corr_range4: f32 = Alpha_corr_range3 * (1.0 + Ks_To.2 * (CT4 - CT3) as f32);
 
-fn restore_Alpha_corr_range2() -> f32 {
-    return 1.0;
-}
-
-fn restore_Alpha_corr_range3(Ks_To2: f32, CT3: i32) -> f32 {
-    return 1.0 + Ks_To2 * CT3 as f32;
-}
-
-fn restore_Alpha_corr_range4(Ks_To2: f32, Ks_To3: f32, CT3: i32, CT4: i32) -> f32 {
-    return (1.0 + Ks_To2 * CT3 as f32) * (1.0 + Ks_To3 * (CT4 - CT3) as f32);
+    return (Alpha_corr_range1, Alpha_corr_range2, Alpha_corr_range3, Alpha_corr_range4);
 }
 
 fn restore_a_CP(a_CP_0: &mut f32, a_CP_1: &mut f32) {
