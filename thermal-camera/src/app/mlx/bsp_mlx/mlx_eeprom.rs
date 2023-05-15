@@ -213,8 +213,8 @@ pub fn restore() -> EepromVars {
     read_eeprom();
 
     // VDD
-    let K_Vdd = calc_K_Vdd();
-    let VDD_25 = calc_VDD_25();
+    let K_Vdd = restore_K_Vdd();
+    let VDD_25 = restore_VDD_25();
 
     // Ta
     let mut K_V_PTAT: f32 = 0.0;
@@ -375,6 +375,20 @@ fn calc_T_a() -> f32 {
 // | EEPROM restore functions |
 // ----------------------------
 
+fn restore_K_Vdd() -> i32 {
+    let mut K_Vdd: i32 = ((get_eeprom_val(0x2433) & 0xFF00) >> 8) as i32;
+    if K_Vdd > 127 {
+        K_Vdd -= 256;
+    }
+    K_Vdd *= 2_i32.pow(5);
+    return K_Vdd;
+}
+
+fn restore_VDD_25() -> i32 {
+    let mut VDD_25: i32 = (get_eeprom_val(0x2433) & 0x00FF) as i32;
+    VDD_25 = ((VDD_25 - 256) * 2_i32.pow(5)) - 2_i32.pow(13);
+    return VDD_25;
+}
 
 fn restore_T_a(K_V_PTAT: &mut f32, K_T_PTAT: &mut f32, V_PTAT_25: &mut i32, Alpha_PTAT: &mut f32) {
     *K_V_PTAT = ((get_eeprom_val(0x2432) & 0xFC00) >> 10) as f32;
@@ -399,21 +413,6 @@ fn restore_T_a(K_V_PTAT: &mut f32, K_T_PTAT: &mut f32, V_PTAT_25: &mut i32, Alph
 }
 
 // ------- Old functions -------
-
-fn calc_K_Vdd() -> i32 {
-    let mut K_Vdd: i32 = ((get_eeprom_val(0x2433) & 0xFF00) >> 8) as i32;
-    if K_Vdd > 127 {
-        K_Vdd -= 256;
-    }
-    K_Vdd *= 2_i32.pow(5);
-    return K_Vdd;
-}
-
-fn calc_VDD_25() -> i32 {
-    let mut VDD_25: i32 = (get_eeprom_val(0x2433) & 0x00FF) as i32;
-    VDD_25 = ((VDD_25 - 256) * 2_i32.pow(5)) - 2_i32.pow(13);
-    return VDD_25;
-}
 
 fn calc_offset() -> [i32; PIXEL_COUNT] {
     let mut offset_avg: i32 = get_eeprom_val(0x2411) as i32;
