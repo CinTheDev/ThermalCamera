@@ -13,6 +13,10 @@ pub struct EepromVars {
     VDD_25: i32,
 
     //T_a: f32,
+    K_V_PTAT: f32,
+    K_T_PTAT: f32,
+    V_PTAT_25: i32,
+    Alpha_PTAT: f32,
 
     pix_os_ref: [i32; PIXEL_COUNT],
 
@@ -214,7 +218,11 @@ pub fn restore() -> EepromVars {
     let VDD_25 = calc_VDD_25();
 
     // Ta
-    //let T_a = calc_T_a(K_Vdd, VDD_25);
+    let mut K_V_PTAT: f32 = 0.0;
+    let mut K_T_PTAT: f32 = 0.0;
+    let mut V_PTAT_25: i32 = 0;
+    let mut Alpha_PTAT: f32 = 0.0;
+    restore_T_a(K_Vdd, VDD_25, &mut K_V_PTAT, &mut K_T_PTAT, &mut V_PTAT_25, &mut Alpha_PTAT);
 
     // Offset
     let pix_os_ref = calc_offset();
@@ -279,6 +287,10 @@ pub fn restore() -> EepromVars {
         VDD_25: VDD_25,
 
         //T_a: T_a,
+        K_V_PTAT: K_V_PTAT,
+        K_T_PTAT: K_T_PTAT,
+        V_PTAT_25: V_PTAT_25,
+        Alpha_PTAT: Alpha_PTAT,
 
         pix_os_ref: pix_os_ref,
 
@@ -321,6 +333,40 @@ pub fn restore() -> EepromVars {
         Resolution: Resolution,
     };
 }
+// -------------------------------------
+// | Temperature calculation functions |
+// -------------------------------------
+
+// TODO: Fill this
+
+// ----------------------------
+// | EEPROM restore functions |
+// ----------------------------
+
+
+fn restore_T_a(K_V_dd: i32, VDD_25: i32, K_V_PTAT: &mut f32, K_T_PTAT: &mut f32, V_PTAT_25: &mut i32, Alpha_PTAT: &mut f32) {
+    *K_V_PTAT = ((get_eeprom_val(0x2432) & 0xFC00) >> 10) as f32;
+    if *K_V_PTAT > 31.0 {
+        *K_V_PTAT -= 64.0;
+    }
+    *K_V_PTAT /= 2_f32.powi(12);
+
+    *K_T_PTAT = (get_eeprom_val(0x2432) & 0x03FF) as f32;
+    if *K_T_PTAT > 511.0 {
+        *K_T_PTAT -= 1024.0;
+    }
+    *K_T_PTAT /= 2_f32.powi(3);
+
+    *V_PTAT_25 = get_eeprom_val(0x2431) as i32;
+    if *V_PTAT_25 > 32767 {
+        *V_PTAT_25 -= 65536;
+    }
+
+    let Alpha_PTAT_EE: f32 = ((get_eeprom_val(0x2410) & 0xF000) >> 12) as f32;
+    *Alpha_PTAT = Alpha_PTAT_EE / 2_f32.powi(2) + 8.0;
+}
+
+// ------- Old functions -------
 
 fn calc_K_Vdd() -> i32 {
     let mut K_Vdd: i32 = ((get_eeprom_val(0x2433) & 0xFF00) >> 8) as i32;
@@ -337,6 +383,7 @@ fn calc_VDD_25() -> i32 {
     return VDD_25;
 }
 
+/*
 fn calc_T_a(K_Vdd: i32, VDD_25: i32) -> f32 {
     let mut K_V_PTAT: f32 = ((get_eeprom_val(0x2432) & 0xFC00) >> 10) as f32;
     if K_V_PTAT > 31.0 {
@@ -384,6 +431,7 @@ fn calc_T_a(K_Vdd: i32, VDD_25: i32) -> f32 {
 
     return T_a;
 }
+*/
 
 fn calc_offset() -> [i32; PIXEL_COUNT] {
     let mut offset_avg: i32 = get_eeprom_val(0x2411) as i32;
