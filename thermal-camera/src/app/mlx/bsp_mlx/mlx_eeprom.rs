@@ -29,7 +29,6 @@ pub struct EepromVars {
 
     Ks_Ta: f32,
 
-    Step: i32,
     CT3: i32,
     CT4: i32,
 
@@ -116,8 +115,8 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
     // Calculate To
     let T_o = calc_T_o(EMISSIVITY, T_a, V_IR_compensated, a_comp);
 
-    // TODO: do additional temperature ranges
-    return T_o;
+    let T_o_extra = calc_T_o_extra(T_o, EMISSIVITY, T_a, V_IR_compensated, a_comp);
+    return T_o_extra;
 }
 
 
@@ -206,7 +205,6 @@ pub fn restore() -> EepromVars {
 
         Ks_Ta,
 
-        Step,
         CT3,
         CT4,
 
@@ -405,6 +403,52 @@ fn calc_T_o(emissivity: f32, T_a: f32, V_IR_compensated: [f32; PIXEL_COUNT], a_c
     }
 
     return T_o;
+}
+
+fn calc_T_o_extra(T_o: [f32; PIXEL_COUNT], emissivity: f32, T_a: f32, V_IR_compensated: [f32; PIXEL_COUNT], a_comp: [f32; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
+    let T_r = T_a - 8.0;
+    let T_aK4 = (T_a + 273.15).powi(4);
+    let T_rK4 = (T_r + 273.15).powi(4);
+
+    let T_a_r = T_rK4 - (T_rK4 - T_aK4) / emissivity;
+
+    let mut T_o_extra: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
+    for i in 0..PIXEL_COUNT {
+        let Ks_To_x: f32;
+        let Alpha_corr_x: f32;
+        let CT_x: f32;
+
+        if T_o[i] < 0.0 {
+            Ks_To_x = EEPROM_VARS.Ks_To.0;
+            Alpha_corr_x = EEPROM_VARS.Ks_To.0;
+            CT_x = -40.0;
+        }
+        else if T_o[i] < EEPROM_VARS.CT3 as f32 {
+            Ks_To_x = EEPROM_VARS.Ks_To.1;
+            Alpha_corr_x = EEPROM_VARS.Alpha_corr.1;
+            CT_x = 0.0;
+        }
+        else if T_o[i] < EEPROM_VARS.CT4 as f32 {
+            Ks_To_x = EEPROM_VARS.Ks_To.2;
+            Alpha_corr_x = EEPROM_VARS.Alpha_corr.2;
+            CT_x = EEPROM_VARS.CT3 as f32;
+        }
+        else {
+            Ks_To_x = EEPROM_VARS.Ks_To.3;
+            Alpha_corr_x = EEPROM_VARS.Alpha_corr.3;
+            CT_x = EEPROM_VARS.CT4 as f32;
+        }
+ 
+        T_o_extra[i] = V_IR_compensated[i];
+
+        let coefficient: f32 = 1.0 + Ks_To_x * (T_o[i] - CT_x);
+        T_o_extra[i] /= a_comp[i] * Alpha_corr_x * coefficient;
+        T_o_extra[i] += T_a_r;
+        T_o_extra[i] = T_o_extra[i].powf(1.0 / 4.0);
+        T_o_extra[i] -= 273.15;
+    }
+
+    return T_o_extra;
 }
 
 // ----------------------------
