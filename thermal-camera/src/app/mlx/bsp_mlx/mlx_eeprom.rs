@@ -100,8 +100,7 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
     let V_dd:f32 = (Resolution_corr * V_ram as f32 - EEPROM_VARS.VDD_25 as f32) / EEPROM_VARS.K_Vdd as f32 + 3.3;
 
     // Calculate Ambient temperature
-    // TODO: Improve this to do less calculations, more things should be stored
-    let T_a: f32 = calc_T_a(EEPROM_VARS.K_Vdd, EEPROM_VARS.VDD_25);
+    let T_a: f32 = calc_T_a();
 
     // Compensate for gain
     let mut gain_ram: i32 = super::read_value(0x070A) as i32;
@@ -286,7 +285,6 @@ pub fn restore() -> EepromVars {
         K_Vdd: K_Vdd,
         VDD_25: VDD_25,
 
-        //T_a: T_a,
         K_V_PTAT: K_V_PTAT,
         K_T_PTAT: K_T_PTAT,
         V_PTAT_25: V_PTAT_25,
@@ -338,6 +336,40 @@ pub fn restore() -> EepromVars {
 // -------------------------------------
 
 // TODO: Fill this
+fn calc_T_a() -> f32 {
+    let VDD_25 = EEPROM_VARS.VDD_25;
+    let K_Vdd = EEPROM_VARS.K_Vdd;
+    let K_V_PTAT = EEPROM_VARS.K_V_PTAT;
+    let K_T_PTAT = EEPROM_VARS.K_T_PTAT;
+    let V_PTAT_25 = EEPROM_VARS.V_PTAT_25;
+    let Alpha_PTAT = EEPROM_VARS.Alpha_PTAT;
+
+    let mut dV: f32 = super::read_value(0x072A) as f32;
+    if dV > 32767.0 {
+        dV -= 65536.0;
+    }
+    dV -= VDD_25 as f32;
+    dV /= K_Vdd as f32;
+
+    let mut V_PTAT: f32 = super::read_value(0x0720) as f32;
+    if V_PTAT > 32767.0 {
+        V_PTAT -= 65536.0;
+    }
+
+    let mut V_BE: f32 = super::read_value(0x0700) as f32;
+    if V_BE > 32767.0 {
+        V_BE -= 65536.0;
+    }
+
+    let V_PTAT_art: f32 = (V_PTAT as f32 / (V_PTAT * Alpha_PTAT + V_BE)) * 2_f32.powi(18);
+
+    let mut T_a: f32 = V_PTAT_art / (1.0 + K_V_PTAT * dV);
+    T_a -= V_PTAT_25 as f32;
+    T_a /= K_T_PTAT;
+    T_a += 25.0;
+
+    return T_a;
+}
 
 // ----------------------------
 // | EEPROM restore functions |
@@ -382,56 +414,6 @@ fn calc_VDD_25() -> i32 {
     VDD_25 = ((VDD_25 - 256) * 2_i32.pow(5)) - 2_i32.pow(13);
     return VDD_25;
 }
-
-/*
-fn calc_T_a(K_Vdd: i32, VDD_25: i32) -> f32 {
-    let mut K_V_PTAT: f32 = ((get_eeprom_val(0x2432) & 0xFC00) >> 10) as f32;
-    if K_V_PTAT > 31.0 {
-        K_V_PTAT -= 64.0;
-    }
-    K_V_PTAT /= 2_f32.powi(12);
-
-    let mut K_T_PTAT: f32 = (get_eeprom_val(0x2432) & 0x03FF) as f32;
-    if K_T_PTAT > 511.0 {
-        K_T_PTAT -= 1024.0;
-    }
-    K_T_PTAT /= 2_f32.powi(3);
-
-    let mut dV: f32 = super::read_value(0x072A) as f32;
-    if dV > 32767.0 {
-        dV -= 65536.0;
-    }
-    dV -= VDD_25 as f32;
-    dV /= K_Vdd as f32;
-
-    let mut V_PTAT_25: f32 = get_eeprom_val(0x2431) as f32;
-    if V_PTAT_25 > 32767.0 {
-        V_PTAT_25 -= 65536.0;
-    }
-
-    let mut V_PTAT: f32 = super::read_value(0x0720) as f32;
-    if V_PTAT > 32767.0 {
-        V_PTAT -= 65536.0;
-    }
-
-    let mut V_BE: f32 = super::read_value(0x0700) as f32;
-    if V_BE > 32767.0 {
-        V_BE -= 65536.0;
-    }
-
-    let Alpha_PTAT_EE: i32 = ((get_eeprom_val(0x2410) & 0xF000) >> 12) as i32;
-    let Alpha_PTAT: f32 = (Alpha_PTAT_EE as f32 / 4.0) + 8.0;
-
-    let V_PTAT_art: f32 = (V_PTAT as f32 / (V_PTAT * Alpha_PTAT + V_BE)) * 2_f32.powi(18);
-
-    let mut T_a: f32 = V_PTAT_art / (1.0 + K_V_PTAT * dV);
-    T_a -= V_PTAT_25 as f32;
-    T_a /= K_T_PTAT;
-    T_a += 25.0;
-
-    return T_a;
-}
-*/
 
 fn calc_offset() -> [i32; PIXEL_COUNT] {
     let mut offset_avg: i32 = get_eeprom_val(0x2411) as i32;
