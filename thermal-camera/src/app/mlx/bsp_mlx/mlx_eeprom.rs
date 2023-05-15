@@ -120,38 +120,10 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
     let V_IR_compensated = calc_V_IR_compensated(V_IR_Em_compensated, pix_OS_CP_SP);
 
     // Normalize to sensitivity
-    let mut a_comp: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
-    for i in 0..PIXEL_COUNT {
-        a_comp[i] = EEPROM_VARS.a[i];
-
-        a_comp[i] -= EEPROM_VARS.TGC * ((1 - pattern[i]) as f32 * EEPROM_VARS.a_CP_0 + pattern[i] as f32 * EEPROM_VARS.a_CP_1);
-
-        a_comp[i] *= 1.0 + EEPROM_VARS.Ks_Ta * (T_a - 25.0);
-    }
+    let a_comp = calc_a_comp(T_a);
 
     // Calculate To
-    let T_r = T_a - 8.0;
-    let T_aK4 = (T_a + 273.15).powi(4);
-    let T_rK4 = (T_r + 273.15).powi(4);
-
-    let T_a_r = T_rK4 - (T_rK4 - T_aK4) / EMISSIVITY;
-
-    let mut S_x: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
-    for i in 0..PIXEL_COUNT {
-        S_x[i] = EEPROM_VARS.Ks_To2;
-        
-        // This is fourth root
-        S_x[i] *= (a_comp[i].powi(3) * V_IR_compensated[i] + a_comp[i].powi(4) * T_a_r).powf(1.0 / 4.0);
-    }
-
-    let mut T_o: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
-    for i in 0..PIXEL_COUNT {
-        T_o[i] = V_IR_compensated[i];
-        T_o[i] /= a_comp[i] * (1.0 - EEPROM_VARS.Ks_To2 * 273.15) + S_x[i];
-        T_o[i] += T_a_r;
-        T_o[i] = T_o[i].powf(1.0 / 4.0);
-        T_o[i] -= 273.15;
-    }
+    let T_o = calc_T_o(EMISSIVITY, T_a, V_IR_compensated, a_comp);
 
     // TODO: do additional temperature ranges
     return T_o;
@@ -415,6 +387,54 @@ fn calc_V_IR_compensated(V_IR_Em_compensated: [f32; PIXEL_COUNT], pix_OS_CP_SP: 
         V_IR_compensated[i] -= TGC * ((1 - pattern[i]) as f32 * pix_OS_CP_SP.0 + pattern[i] as f32 * pix_OS_CP_SP.1);
     }
     return V_IR_compensated;
+}
+
+fn calc_a_comp(T_a: f32) -> [f32; PIXEL_COUNT] {
+    let a = EEPROM_VARS.a;
+    let TGC = EEPROM_VARS.TGC;
+    let pattern = EEPROM_VARS.pattern;
+    let a_CP_0 = EEPROM_VARS.a_CP_0;
+    let a_CP_1 = EEPROM_VARS.a_CP_1;
+    let Ks_Ta = EEPROM_VARS.Ks_Ta;
+
+    let mut a_comp: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
+    for i in 0..PIXEL_COUNT {
+        a_comp[i] = a[i];
+
+        a_comp[i] -= TGC * ((1 - pattern[i]) as f32 * a_CP_0 + pattern[i] * a_CP_1);
+
+        a_comp[i] *= 1.0 + Ks_Ta * (T_a - 25.0);
+    }
+
+    return a_comp;
+}
+
+fn calc_T_o(emissivity: f32, T_a: f32, V_IR_compensated: [f32; PIXEL_COUNT], a_comp: [f32; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
+    let Ks_To2 = EEPROM_VARS.Ks_To2;
+
+    let T_r = T_a - 8.0;
+    let T_aK4 = (T_a + 273.15).powi(4);
+    let T_rK4 = (T_r + 273.15).powi(4);
+
+    let T_a_r = T_rK4 - (T_rK4 - T_aK4) / emissivity;
+
+    let mut S_x: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
+    for i in 0..PIXEL_COUNT {
+        S_x[i] = Ks_To2;
+
+        S_x[i] *= (a_comp[i].powi(3) * V_IR_compensated[i] + a_comp[i].powi(4) * T_a_r).powf(1.0 / 4.0);
+    }
+
+    let mut T_o: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
+    for i in 0..PIXEL_COUNT {
+        T_o[i] = V_IR_compensated[i];
+        T_o[i] /= a_comp[i] * (1.0 - Ks_To2 * 273.15) + S_x[i];
+        T_o[i] += T_a_r;
+        T_o[i] = T_o[i].powf(1.0 / 4.0);
+        T_o[i] -= 273.15;
+    }
+
+    return T_o;
 }
 
 // ----------------------------
