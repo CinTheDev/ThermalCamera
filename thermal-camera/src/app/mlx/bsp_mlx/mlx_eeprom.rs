@@ -38,11 +38,9 @@ pub struct EepromVars {
 
     Alpha_corr: (f32, f32, f32, f32),
 
-    a_CP_0: f32,
-    a_CP_1: f32,
+    a_CP: (f32, f32),
 
-    Off_CP_0: i32,
-    Off_CP_1: i32,
+    Off_CP: (i32, i32),
 
     K_V_CP: f32,
 
@@ -169,14 +167,10 @@ pub fn restore() -> EepromVars {
     let Alpha_corr = restore_Alpha_corr(Ks_To, CT3, CT4);
 
     // Sensitivity a_CP
-    let mut a_CP_0: f32 = 0.0;
-    let mut a_CP_1: f32 = 0.0;
-    restore_a_CP(&mut a_CP_0, &mut a_CP_1);
+    let a_CP = restore_a_CP();
 
     // Offset of CP
-    let mut Off_CP_0: i32 = 0;
-    let mut Off_CP_1: i32 = 0;
-    restore_Off_CP(&mut Off_CP_0, &mut Off_CP_1);
+    let Off_CP = restore_Off_CP();
 
     // Kv CP
     let K_V_CP = restore_K_V_CP();
@@ -221,11 +215,9 @@ pub fn restore() -> EepromVars {
 
         Alpha_corr,
 
-        a_CP_0,
-        a_CP_1,
+        a_CP,
 
-        Off_CP_0,
-        Off_CP_1,
+        Off_CP,
 
         K_V_CP,
 
@@ -335,8 +327,7 @@ fn calc_V_IR_Em_compensated(pix_os: [f32; PIXEL_COUNT], emissivity: f32) -> [f32
 fn calc_pix_OS_CP_SPX(V_dd: f32, T_a: f32, K_gain: f32) -> (f32, f32) {
     let K_Ta_CP = EEPROM_VARS.K_Ta_CP;
     let K_V_CP = EEPROM_VARS.K_V_CP;
-    let Off_CP_0 = EEPROM_VARS.Off_CP_0 as f32;
-    let Off_CP_1 = EEPROM_VARS.Off_CP_1 as f32;
+    let Off_CP = EEPROM_VARS.Off_CP;
 
     let mut pix_gain_CP_SP0_RAM = super::read_value(0x0708) as f32;
     let mut pix_gain_CP_SP1_RAM = super::read_value(0x0728) as f32;
@@ -352,8 +343,8 @@ fn calc_pix_OS_CP_SPX(V_dd: f32, T_a: f32, K_gain: f32) -> (f32, f32) {
     let mut pix_OS_CP_SP0 = pix_gain_CP_SP0;
     let mut pix_OS_CP_SP1 = pix_gain_CP_SP1;
 
-    pix_OS_CP_SP0 -= Off_CP_0 * coef_1 * coef_2;
-    pix_OS_CP_SP1 -= Off_CP_1 * coef_1 * coef_2;
+    pix_OS_CP_SP0 -= Off_CP.0 as f32 * coef_1 * coef_2;
+    pix_OS_CP_SP1 -= Off_CP.1 as f32 * coef_1 * coef_2;
 
     return (pix_OS_CP_SP0, pix_OS_CP_SP1);
 }
@@ -374,15 +365,14 @@ fn calc_a_comp(T_a: f32) -> [f32; PIXEL_COUNT] {
     let a = EEPROM_VARS.a;
     let TGC = EEPROM_VARS.TGC;
     let pattern = EEPROM_VARS.pattern;
-    let a_CP_0 = EEPROM_VARS.a_CP_0;
-    let a_CP_1 = EEPROM_VARS.a_CP_1;
+    let a_CP = EEPROM_VARS.a_CP;
     let Ks_Ta = EEPROM_VARS.Ks_Ta;
 
     let mut a_comp: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
     for i in 0..PIXEL_COUNT {
         a_comp[i] = a[i];
 
-        a_comp[i] -= TGC * ((1 - pattern[i]) as f32 * a_CP_0 + pattern[i] as f32 * a_CP_1);
+        a_comp[i] -= TGC * ((1 - pattern[i]) as f32 * a_CP.0 + pattern[i] as f32 * a_CP.1);
 
         a_comp[i] *= 1.0 + Ks_Ta * (T_a - 25.0);
     }
@@ -771,21 +761,23 @@ fn restore_Alpha_corr(Ks_To: (f32, f32, f32, f32), CT3: i32, CT4: i32) -> (f32, 
     return (Alpha_corr_range1, Alpha_corr_range2, Alpha_corr_range3, Alpha_corr_range4);
 }
 
-fn restore_a_CP(a_CP_0: &mut f32, a_CP_1: &mut f32) {
+fn restore_a_CP() -> (f32, f32) {
     let a_scale_CP = ((get_eeprom_val(0x2420) & 0xF000) >> 12) as i32 + 27;
     let mut CP_P1_P0_ratio = ((get_eeprom_val(0x2439) & 0xFC00) >> 10) as i32;
     if CP_P1_P0_ratio > 31 {
         CP_P1_P0_ratio -= 64;
     }
 
-    *a_CP_0 = ((get_eeprom_val(0x2439) & 0x03FF)) as i32 as f32 / 2_f32.powi(a_scale_CP as i32);
-    *a_CP_1 = *a_CP_0 * (1.0 + (CP_P1_P0_ratio as f32 / 2_f32.powi(7)));
+    let a_CP_0 = ((get_eeprom_val(0x2439) & 0x03FF)) as i32 as f32 / 2_f32.powi(a_scale_CP as i32);
+    let a_CP_1 = a_CP_0 * (1.0 + (CP_P1_P0_ratio as f32 / 2_f32.powi(7)));
+
+    return (a_CP_0, a_CP_1);
 }
 
-fn restore_Off_CP(Off_CP_0: &mut i32, Off_CP_1: &mut i32) {
-    *Off_CP_0 = (get_eeprom_val(0x243A) & 0x03FF) as i32;
-    if *Off_CP_0 > 511 {
-        *Off_CP_0 -= 1024;
+fn restore_Off_CP() -> (i32, i32) {
+    let mut Off_CP_0 = (get_eeprom_val(0x243A) & 0x03FF) as i32;
+    if Off_CP_0 > 511 {
+        Off_CP_0 -= 1024;
     }
 
     let mut Off_CP_1_delta: i32 = ((get_eeprom_val(0x243A) & 0xFC00) >> 10) as i32;
@@ -793,7 +785,9 @@ fn restore_Off_CP(Off_CP_0: &mut i32, Off_CP_1: &mut i32) {
         Off_CP_1_delta -= 64;
     }
 
-    *Off_CP_1 = *Off_CP_0 + Off_CP_1_delta;
+    let Off_CP_1 = Off_CP_0 + Off_CP_1_delta;
+
+    return (Off_CP_0, Off_CP_1);
 }
 
 fn restore_K_V_CP() -> f32 {
