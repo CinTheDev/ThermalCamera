@@ -158,7 +158,7 @@ pub fn restore() -> EepromVars {
     let K_Ta = restore_K_Ta();
 
     // GAIN
-    let gain = restore_gain();
+    let GAIN = restore_gain();
 
     // Ks_Ta
     let Ks_Ta = restore_Ks_Ta();
@@ -176,10 +176,10 @@ pub fn restore() -> EepromVars {
     restore_Ks_To(&mut Ks_To1, &mut Ks_To2, &mut Ks_To3, &mut Ks_To4);
 
     // Ranged sensitivity correction
-    let Alpha_corr_range1 = restore_Alpha_corr_range1(Ks_To1);
-    let Alpha_corr_range2 = restore_Alpha_corr_range2();
-    let Alpha_corr_range3 = restore_Alpha_corr_range3(Ks_To2, CT3);
-    let Alpha_corr_range4 = restore_Alpha_corr_range4(Ks_To2, Ks_To3, CT3, CT4);
+    let Alpha_corr_1 = restore_Alpha_corr_range1(Ks_To1);
+    let Alpha_corr_2 = restore_Alpha_corr_range2();
+    let Alpha_corr_3 = restore_Alpha_corr_range3(Ks_To2, CT3);
+    let Alpha_corr_4 = restore_Alpha_corr_range4(Ks_To2, Ks_To3, CT3, CT4);
 
     // Sensitivity a_CP
     let mut a_CP_0: f32 = 0.0;
@@ -206,55 +206,55 @@ pub fn restore() -> EepromVars {
     let pattern = restore_pattern();
 
     return EepromVars {
-        K_Vdd: K_Vdd,
-        VDD_25: VDD_25,
+        K_Vdd,
+        VDD_25,
 
-        K_V_PTAT: K_V_PTAT,
-        K_T_PTAT: K_T_PTAT,
-        V_PTAT_25: V_PTAT_25,
-        Alpha_PTAT: Alpha_PTAT,
+        K_V_PTAT,
+        K_T_PTAT,
+        V_PTAT_25,
+        Alpha_PTAT,
 
-        pix_os_ref: pix_os_ref,
+        pix_os_ref,
 
-        a: a,
+        a,
 
-        K_V: K_V,
+        K_V,
 
-        K_Ta: K_Ta,
+        K_Ta,
 
-        GAIN: gain,
+        GAIN,
 
-        Ks_Ta: Ks_Ta,
+        Ks_Ta,
 
-        Step: Step,
-        CT3: CT3,
-        CT4: CT4,
+        Step,
+        CT3,
+        CT4,
 
-        Ks_To1: Ks_To1,
-        Ks_To2: Ks_To2,
-        Ks_To3: Ks_To3,
-        Ks_To4: Ks_To4,
+        Ks_To1,
+        Ks_To2,
+        Ks_To3,
+        Ks_To4,
 
-        Alpha_corr_1: Alpha_corr_range1,
-        Alpha_corr_2: Alpha_corr_range2,
-        Alpha_corr_3: Alpha_corr_range3,
-        Alpha_corr_4: Alpha_corr_range4,
+        Alpha_corr_1,
+        Alpha_corr_2,
+        Alpha_corr_3,
+        Alpha_corr_4,
 
-        a_CP_0: a_CP_0,
-        a_CP_1: a_CP_1,
+        a_CP_0,
+        a_CP_1,
 
-        Off_CP_0: Off_CP_0,
-        Off_CP_1: Off_CP_1,
+        Off_CP_0,
+        Off_CP_1,
 
-        K_V_CP: K_V_CP,
+        K_V_CP,
 
-        K_Ta_CP: K_Ta_CP,
+        K_Ta_CP,
 
-        TGC: TGC,
+        TGC,
 
-        Resolution: Resolution,
+        Resolution,
 
-        pattern: pattern,
+        pattern,
     };
 }
 
