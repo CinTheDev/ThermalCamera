@@ -99,10 +99,10 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
     let pix_gain = calc_pix_gain(K_gain, pix_data);
 
     // Offset, VDD and Ta
-    let pix_os = calc_pix_os(pix_gain, V_dd, T_a);
+    let pix_os = calc_pix_os(V_dd, T_a, pix_gain);
 
     // Emissivity compensation
-    let V_IR_Em_compensated = calc_V_IR_Em_compensated(pix_os, EMISSIVITY);
+    let V_IR_Em_compensated = calc_V_IR_Em_compensated(EMISSIVITY, pix_os);
 
     // CP gain compensation
     let pix_OS_CP_SP = calc_pix_OS_CP_SPX(V_dd, T_a, K_gain);
@@ -298,7 +298,7 @@ fn calc_pix_gain(K_gain: f32, pixel_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COU
     return pix_gain;
 }
 
-fn calc_pix_os(pix_gain: [f32; PIXEL_COUNT], V_dd: f32, T_a: f32) -> [f32; PIXEL_COUNT] {
+fn calc_pix_os(V_dd: f32, T_a: f32, pix_gain: [f32; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
     let K_Ta = EEPROM_VARS.K_Ta;
     let K_V = EEPROM_VARS.K_V;
     let pix_os_ref = EEPROM_VARS.pix_os_ref;
@@ -315,7 +315,7 @@ fn calc_pix_os(pix_gain: [f32; PIXEL_COUNT], V_dd: f32, T_a: f32) -> [f32; PIXEL
     return pix_os;
 }
 
-fn calc_V_IR_Em_compensated(pix_os: [f32; PIXEL_COUNT], emissivity: f32) -> [f32; PIXEL_COUNT] {
+fn calc_V_IR_Em_compensated(emissivity: f32, pix_os: [f32; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
     let mut V_IR_Em_compensated: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
     for i in 0..PIXEL_COUNT {
         V_IR_Em_compensated[i] = pix_os[i] / emissivity;
