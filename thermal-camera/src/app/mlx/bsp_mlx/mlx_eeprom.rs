@@ -227,7 +227,7 @@ pub fn restore() -> EepromVars {
     let pix_os_ref = restore_offset();
 
     // Sensitivity a (i, j)
-    let a = calc_a();
+    let a = restore_a();
 
     // K_V (i, j)
     let K_V = calc_K_V();
@@ -483,9 +483,7 @@ fn restore_offset() -> [i32; PIXEL_COUNT] {
     return pix_os_ref;
 }
 
-// ------- Old functions -------
-
-fn calc_a() -> [f32; PIXEL_COUNT] {
+fn restore_a() -> [f32; PIXEL_COUNT] {
     let a_reference: i32 = get_eeprom_val(0x2421) as i32;
 
     let a_scale: i32 = ((get_eeprom_val(0x2420) & 0xF000) >> 12) as i32 + 30;
@@ -550,6 +548,8 @@ fn calc_a() -> [f32; PIXEL_COUNT] {
     }
     return a;
 }
+
+// ------- Old functions -------
 
 fn calc_K_V() -> [f32; PIXEL_COUNT] {
     let K_V_scale: u16 = (get_eeprom_val(0x2438) & 0x0F00) as u16 >> 8;
