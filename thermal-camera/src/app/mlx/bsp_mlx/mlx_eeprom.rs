@@ -230,56 +230,56 @@ pub fn restore() -> EepromVars {
     let a = restore_a();
 
     // K_V (i, j)
-    let K_V = calc_K_V();
+    let K_V = restore_K_V();
 
     // K_Ta (i, j)
-    let K_Ta = calc_K_Ta();
+    let K_Ta = restore_K_Ta();
 
     // GAIN
-    let gain = calc_gain();
+    let gain = restore_gain();
 
     // Ks_Ta
-    let Ks_Ta = calc_Ks_Ta();
+    let Ks_Ta = restore_Ks_Ta();
 
     // Corner temperatures
-    let Step = calc_Step();
-    let CT3 = calc_CT3(Step);
-    let CT4 = calc_CT4(Step, CT3);
+    let Step = restore_Step();
+    let CT3 = restore_CT3(Step);
+    let CT4 = restore_CT4(Step, CT3);
 
     // Ks_To
     let mut Ks_To1: f32 = 0.0;
     let mut Ks_To2: f32 = 0.0;
     let mut Ks_To3: f32 = 0.0;
     let mut Ks_To4: f32 = 0.0;
-    calc_Ks_To(&mut Ks_To1, &mut Ks_To2, &mut Ks_To3, &mut Ks_To4);
+    restore_Ks_To(&mut Ks_To1, &mut Ks_To2, &mut Ks_To3, &mut Ks_To4);
 
     // Ranged sensitivity correction
-    let Alpha_corr_range1 = calc_Alpha_corr_range1(Ks_To1);
-    let Alpha_corr_range2 = calc_Alpha_corr_range2();
-    let Alpha_corr_range3 = calc_Alpha_corr_range3(Ks_To2, CT3);
-    let Alpha_corr_range4 = calc_Alpha_corr_range4(Ks_To2, Ks_To3, CT3, CT4);
+    let Alpha_corr_range1 = restore_Alpha_corr_range1(Ks_To1);
+    let Alpha_corr_range2 = restore_Alpha_corr_range2();
+    let Alpha_corr_range3 = restore_Alpha_corr_range3(Ks_To2, CT3);
+    let Alpha_corr_range4 = restore_Alpha_corr_range4(Ks_To2, Ks_To3, CT3, CT4);
 
     // Sensitivity a_CP
     let mut a_CP_0: f32 = 0.0;
     let mut a_CP_1: f32 = 0.0;
-    calc_a_CP(&mut a_CP_0, &mut a_CP_1);
+    restore_a_CP(&mut a_CP_0, &mut a_CP_1);
 
     // Offset of CP
     let mut Off_CP_0: i32 = 0;
     let mut Off_CP_1: i32 = 0;
-    calc_Off_CP(&mut Off_CP_0, &mut Off_CP_1);
+    restore_Off_CP(&mut Off_CP_0, &mut Off_CP_1);
 
     // Kv CP
-    let K_V_CP = calc_K_V_CP();
+    let K_V_CP = restore_K_V_CP();
 
     // Kta CP
-    let K_Ta_CP = calc_K_Ta_CP();
+    let K_Ta_CP = restore_K_Ta_CP();
 
     // TGC
-    let TGC = calc_TGC();
+    let TGC = restore_TGC();
 
     // Resolution control
-    let Resolution = calc_Resolution();
+    let Resolution = restore_Resolution();
 
     return EepromVars {
         K_Vdd: K_Vdd,
@@ -549,9 +549,7 @@ fn restore_a() -> [f32; PIXEL_COUNT] {
     return a;
 }
 
-// ------- Old functions -------
-
-fn calc_K_V() -> [f32; PIXEL_COUNT] {
+fn restore_K_V() -> [f32; PIXEL_COUNT] {
     let K_V_scale: u16 = (get_eeprom_val(0x2438) & 0x0F00) as u16 >> 8;
 
     let mut K_V: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
@@ -598,7 +596,7 @@ fn calc_K_V() -> [f32; PIXEL_COUNT] {
     return K_V;
 }
 
-fn calc_K_Ta() -> [f32; PIXEL_COUNT] {
+fn restore_K_Ta() -> [f32; PIXEL_COUNT] {
     let mut K_Ta_EE: [i32; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
 
     for i in 0..PIXEL_COUNT {
@@ -665,7 +663,7 @@ fn calc_K_Ta() -> [f32; PIXEL_COUNT] {
     return K_Ta;
 }
 
-fn calc_gain() -> i32 {
+fn restore_gain() -> i32 {
     let mut gain: i32 = get_eeprom_val(0x2430) as i32;
     if gain > 32767 {
         gain -= 65536;
@@ -673,7 +671,7 @@ fn calc_gain() -> i32 {
     return gain;
 }
 
-fn calc_Ks_Ta() -> f32 {
+fn restore_Ks_Ta() -> f32 {
     let mut Ks_Ta_EE: i32 = ((get_eeprom_val(0x243C) & 0xFF00) >> 8) as i32;
     if Ks_Ta_EE > 127 {
         Ks_Ta_EE -= 256;
@@ -683,19 +681,19 @@ fn calc_Ks_Ta() -> f32 {
     return Ks_Ta;
 }
 
-fn calc_Step() -> i32 {
+fn restore_Step() -> i32 {
     return ((get_eeprom_val(0x243F) & 0x3000) >> 12) as i32 * 10;
 }
 
-fn calc_CT3(Step: i32) -> i32 {
+fn restore_CT3(Step: i32) -> i32 {
     return ((get_eeprom_val(0x243F) & 0x00F0) >> 4) as i32 * Step;
 }
 
-fn calc_CT4(Step: i32, CT3: i32) -> i32 {
+fn restore_CT4(Step: i32, CT3: i32) -> i32 {
     return ((get_eeprom_val(0x243F) & 0x0F00) >> 8) as i32 * Step + CT3;
 }
 
-fn calc_Ks_To(Ks_To1: &mut f32, Ks_To2: & mut f32, Ks_To3: &mut f32, Ks_To4: &mut f32) {
+fn restore_Ks_To(Ks_To1: &mut f32, Ks_To2: & mut f32, Ks_To3: &mut f32, Ks_To4: &mut f32) {
     let Ks_To_scale: u16 = (get_eeprom_val(0x243F) & 0x000F) + 8;
 
     let mut Ks_To1_EE: i32 = (get_eeprom_val(0x243D) & 0x00FF) as i32;
@@ -715,23 +713,23 @@ fn calc_Ks_To(Ks_To1: &mut f32, Ks_To2: & mut f32, Ks_To3: &mut f32, Ks_To4: &mu
     *Ks_To4 = Ks_To4_EE as f32 / 2_f32.powi(Ks_To_scale as i32);
 }
 
-fn calc_Alpha_corr_range1(Ks_To1: f32) -> f32 {
+fn restore_Alpha_corr_range1(Ks_To1: f32) -> f32 {
     return 1.0 / (1.0 + Ks_To1 * 40.0);
 }
 
-fn calc_Alpha_corr_range2() -> f32 {
+fn restore_Alpha_corr_range2() -> f32 {
     return 1.0;
 }
 
-fn calc_Alpha_corr_range3(Ks_To2: f32, CT3: i32) -> f32 {
+fn restore_Alpha_corr_range3(Ks_To2: f32, CT3: i32) -> f32 {
     return 1.0 + Ks_To2 * CT3 as f32;
 }
 
-fn calc_Alpha_corr_range4(Ks_To2: f32, Ks_To3: f32, CT3: i32, CT4: i32) -> f32 {
+fn restore_Alpha_corr_range4(Ks_To2: f32, Ks_To3: f32, CT3: i32, CT4: i32) -> f32 {
     return (1.0 + Ks_To2 * CT3 as f32) * (1.0 + Ks_To3 * (CT4 - CT3) as f32);
 }
 
-fn calc_a_CP(a_CP_0: &mut f32, a_CP_1: &mut f32) {
+fn restore_a_CP(a_CP_0: &mut f32, a_CP_1: &mut f32) {
     let a_scale_CP = ((get_eeprom_val(0x2420) & 0xF000) >> 12) as i32 + 27;
     let mut CP_P1_P0_ratio = ((get_eeprom_val(0x2439) & 0xFC00) >> 10) as i32;
     if CP_P1_P0_ratio > 31 {
@@ -742,7 +740,7 @@ fn calc_a_CP(a_CP_0: &mut f32, a_CP_1: &mut f32) {
     *a_CP_1 = *a_CP_0 * (1.0 + (CP_P1_P0_ratio as f32 / 2_f32.powi(7)));
 }
 
-fn calc_Off_CP(Off_CP_0: &mut i32, Off_CP_1: &mut i32) {
+fn restore_Off_CP(Off_CP_0: &mut i32, Off_CP_1: &mut i32) {
     *Off_CP_0 = (get_eeprom_val(0x243A) & 0x03FF) as i32;
     if *Off_CP_0 > 511 {
         *Off_CP_0 -= 1024;
@@ -756,7 +754,7 @@ fn calc_Off_CP(Off_CP_0: &mut i32, Off_CP_1: &mut i32) {
     *Off_CP_1 = *Off_CP_0 + Off_CP_1_delta;
 }
 
-fn calc_K_V_CP() -> f32 {
+fn restore_K_V_CP() -> f32 {
     let K_V_Scale: u16 = (get_eeprom_val(0x2438) & 0x0F00) as u16 >> 8;
 
     let mut K_V_CP_EE: i32 = ((get_eeprom_val(0x243B) & 0xFF00) >> 8) as i32;
@@ -768,7 +766,7 @@ fn calc_K_V_CP() -> f32 {
     return K_V_CP;
 }
 
-fn calc_K_Ta_CP() -> f32 {
+fn restore_K_Ta_CP() -> f32 {
     let K_Ta_scale_1: u16 = ((get_eeprom_val(0x2438) & 0x00F0) as u16 >> 4) + 8;
 
     let mut K_Ta_CP_EE: i32 = (get_eeprom_val(0x243B) & 0x00FF) as i32;
@@ -780,7 +778,7 @@ fn calc_K_Ta_CP() -> f32 {
     return K_Ta_CP;
 }
 
-fn calc_TGC() -> f32 {
+fn restore_TGC() -> f32 {
     let mut TGC_EE: i32 = (get_eeprom_val(0x243C) & 0x00FF) as i32;
     if TGC_EE > 127 {
         TGC_EE -= 256;
@@ -790,6 +788,6 @@ fn calc_TGC() -> f32 {
     return TGC; // as a test
 }
 
-fn calc_Resolution() -> u16 {
+fn restore_Resolution() -> u16 {
     return (get_eeprom_val(0x2438) & 0x3000) as u16 >> 12;
 }
