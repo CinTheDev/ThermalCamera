@@ -221,7 +221,7 @@ pub fn restore() -> EepromVars {
     let mut K_T_PTAT: f32 = 0.0;
     let mut V_PTAT_25: i32 = 0;
     let mut Alpha_PTAT: f32 = 0.0;
-    restore_T_a(K_Vdd, VDD_25, &mut K_V_PTAT, &mut K_T_PTAT, &mut V_PTAT_25, &mut Alpha_PTAT);
+    restore_T_a(&mut K_V_PTAT, &mut K_T_PTAT, &mut V_PTAT_25, &mut Alpha_PTAT);
 
     // Offset
     let pix_os_ref = calc_offset();
@@ -376,7 +376,7 @@ fn calc_T_a() -> f32 {
 // ----------------------------
 
 
-fn restore_T_a(K_V_dd: i32, VDD_25: i32, K_V_PTAT: &mut f32, K_T_PTAT: &mut f32, V_PTAT_25: &mut i32, Alpha_PTAT: &mut f32) {
+fn restore_T_a(K_V_PTAT: &mut f32, K_T_PTAT: &mut f32, V_PTAT_25: &mut i32, Alpha_PTAT: &mut f32) {
     *K_V_PTAT = ((get_eeprom_val(0x2432) & 0xFC00) >> 10) as f32;
     if *K_V_PTAT > 31.0 {
         *K_V_PTAT -= 64.0;
