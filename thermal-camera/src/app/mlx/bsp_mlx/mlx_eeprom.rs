@@ -115,17 +115,7 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
     let pix_OS_CP_SP = calc_pix_OS_CP_SPX(V_dd, T_a, K_gain);
 
     // Gradient compensation
-    let mut pattern: [u16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
-
-    for i in 0..PIXEL_COUNT {
-        pattern[i] = i as u16 / 32;
-        pattern[i] -= pattern[i] & !0x0001;
-
-        let mut v: u16 = i as u16;
-        v -= i as u16 & !0x0001;
-
-        pattern[i] = pattern[i] ^ v;
-    }
+    let pattern = calc_pattern();
 
     let mut V_IR_compensated: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
     for i in 0..PIXEL_COUNT {
@@ -414,6 +404,22 @@ fn calc_pix_OS_CP_SPX(V_dd: f32, T_a: f32, K_gain: f32) -> (f32, f32) {
     pix_OS_CP_SP1 -= Off_CP_1 * coef_1 * coef_2;
 
     return (pix_OS_CP_SP0, pix_OS_CP_SP1);
+}
+
+fn calc_pattern() -> [u16; PIXEL_COUNT] {
+    let mut pattern: [u16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
+
+    for i in 0..PIXEL_COUNT {
+        pattern[i] = i as u16 / 32;
+        pattern[i] -= pattern[i] & !0x0001;
+
+        let mut v = i as u16;
+        v -= i as u16 & !0x0001;
+
+        pattern[i] = pattern[i] ^ v;
+    }
+
+    return pattern;
 }
 
 // ----------------------------
