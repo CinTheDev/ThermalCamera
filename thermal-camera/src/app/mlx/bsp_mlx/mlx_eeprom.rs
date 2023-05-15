@@ -12,7 +12,6 @@ pub struct EepromVars {
     K_Vdd: i32,
     VDD_25: i32,
 
-    //T_a: f32,
     K_V_PTAT: f32,
     K_T_PTAT: f32,
     V_PTAT_25: i32,
@@ -821,7 +820,7 @@ fn restore_TGC() -> f32 {
     }
 
     let TGC = TGC_EE as f32 / 2_f32.powi(5);
-    return TGC; // as a test
+    return TGC;
 }
 
 fn restore_Resolution() -> u16 {
