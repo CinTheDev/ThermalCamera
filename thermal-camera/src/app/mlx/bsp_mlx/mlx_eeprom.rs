@@ -101,9 +101,7 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
     let T_a: f32 = calc_T_a();
 
     // Compensate for gain
-    let mut gain_ram: i32 = super::read_value(0x070A) as i32;
-    if gain_ram > 32767 { gain_ram -= 65536 }
-    let K_gain:f32 = EEPROM_VARS.GAIN as f32 / gain_ram as f32;
+    let K_gain: f32 = calc_K_gain();
 
     let mut pix_gain: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
     for i in 0..PIXEL_COUNT {
@@ -377,6 +375,15 @@ fn calc_T_a() -> f32 {
     T_a += 25.0;
 
     return T_a;
+}
+
+fn calc_K_gain() -> f32 {
+    let GAIN: f32 = EEPROM_VARS.GAIN as f32;
+
+    let mut gain_ram: f32 = super::read_value(0x070A) as f32;
+    if gain_ram > 32767.0 { gain_ram -= 65536.0 }
+    let K_gain: f32 = GAIN / gain_ram;
+    return K_gain;
 }
 
 // ----------------------------
