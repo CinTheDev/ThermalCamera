@@ -95,26 +95,18 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
     let Resolution_corr = 2_f32.powi(EEPROM_VARS.Resolution as i32) / 2_f32.powi((super::read_value(0x800D) as i32 & 0x0C00) >> 10);
 
     // Calculate Voltage
-    let V_dd: f32 = calc_V_dd(Resolution_corr);
+    let V_dd = calc_V_dd(Resolution_corr);
 
     // Calculate Ambient temperature
-    let T_a: f32 = calc_T_a();
+    let T_a = calc_T_a();
 
     // Compensate for gain
-    let K_gain: f32 = calc_K_gain();
+    let K_gain = calc_K_gain();
 
-    let pix_gain: [f32; PIXEL_COUNT] = calc_pix_gain(K_gain, pix_data);
+    let pix_gain = calc_pix_gain(K_gain, pix_data);
 
     // Offset, VDD and Ta
-    let mut pix_os: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
-    for i in 0..PIXEL_COUNT {
-        pix_os[i] = pix_gain[i];
-
-        let coef_1: f32 = 1.0 + EEPROM_VARS.K_Ta[i] * (T_a - 25.0);
-        let coef_2: f32 = 1.0 + EEPROM_VARS.K_V[i] * (V_dd - 3.3);
-
-        pix_os[i] -= EEPROM_VARS.pix_os_ref[i] as f32 * coef_1 * coef_2;
-    }
+    let pix_os = calc_pix_os(pix_gain, V_dd, T_a);
 
     // Emissivity compensation
     let mut V_IR_Em_compensated: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
@@ -389,6 +381,23 @@ fn calc_pix_gain(K_gain: f32, pixel_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COU
         pix_gain[i] = p * K_gain;
     }
     return pix_gain;
+}
+
+fn calc_pix_os(pix_gain: [f32; PIXEL_COUNT], V_dd: f32, T_a: f32) -> [f32; PIXEL_COUNT] {
+    let K_Ta = EEPROM_VARS.K_Ta;
+    let K_V = EEPROM_VARS.K_V;
+    let pix_os_ref = EEPROM_VARS.pix_os_ref;
+
+    let mut pix_os: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
+    for i in 0..PIXEL_COUNT {
+        pix_os[i] = pix_gain[i];
+
+        let coef_1: f32 = 1.0 + K_Ta[i] * (T_a - 25.0);
+        let coef_2: f32 = 1.0 + K_V[i] * (V_dd - 3.3);
+
+        pix_os[i] -= pix_os_ref[i] as f32 * coef_1 * coef_2;
+    }
+    return pix_os;
 }
 
 // ----------------------------
