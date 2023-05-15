@@ -224,7 +224,7 @@ pub fn restore() -> EepromVars {
     restore_T_a(&mut K_V_PTAT, &mut K_T_PTAT, &mut V_PTAT_25, &mut Alpha_PTAT);
 
     // Offset
-    let pix_os_ref = calc_offset();
+    let pix_os_ref = restore_offset();
 
     // Sensitivity a (i, j)
     let a = calc_a();
@@ -412,9 +412,7 @@ fn restore_T_a(K_V_PTAT: &mut f32, K_T_PTAT: &mut f32, V_PTAT_25: &mut i32, Alph
     *Alpha_PTAT = Alpha_PTAT_EE / 2_f32.powi(2) + 8.0;
 }
 
-// ------- Old functions -------
-
-fn calc_offset() -> [i32; PIXEL_COUNT] {
+fn restore_offset() -> [i32; PIXEL_COUNT] {
     let mut offset_avg: i32 = get_eeprom_val(0x2411) as i32;
     if offset_avg > 32767 {
         offset_avg -= 65536;
@@ -484,6 +482,8 @@ fn calc_offset() -> [i32; PIXEL_COUNT] {
     }
     return pix_os_ref;
 }
+
+// ------- Old functions -------
 
 fn calc_a() -> [f32; PIXEL_COUNT] {
     let a_reference: i32 = get_eeprom_val(0x2421) as i32;
