@@ -401,7 +401,7 @@ fn calc_a_comp(T_a: f32) -> [f32; PIXEL_COUNT] {
     for i in 0..PIXEL_COUNT {
         a_comp[i] = a[i];
 
-        a_comp[i] -= TGC * ((1 - pattern[i]) as f32 * a_CP_0 + pattern[i] * a_CP_1);
+        a_comp[i] -= TGC * ((1 - pattern[i]) as f32 * a_CP_0 + pattern[i] as f32 * a_CP_1);
 
         a_comp[i] *= 1.0 + Ks_Ta * (T_a - 25.0);
     }
