@@ -34,10 +34,7 @@ pub struct EepromVars {
     CT3: i32,
     CT4: i32,
 
-    Ks_To1: f32,
-    Ks_To2: f32,
-    Ks_To3: f32,
-    Ks_To4: f32,
+    Ks_To: (f32, f32, f32, f32),
 
     Alpha_corr_1: f32,
     Alpha_corr_2: f32,
@@ -169,17 +166,13 @@ pub fn restore() -> EepromVars {
     let CT4 = restore_CT4(Step, CT3);
 
     // Ks_To
-    let mut Ks_To1: f32 = 0.0;
-    let mut Ks_To2: f32 = 0.0;
-    let mut Ks_To3: f32 = 0.0;
-    let mut Ks_To4: f32 = 0.0;
-    restore_Ks_To(&mut Ks_To1, &mut Ks_To2, &mut Ks_To3, &mut Ks_To4);
+    let Ks_To = restore_Ks_To();
 
     // Ranged sensitivity correction
-    let Alpha_corr_1 = restore_Alpha_corr_range1(Ks_To1);
+    let Alpha_corr_1 = restore_Alpha_corr_range1(Ks_To.1);
     let Alpha_corr_2 = restore_Alpha_corr_range2();
-    let Alpha_corr_3 = restore_Alpha_corr_range3(Ks_To2, CT3);
-    let Alpha_corr_4 = restore_Alpha_corr_range4(Ks_To2, Ks_To3, CT3, CT4);
+    let Alpha_corr_3 = restore_Alpha_corr_range3(Ks_To.2, CT3);
+    let Alpha_corr_4 = restore_Alpha_corr_range4(Ks_To.2, Ks_To.3, CT3, CT4);
 
     // Sensitivity a_CP
     let mut a_CP_0: f32 = 0.0;
@@ -230,10 +223,7 @@ pub fn restore() -> EepromVars {
         CT3,
         CT4,
 
-        Ks_To1,
-        Ks_To2,
-        Ks_To3,
-        Ks_To4,
+        Ks_To,
 
         Alpha_corr_1,
         Alpha_corr_2,
@@ -410,7 +400,7 @@ fn calc_a_comp(T_a: f32) -> [f32; PIXEL_COUNT] {
 }
 
 fn calc_T_o(emissivity: f32, T_a: f32, V_IR_compensated: [f32; PIXEL_COUNT], a_comp: [f32; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
-    let Ks_To2 = EEPROM_VARS.Ks_To2;
+    let Ks_To2 = EEPROM_VARS.Ks_To.2;
 
     let T_r = T_a - 8.0;
     let T_aK4 = (T_a + 273.15).powi(4);
@@ -759,24 +749,26 @@ fn restore_CT4(Step: i32, CT3: i32) -> i32 {
     return ((get_eeprom_val(0x243F) & 0x0F00) >> 8) as i32 * Step + CT3;
 }
 
-fn restore_Ks_To(Ks_To1: &mut f32, Ks_To2: & mut f32, Ks_To3: &mut f32, Ks_To4: &mut f32) {
+fn restore_Ks_To() -> (f32, f32, f32, f32) {
     let Ks_To_scale: u16 = (get_eeprom_val(0x243F) & 0x000F) + 8;
 
     let mut Ks_To1_EE: i32 = (get_eeprom_val(0x243D) & 0x00FF) as i32;
     if Ks_To1_EE > 127 { Ks_To1_EE -= 256 }
-    *Ks_To1 = Ks_To1_EE as f32 / 2_f32.powi(Ks_To_scale as i32);
+    let Ks_To1 = Ks_To1_EE as f32 / 2_f32.powi(Ks_To_scale as i32);
 
     let mut Ks_To2_EE: i32 = ((get_eeprom_val(0x243D) & 0xFF00) >> 8) as i32;
     if Ks_To2_EE > 127 { Ks_To2_EE -= 256 }
-    *Ks_To2 = Ks_To2_EE as f32 / 2_f32.powi(Ks_To_scale as i32);
+    let Ks_To2 = Ks_To2_EE as f32 / 2_f32.powi(Ks_To_scale as i32);
 
     let mut Ks_To3_EE: i32 = (get_eeprom_val(0x243E) & 0x00FF) as i32;
     if Ks_To3_EE > 127 { Ks_To3_EE -= 256 }
-    *Ks_To3 = Ks_To3_EE as f32 / 2_f32.powi(Ks_To_scale as i32);
+    let Ks_To3 = Ks_To3_EE as f32 / 2_f32.powi(Ks_To_scale as i32);
 
     let mut Ks_To4_EE: i32 = ((get_eeprom_val(0x243E) & 0xFF00) >> 8) as i32;
     if Ks_To4_EE > 127 { Ks_To4_EE -= 256 }
-    *Ks_To4 = Ks_To4_EE as f32 / 2_f32.powi(Ks_To_scale as i32);
+    let Ks_To4 = Ks_To4_EE as f32 / 2_f32.powi(Ks_To_scale as i32);
+
+    return (Ks_To1, Ks_To2, Ks_To3, Ks_To4);
 }
 
 fn restore_Alpha_corr_range1(Ks_To1: f32) -> f32 {
