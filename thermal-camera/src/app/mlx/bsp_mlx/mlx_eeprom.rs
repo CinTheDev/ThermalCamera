@@ -103,12 +103,7 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
     // Compensate for gain
     let K_gain: f32 = calc_K_gain();
 
-    let mut pix_gain: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
-    for i in 0..PIXEL_COUNT {
-        let mut p: i32 = pix_data[i] as i32;
-        if p > 32767 { p -= 65536 }
-        pix_gain[i] = p as f32 * K_gain;
-    }
+    let pix_gain: [f32; PIXEL_COUNT] = calc_pix_gain(K_gain, pix_data);
 
     // Offset, VDD and Ta
     let mut pix_os: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
@@ -384,6 +379,16 @@ fn calc_K_gain() -> f32 {
     if gain_ram > 32767.0 { gain_ram -= 65536.0 }
     let K_gain: f32 = GAIN / gain_ram;
     return K_gain;
+}
+
+fn calc_pix_gain(K_gain: f32, pixel_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
+    let mut pix_gain: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
+    for i in 0..PIXEL_COUNT {
+        let mut p: f32 = pixel_data[i] as f32;
+        if p > 32767.0 { p -= 65536.0 }
+        pix_gain[i] = p * K_gain;
+    }
+    return pix_gain;
 }
 
 // ----------------------------
