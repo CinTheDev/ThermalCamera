@@ -92,7 +92,7 @@ fn get_eeprom_val(address: u16) -> u16 {
 pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
     const EMISSIVITY: f32 = 1.0;
 
-    let Resolution_corr = 2_f32.powi(EEPROM_VARS.Resolution as i32) / 2_f32.powi((super::read_value(0x800D) as i32 & 0x0C00) >> 10);
+    let Resolution_corr: f32 = 2_f32.powi(EEPROM_VARS.Resolution as i32) / 2_f32.powi((super::read_value(0x800D) as i32 & 0x0C00) >> 10);
 
     // Calculate Voltage
     let V_dd = calc_V_dd(Resolution_corr);
@@ -109,28 +109,10 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
     let pix_os = calc_pix_os(pix_gain, V_dd, T_a);
 
     // Emissivity compensation
-    let mut V_IR_Em_compensated: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
-    for i in 0..PIXEL_COUNT {
-        V_IR_Em_compensated[i] = pix_os[i] / EMISSIVITY;
-    }
+    let V_IR_Em_compensated = calc_V_IR_Em_compensated(pix_os, EMISSIVITY);
 
     // CP gain compensation
-    let mut pix_gain_CP_SP0_RAM = super::read_value(0x0708) as i32;
-    let mut pix_gain_CP_SP1_RAM = super::read_value(0x0728) as i32;
-    if pix_gain_CP_SP0_RAM > 32767 { pix_gain_CP_SP0_RAM -= 65536 }
-    if pix_gain_CP_SP1_RAM > 32767 { pix_gain_CP_SP1_RAM -= 65536 }
-
-    let pix_gain_CP_SP0: f32 = pix_gain_CP_SP0_RAM as f32 * K_gain;
-    let pix_gain_CP_SP1: f32 = pix_gain_CP_SP1_RAM as f32 * K_gain;
-
-    let mut pix_OS_CP_SP0: f32 = pix_gain_CP_SP0;
-    let mut pix_OS_CP_SP1: f32 = pix_gain_CP_SP1;
-
-    let pix_os_cp_coef_1: f32 = 1.0 + EEPROM_VARS.K_Ta_CP * (T_a - 25.0);
-    let pix_os_cp_coef_2: f32 = 1.0 + EEPROM_VARS.K_V_CP * (V_dd - 3.3);
-
-    pix_OS_CP_SP0 -= EEPROM_VARS.Off_CP_0 as f32 * pix_os_cp_coef_1 * pix_os_cp_coef_2;
-    pix_OS_CP_SP1 -= EEPROM_VARS.Off_CP_1 as f32 * pix_os_cp_coef_1 * pix_os_cp_coef_2;
+    let pix_OS_CP_SP = calc_pix_OS_CP_SPX(V_dd, T_a, K_gain);
 
     // Gradient compensation
     let mut pattern: [u16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
@@ -149,7 +131,7 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
     for i in 0..PIXEL_COUNT {
         V_IR_compensated[i] = V_IR_Em_compensated[i];
 
-        V_IR_compensated[i] -= EEPROM_VARS.TGC * ((1 - pattern[i]) as f32 * pix_OS_CP_SP0 + pattern[i] as f32 * pix_OS_CP_SP1);
+        V_IR_compensated[i] -= EEPROM_VARS.TGC * ((1 - pattern[i]) as f32 * pix_OS_CP_SP.0 + pattern[i] as f32 * pix_OS_CP_SP.1);
     }
 
     // Normalize to sensitivity
@@ -398,6 +380,40 @@ fn calc_pix_os(pix_gain: [f32; PIXEL_COUNT], V_dd: f32, T_a: f32) -> [f32; PIXEL
         pix_os[i] -= pix_os_ref[i] as f32 * coef_1 * coef_2;
     }
     return pix_os;
+}
+
+fn calc_V_IR_Em_compensated(pix_os: [f32; PIXEL_COUNT], emissivity: f32) -> [f32; PIXEL_COUNT] {
+    let mut V_IR_Em_compensated: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
+    for i in 0..PIXEL_COUNT {
+        V_IR_Em_compensated[i] = pix_os[i] / emissivity;
+    }
+    return V_IR_Em_compensated;
+}
+
+fn calc_pix_OS_CP_SPX(V_dd: f32, T_a: f32, K_gain: f32) -> (f32, f32) {
+    let K_Ta_CP = EEPROM_VARS.K_Ta_CP;
+    let K_V_CP = EEPROM_VARS.K_V_CP;
+    let Off_CP_0 = EEPROM_VARS.Off_CP_0 as f32;
+    let Off_CP_1 = EEPROM_VARS.Off_CP_1 as f32;
+
+    let mut pix_gain_CP_SP0_RAM = super::read_value(0x0708) as f32;
+    let mut pix_gain_CP_SP1_RAM = super::read_value(0x0728) as f32;
+    if pix_gain_CP_SP0_RAM > 32767.0 { pix_gain_CP_SP0_RAM -= 65536.0 }
+    if pix_gain_CP_SP1_RAM > 32767.0 { pix_gain_CP_SP1_RAM -= 65536.0 }
+
+    let pix_gain_CP_SP0 = pix_gain_CP_SP0_RAM * K_gain;
+    let pix_gain_CP_SP1 = pix_gain_CP_SP1_RAM * K_gain;
+
+    let coef_1 = 1.0 + K_Ta_CP * (T_a - 25.0);
+    let coef_2 = 1.0 + K_V_CP * (V_dd - 3.3);
+
+    let mut pix_OS_CP_SP0 = pix_gain_CP_SP0;
+    let mut pix_OS_CP_SP1 = pix_gain_CP_SP1;
+
+    pix_OS_CP_SP0 -= Off_CP_0 * coef_1 * coef_2;
+    pix_OS_CP_SP1 -= Off_CP_1 * coef_1 * coef_2;
+
+    return (pix_OS_CP_SP0, pix_OS_CP_SP1);
 }
 
 // ----------------------------
