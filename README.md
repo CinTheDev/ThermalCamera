@@ -74,5 +74,4 @@ The Thermal Camera is connected in the following fashion:
 
 ## TODOs
 
-- Add extended temperature range
 - Add Bad Pixel correction
