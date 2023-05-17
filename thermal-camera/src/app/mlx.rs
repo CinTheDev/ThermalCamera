@@ -12,11 +12,17 @@ pub fn init() {
 }
 
 pub fn test() {
-    let img = take_image();
+    let temps = read_temperatures();
+    let img = mlx_image::grayscale(temps, 20.0, 40.0);
     bsp::write_pgm("./test.pgm", &img, PIXELS_WIDTH, PIXELS_HEIGHT);
 }
 
-fn read_image() -> [u16; PIXEL_COUNT] {
+fn read_temperatures() -> [f32; PIXEL_COUNT] {
+    let image_raw = read_raw_image();
+    return bsp_mlx::evaluate_image(image_raw);
+}
+
+fn read_raw_image() -> [u16; PIXEL_COUNT] {
     let mut img: [u16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
 
     let subpage = bsp_mlx::read_value(0x8000) & 0x1;
@@ -58,10 +64,4 @@ fn wait_for_data() {
     status_reg &= !0x8; // Clear that bit
     
     bsp_mlx::write(0x8000, status_reg);
-}
-
-fn take_image() -> [u8; PIXEL_COUNT] {
-    let image_raw = read_image();
-    let image_temperatures = bsp_mlx::evaluate_image(image_raw);
-    return mlx_image::grayscale_test(&image_temperatures);
 }
