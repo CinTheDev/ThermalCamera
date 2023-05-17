@@ -13,22 +13,6 @@ pub fn test() {
     bsp_mlx::write_image("./test.pgm", &img, PIXELS_WIDTH, PIXELS_HEIGHT);
 }
 
-fn wait_for_data() {
-    loop {
-        let status_reg = bsp_mlx::read_value(0x8000);
-
-        // If that bit is a 1, it's bigger than 0
-        let new_data = status_reg & 0x8 > 0;
-
-        if new_data { break }
-    }
-
-    let mut status_reg = bsp_mlx::read_value(0x8000);
-    status_reg &= !0x8; // Clear that bit
-    
-    bsp_mlx::write(0x8000, status_reg);
-}
-
 fn read_image() -> [u16; PIXEL_COUNT] {
     let mut img: [u16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
 
@@ -55,6 +39,22 @@ fn read_image() -> [u16; PIXEL_COUNT] {
     }
 
     return img;
+}
+
+fn wait_for_data() {
+    loop {
+        let status_reg = bsp_mlx::read_value(0x8000);
+
+        // If that bit is a 1, it's bigger than 0
+        let new_data = status_reg & 0x8 > 0;
+
+        if new_data { break }
+    }
+
+    let mut status_reg = bsp_mlx::read_value(0x8000);
+    status_reg &= !0x8; // Clear that bit
+    
+    bsp_mlx::write(0x8000, status_reg);
 }
 
 fn take_image() -> [u8; PIXEL_COUNT] {
