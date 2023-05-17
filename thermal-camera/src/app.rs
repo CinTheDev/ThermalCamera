@@ -8,7 +8,7 @@ pub fn init() {
 
     let opt = Opt::from_args();
 
-    mlx::grayscale(opt.filename.as_str(), 20.0, 40.0);
+    mlx::grayscale(opt.filename.as_str(), opt.min, opt.max);
 }
 
 #[derive(Debug, StructOpt)]
@@ -16,4 +16,10 @@ pub fn init() {
 struct Opt {
     #[structopt()]
     filename: String,
+
+    #[structopt(long, default_value = "20")]
+    min: f32,
+
+    #[structopt(long, default_value = "40")]
+    max: f32,
 }
