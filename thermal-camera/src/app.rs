@@ -5,8 +5,10 @@ mod mlx;
 
 pub fn init() {
     mlx::init();
+
     let opt = Opt::from_args();
-    println!("Filename: {}", opt.filename);
+
+    mlx::grayscale(opt.filename.as_str(), 20.0, 40.0);
 }
 
 #[derive(Debug, StructOpt)]

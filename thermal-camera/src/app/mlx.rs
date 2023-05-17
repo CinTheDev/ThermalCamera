@@ -11,10 +11,18 @@ pub fn init() {
     bsp_mlx::init();
 }
 
+/*
 pub fn test() {
     let temps = read_temperatures();
     let img = mlx_image::grayscale(temps, 20.0, 40.0);
     bsp::write_pgm("./test.pgm", &img, PIXELS_WIDTH, PIXELS_HEIGHT);
+}
+*/
+
+pub fn grayscale(filename: &str, temp_min: f32, temp_max: f32) {
+    let temps = read_temperatures();
+    let img = mlx_image::grayscale(temps, temp_min, temp_max);
+    bsp::write_pgm(filename, &img, PIXELS_WIDTH, PIXELS_HEIGHT);
 }
 
 fn read_temperatures() -> [f32; PIXEL_COUNT] {
