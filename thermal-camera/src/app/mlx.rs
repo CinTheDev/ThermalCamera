@@ -60,12 +60,6 @@ fn wait_for_data() {
 
 fn take_image() -> [u8; PIXEL_COUNT] {
     let image_raw = read_image();
-    let grid_eval = bsp_mlx::evaluate_image(image_raw);
-
-    // Let 20°C be black, and 40°C be white
-    let mut res: [u8; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
-    for i in 0..PIXEL_COUNT {
-        res[i] = (((grid_eval[i] - 20.0) * (255.0/40.0)).round() as u8).max(0).min(255);
-    }
-    return res;
+    let image_temperatures = bsp_mlx::evaluate_image(image_raw);
+    return mlx_image::grayscale_test(&image_temperatures);
 }
