@@ -1,4 +1,5 @@
 mod bsp_mlx;
+mod mlx_image;
 
 const PIXELS_WIDTH: usize = 32;
 const PIXELS_HEIGHT: usize = 24;
