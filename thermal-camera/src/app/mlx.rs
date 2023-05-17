@@ -13,7 +13,8 @@ pub fn init() {
 
 pub fn test() {
     let img = take_image();
-    bsp_mlx::write_image("./test.pgm", &img, PIXELS_WIDTH, PIXELS_HEIGHT);
+    //bsp_mlx::write_image("./test.pgm", &img, PIXELS_WIDTH, PIXELS_HEIGHT);
+    bsp::write_pgm("./test.pgm", &img, PIXELS_WIDTH, PIXELS_HEIGHT);
 }
 
 fn read_image() -> [u16; PIXEL_COUNT] {
