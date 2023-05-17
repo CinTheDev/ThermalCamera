@@ -1,6 +1,8 @@
 mod bsp_mlx;
 mod mlx_image;
 
+use super::bsp;
+
 const PIXELS_WIDTH: usize = 32;
 const PIXELS_HEIGHT: usize = 24;
 const PIXEL_COUNT: usize = PIXELS_WIDTH * PIXELS_HEIGHT;
