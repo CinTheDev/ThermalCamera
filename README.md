@@ -24,6 +24,7 @@ At this point, there is no need for an external keyboard and monitor anymore, th
 Optional:
 
 - Add personal public ssh key for easy access via ssh
+- Install eog for viewing image files via ssh
 
 ### Peripheral setup
 
