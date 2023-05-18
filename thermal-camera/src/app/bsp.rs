@@ -1,5 +1,6 @@
 use std::fs::File;
 use std::io::Write;
+use image::{RgbImage, Rgb};
 
 pub fn write_pgm(path: &str, image: &[u8], width: usize, height: usize) {
     // Raw image is graymap
@@ -14,4 +15,18 @@ pub fn write_pgm(path: &str, image: &[u8], width: usize, height: usize) {
 
     // Write image contents in binary format
     file.write(image).expect(err_msg);
+}
+
+pub fn write_png_grayscale(path: &str, image: &[u8], width: u32, height: u32) {
+    let mut img_png = RgbImage::new(width, height);
+
+    for y in 0..height {
+        for x in 0..width {
+            let index = y * width + x;
+            let col = image[index as usize];
+            img_png.put_pixel(x, y, Rgb([col, col, col]));
+        }
+    }
+
+    img_png.save(path).unwrap();
 }
