@@ -2,7 +2,18 @@ use std::fs::File;
 use std::io::Write;
 use image::{RgbImage, Rgb};
 
-pub fn write_pgm(path: &str, image: &[u8], width: usize, height: usize) {
+pub fn write_grayscale(path: &str, image: &[u8], width: usize, height: usize) {
+    let file_suffix = path.split('.').last().expect("Unrecognised file suffix");
+
+    match file_suffix.to_ascii_lowercase().as_str() {
+        "pgm" => write_pgm(path, image, width, height),
+        "png" => write_png_grayscale(path, image, width as u32, height as u32),
+
+        _ => panic!()
+    }
+}
+
+fn write_pgm(path: &str, image: &[u8], width: usize, height: usize) {
     // Raw image is graymap
     let mut file = File::create(path).unwrap();
 
@@ -17,7 +28,7 @@ pub fn write_pgm(path: &str, image: &[u8], width: usize, height: usize) {
     file.write(image).expect(err_msg);
 }
 
-pub fn write_png_grayscale(path: &str, image: &[u8], width: u32, height: u32) {
+fn write_png_grayscale(path: &str, image: &[u8], width: u32, height: u32) {
     let mut img_png = RgbImage::new(width, height);
 
     for y in 0..height {

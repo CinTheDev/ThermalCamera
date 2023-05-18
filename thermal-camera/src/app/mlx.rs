@@ -14,7 +14,7 @@ pub fn init() {
 pub fn grayscale(filename: &str, temp_min: f32, temp_max: f32) {
     let temps = read_temperatures();
     let img = mlx_image::grayscale(temps, temp_min, temp_max);
-    bsp::write_png_grayscale(filename, &img, PIXELS_WIDTH as u32, PIXELS_HEIGHT as u32);
+    bsp::write_grayscale(filename, &img, PIXELS_WIDTH, PIXELS_HEIGHT);
 }
 
 fn read_temperatures() -> [f32; PIXEL_COUNT] {

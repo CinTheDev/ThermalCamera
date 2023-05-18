@@ -8,7 +8,11 @@ pub fn init() {
 
     let opt = Opt::from_args();
 
-    mlx::grayscale(opt.filename.as_str(), opt.min, opt.max);
+    let filename = opt.filename.as_str();
+    let min = opt.min;
+    let max = opt.max;
+
+    mlx::grayscale(filename, min, max);
 }
 
 #[derive(Debug, StructOpt)]
