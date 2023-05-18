@@ -1,20 +1,17 @@
 mod bsp_mlx;
 mod mlx_image;
 
-use super::bsp;
-
-const PIXELS_WIDTH: usize = 32;
-const PIXELS_HEIGHT: usize = 24;
-const PIXEL_COUNT: usize = PIXELS_WIDTH * PIXELS_HEIGHT;
+pub const PIXELS_WIDTH: usize = 32;
+pub const PIXELS_HEIGHT: usize = 24;
+pub const PIXEL_COUNT: usize = PIXELS_WIDTH * PIXELS_HEIGHT;
 
 pub fn init() {
     bsp_mlx::init();
 }
 
-pub fn grayscale(filename: &str, temp_min: f32, temp_max: f32) {
-    let temps = read_temperatures();
-    let img = mlx_image::grayscale(temps, temp_min, temp_max);
-    bsp::write_grayscale(filename, &img, PIXELS_WIDTH, PIXELS_HEIGHT);
+pub fn grayscale(temp_min: f32, temp_max: f32) -> [u8; PIXEL_COUNT] {
+    let temperature_grid = read_temperatures();
+    return mlx_image::grayscale(temperature_grid, temp_min, temp_max);
 }
 
 fn read_temperatures() -> [f32; PIXEL_COUNT] {

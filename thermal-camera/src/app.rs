@@ -12,7 +12,11 @@ pub fn run() {
     let min = opt.min;
     let max = opt.max;
 
-    mlx::grayscale(filename, min, max);
+    let width = mlx::PIXELS_WIDTH;
+    let height = mlx::PIXELS_HEIGHT;
+    let output = mlx::grayscale(min, max);
+
+    bsp::write_grayscale(filename, &output, width, height);
 }
 
 #[derive(Debug, StructOpt)]
