@@ -22,7 +22,7 @@ pub fn run() {
 #[derive(Debug, StructOpt)]
 #[structopt(name = "MLX driver")]
 struct Opt {
-    #[structopt()]
+    #[structopt(default_value = "out.png")]
     filename: String,
 
     #[structopt(long, default_value = "20")]
