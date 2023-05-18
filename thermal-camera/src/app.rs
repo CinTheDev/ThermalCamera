@@ -3,7 +3,7 @@ use structopt::StructOpt;
 mod bsp;
 mod mlx;
 
-pub fn init() {
+pub fn run() {
     mlx::init();
 
     let opt = Opt::from_args();
