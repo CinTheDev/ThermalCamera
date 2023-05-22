@@ -1,7 +1,33 @@
+use structopt::StructOpt;
+
 mod bsp;
 mod mlx;
 
-pub fn init() {
+pub fn run() {
     mlx::init();
-    mlx::test();
+
+    let opt = Opt::from_args();
+
+    let filename = opt.filename.as_str();
+    let min = opt.min;
+    let max = opt.max;
+
+    let width = mlx::PIXELS_WIDTH;
+    let height = mlx::PIXELS_HEIGHT;
+    let output = mlx::grayscale(min, max);
+
+    bsp::write_grayscale(filename, &output, width, height);
+}
+
+#[derive(Debug, StructOpt)]
+#[structopt(name = "MLX driver")]
+struct Opt {
+    #[structopt(default_value = "out.png")]
+    filename: String,
+
+    #[structopt(long, default_value = "20")]
+    min: f32,
+
+    #[structopt(long, default_value = "40")]
+    max: f32,
 }

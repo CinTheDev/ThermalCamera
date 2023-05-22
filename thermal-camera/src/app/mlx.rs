@@ -1,35 +1,25 @@
 mod bsp_mlx;
+mod mlx_image;
 
-const PIXELS_WIDTH: usize = 32;
-const PIXELS_HEIGHT: usize = 24;
-const PIXEL_COUNT: usize = PIXELS_WIDTH * PIXELS_HEIGHT;
+pub const PIXELS_WIDTH: usize = 32;
+pub const PIXELS_HEIGHT: usize = 24;
+pub const PIXEL_COUNT: usize = PIXELS_WIDTH * PIXELS_HEIGHT;
 
 pub fn init() {
     bsp_mlx::init();
 }
 
-pub fn test() {
-    let img = take_image();
-    bsp_mlx::write_image("./test.pgm", &img, PIXELS_WIDTH, PIXELS_HEIGHT);
+pub fn grayscale(temp_min: f32, temp_max: f32) -> [u8; PIXEL_COUNT] {
+    let temperature_grid = read_temperatures();
+    return mlx_image::grayscale(temperature_grid, temp_min, temp_max);
 }
 
-fn wait_for_data() {
-    loop {
-        let status_reg = bsp_mlx::read_value(0x8000);
-
-        // If that bit is a 1, it's bigger than 0
-        let new_data = status_reg & 0x8 > 0;
-
-        if new_data { break }
-    }
-
-    let mut status_reg = bsp_mlx::read_value(0x8000);
-    status_reg &= !0x8; // Clear that bit
-    
-    bsp_mlx::write(0x8000, status_reg);
+fn read_temperatures() -> [f32; PIXEL_COUNT] {
+    let image_raw = read_raw_image();
+    return bsp_mlx::evaluate_image(image_raw);
 }
 
-fn read_image() -> [u16; PIXEL_COUNT] {
+fn read_raw_image() -> [u16; PIXEL_COUNT] {
     let mut img: [u16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
 
     let subpage = bsp_mlx::read_value(0x8000) & 0x1;
@@ -57,14 +47,18 @@ fn read_image() -> [u16; PIXEL_COUNT] {
     return img;
 }
 
-fn take_image() -> [u8; PIXEL_COUNT] {
-    let image_raw = read_image();
-    let grid_eval = bsp_mlx::evaluate_image(image_raw);
+fn wait_for_data() {
+    loop {
+        let status_reg = bsp_mlx::read_value(0x8000);
 
-    // Let 20°C be black, and 40°C be white
-    let mut res: [u8; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
-    for i in 0..PIXEL_COUNT {
-        res[i] = (((grid_eval[i] - 20.0) * (255.0/40.0)).round() as u8).max(0).min(255);
+        // If that bit is a 1, it's bigger than 0
+        let new_data = status_reg & 0x8 > 0;
+
+        if new_data { break }
     }
-    return res;
+
+    let mut status_reg = bsp_mlx::read_value(0x8000);
+    status_reg &= !0x8; // Clear that bit
+    
+    bsp_mlx::write(0x8000, status_reg);
 }
