@@ -24,7 +24,7 @@ pub fn run() {
     //let output = mlx::grayscale(min, max);
     let output = get_mlx_output(col, min, max);
 
-    bsp::write_grayscale(filename, &output, width, height);
+    bsp::write_rgb(filename, &output, width, height);
 }
 
 fn get_mlx_output(color_type: String, temp_min: f32, temp_max: f32) -> [u8; mlx::PIXEL_COUNT * 3] {
