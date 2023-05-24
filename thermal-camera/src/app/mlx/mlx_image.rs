@@ -19,7 +19,7 @@ pub fn rgb(temperatures: [f32; PIXEL_COUNT], temp_min: f32, temp_max: f32) -> [u
 
         // Calculate interpolation value t, it is always between 0 and 1
         let mut t = (temperatures[i] - temp_min) / (temp_max - temp_min);
-        t = t.max(1.0).min(0.0);
+        t = t.max(0.0).min(1.0);
 
         // Use special formulas to get rgb colors, I created a really simple and cheap one here.
         // Usually the rgb colors will be between 0 and 1, but sometimes it overshoots
