@@ -3,6 +3,12 @@ use structopt::StructOpt;
 mod bsp;
 mod mlx;
 
+// TODO: use this instead of strings
+enum ColorTypes {
+    Gray,
+    Cheap,
+}
+
 pub fn run() {
     mlx::init();
 
@@ -24,6 +30,9 @@ pub fn run() {
 struct Opt {
     #[structopt(default_value = "out.png")]
     filename: String,
+
+    #[structopt(default_value = "gray")]
+    color_type: String,
 
     #[structopt(long, default_value = "20")]
     min: f32,
