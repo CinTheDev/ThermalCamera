@@ -9,7 +9,7 @@ pub fn init() {
     bsp_mlx::init();
 }
 
-pub fn grayscale(temp_min: f32, temp_max: f32) -> [u8; PIXEL_COUNT] {
+pub fn grayscale(temp_min: f32, temp_max: f32) -> [u8; PIXEL_COUNT * 3] {
     let temperature_grid = read_temperatures();
     return mlx_image::grayscale(temperature_grid, temp_min, temp_max);
 }

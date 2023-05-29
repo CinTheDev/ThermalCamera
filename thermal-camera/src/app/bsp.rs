@@ -1,5 +1,5 @@
-use std::fs::File;
-use std::io::Write;
+//use std::fs::File;
+//use std::io::Write;
 use image::{RgbImage, Rgb};
 
 pub fn write_rgb(path: &str, image: &[u8], width: usize, height: usize) {
@@ -12,6 +12,7 @@ pub fn write_rgb(path: &str, image: &[u8], width: usize, height: usize) {
     }
 }
 
+/*
 pub fn write_grayscale(path: &str, image: &[u8], width: usize, height: usize) {
     let file_suffix = path.split('.').last().expect("Unrecognised file suffix");
 
@@ -37,6 +38,7 @@ fn write_pgm(path: &str, image: &[u8], width: usize, height: usize) {
     // Write image contents in binary format
     file.write(image).expect(err_msg);
 }
+*/
 
 
 fn write_png(path: &str, image: &[u8], width: u32, height: u32) {
@@ -57,6 +59,7 @@ fn write_png(path: &str, image: &[u8], width: u32, height: u32) {
     img_png.save(path).unwrap();
 }
 
+/*
 fn write_png_grayscale(path: &str, image: &[u8], width: u32, height: u32) {
     let mut img_png = RgbImage::new(width, height);
 
@@ -70,3 +73,4 @@ fn write_png_grayscale(path: &str, image: &[u8], width: u32, height: u32) {
 
     img_png.save(path).unwrap();
 }
+*/

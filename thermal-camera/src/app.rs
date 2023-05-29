@@ -30,7 +30,7 @@ pub fn run() {
 fn get_mlx_output(color_type: String, temp_min: f32, temp_max: f32) -> [u8; mlx::PIXEL_COUNT * 3] {
     match color_type.as_str() {
         // TODO: convert mlx::grayscale to also return rgb values
-        //"gray" => return mlx::grayscale(temp_min, temp_max),
+        "gray" => return mlx::grayscale(temp_min, temp_max),
         "cheap" => return mlx::colored_cheap(temp_min, temp_max),
 
         _ => panic!()
