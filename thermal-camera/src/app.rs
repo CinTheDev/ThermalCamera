@@ -1,13 +1,8 @@
+use std::str::FromStr;
 use structopt::StructOpt;
 
 mod bsp;
 mod mlx;
-
-// TODO: use this instead of strings
-enum ColorTypes {
-    Gray,
-    Cheap,
-}
 
 pub fn run() {
     mlx::init();
@@ -33,6 +28,24 @@ fn get_mlx_output(color_type: String, temp_min: f32, temp_max: f32) -> [u8; mlx:
         "cheap" => return mlx::colored_cheap(temp_min, temp_max),
 
         _ => panic!()
+    }
+}
+
+// TODO: use this instead of strings
+enum ColorTypes {
+    Gray,
+    Cheap,
+}
+
+impl FromStr for ColorTypes {
+    type Err = &'static str;
+    fn from_str(color_type: &str) -> Result<Self, Self::Err> {
+        match color_type {
+            "gray" => Ok(ColorTypes::Gray),
+            "cheap" => Ok(ColorTypes::Cheap),
+
+            _ => Err("Unrecognised color type"),
+        }
     }
 }
 
