@@ -22,16 +22,14 @@ pub fn run() {
     bsp::write_rgb(filename, &output, width, height);
 }
 
-fn get_mlx_output(color_type: String, temp_min: f32, temp_max: f32) -> [u8; mlx::PIXEL_COUNT * 3] {
-    match color_type.as_str() {
-        "gray" => return mlx::grayscale(temp_min, temp_max),
-        "cheap" => return mlx::colored_cheap(temp_min, temp_max),
-
-        _ => panic!()
+fn get_mlx_output(color_type: ColorTypes, temp_min: f32, temp_max: f32) -> [u8; mlx::PIXEL_COUNT * 3] {
+    match color_type {
+        ColorTypes::Gray => return mlx::grayscale(temp_min, temp_max),
+        ColorTypes::Cheap => return mlx::colored_cheap(temp_min, temp_max),
     }
 }
 
-// TODO: use this instead of strings
+#[derive(Debug)]
 enum ColorTypes {
     Gray,
     Cheap,
@@ -39,6 +37,7 @@ enum ColorTypes {
 
 impl FromStr for ColorTypes {
     type Err = &'static str;
+    
     fn from_str(color_type: &str) -> Result<Self, Self::Err> {
         match color_type {
             "gray" => Ok(ColorTypes::Gray),
@@ -56,7 +55,7 @@ struct Opt {
     filename: String,
 
     #[structopt(default_value = "cheap")]
-    color_type: String,
+    color_type: ColorTypes,
 
     #[structopt(long, default_value = "20")]
     min: f32,
