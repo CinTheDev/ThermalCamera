@@ -24,9 +24,12 @@ pub fn rgb(temperatures: [f32; PIXEL_COUNT], temp_min: f32, temp_max: f32) -> [u
         // Use special formulas to get rgb colors, I created a really simple and cheap one here.
         // Usually the rgb colors will be between 0 and 1, but sometimes it overshoots
         // Later it's being clamped
-        let r = 1.5 * t*t - 0.5 * t;
-        let g = 1.5 * t*t - 0.5 * t;
-        let b = 18.0 * t*t*t - 27.0 * t*t + 10.0 * t;
+        let factor = 2.0;
+
+        let r = 0_f32.max(-factor * (1.0 - t) + 1.0);
+        let b = 0_f32.max(-factor * t         + 1.0);
+
+        let g = 1.0 - r - b;
 
         // Convert to byte
         res[index + 0] = (r * 255.0).round().max(0.0).min(255.0) as u8;

@@ -43,7 +43,7 @@ struct Opt {
     #[structopt(default_value = "out.png")]
     filename: String,
 
-    #[structopt(default_value = "gray")]
+    #[structopt(default_value = "cheap")]
     color_type: String,
 
     #[structopt(long, default_value = "20")]
