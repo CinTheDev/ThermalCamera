@@ -17,7 +17,7 @@ pub fn grayscale(temperatures: [f32; PIXEL_COUNT], temp_min: f32, temp_max: f32)
     return res;
 }
 
-pub fn rgb(temperatures: [f32; PIXEL_COUNT], temp_min: f32, temp_max: f32) -> [u8; PIXEL_COUNT * 3] {
+pub fn rgb_cheap(temperatures: [f32; PIXEL_COUNT], temp_min: f32, temp_max: f32) -> [u8; PIXEL_COUNT * 3] {
     let mut res: [u8; PIXEL_COUNT * 3] = [0x00; PIXEL_COUNT * 3];
 
     for i in 0..PIXEL_COUNT {
