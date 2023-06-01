@@ -53,11 +53,11 @@ On our working machine, we have to make sure we can cross compile the program an
 
 We first have to add the correct Rust toolchain:
 
-`rustup target add armv7-unknown-linux-musleabihf`
+`rustup target add armv7-unknown-linux-gnueabihf`
 
 For our program to link correctly, we have to manually download the gnu toolchain and add it to our PATH. I got my toolchain from here: <https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads>
 
-I chose **gcc-arm-11.2-2022.02-x86_64-arm-none-linux-gnueabihf.tar.xz**, extracted it somewhere in my home directory, and prepended the binary directory to PATH via ~/.bashrc
+I chose **gcc-arm-11.2-2022.02-x86_64-arm-none-linux-gnueabihf.tar.xz**, extracted it somewhere in my home directory, and prepened the binary directory to PATH inside ~/.bashrc
 
 Verify the installation by running `cargo clean` (if there's some build files already) and `cargo build`. If it compiles successfully, that's a good sign. Finally, upload the binary to the raspi using the **manual_test.sh** script, and do a test run on the raspi with ssh.
 
