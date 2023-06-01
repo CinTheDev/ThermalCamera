@@ -10,9 +10,12 @@ pub fn run() {
     let opt = Opt::from_args();
 
     let filename = opt.filename.as_str();
+    let col = opt.color_type;
+    let windowed = opt.windowed;
     let min = opt.min;
     let max = opt.max;
-    let col = opt.color_type;
+
+    println!("Windowed: {}", windowed);
 
     let width = mlx::PIXELS_WIDTH;
     let height = mlx::PIXELS_HEIGHT;
@@ -56,6 +59,9 @@ struct Opt {
 
     #[structopt(default_value = "cheap")]
     color_type: ColorTypes,
+
+    #[structopt(short, long)]
+    windowed: bool,
 
     #[structopt(long, default_value = "20")]
     min: f32,
