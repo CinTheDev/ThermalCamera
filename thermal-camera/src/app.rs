@@ -55,7 +55,7 @@ impl FromStr for ColorTypes {
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "MLX driver")]
-struct Opt {
+pub struct Opt {
     #[structopt(default_value = "out.png")]
     filename: String,
 
