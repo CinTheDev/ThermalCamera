@@ -3,26 +3,28 @@ use structopt::StructOpt;
 
 mod bsp;
 mod mlx;
+mod window;
 
 pub fn run() {
     mlx::init();
 
     let opt = Opt::from_args();
 
-    let filename = opt.filename.as_str();
-    let col = opt.color_type;
-    let windowed = opt.windowed;
-    let min = opt.min;
-    let max = opt.max;
+    if opt.windowed {
+        window::open_window(opt);
+    }
+    else {
+        let filename = opt.filename.as_str();
+        let col = opt.color_type;
+        let min = opt.min;
+        let max = opt.max;
+        let width = mlx::PIXELS_WIDTH;
+        let height = mlx::PIXELS_HEIGHT;
 
-    println!("Windowed: {}", windowed);
+        let output = get_mlx_output(col, min, max);
 
-    let width = mlx::PIXELS_WIDTH;
-    let height = mlx::PIXELS_HEIGHT;
-
-    let output = get_mlx_output(col, min, max);
-
-    bsp::write_rgb(filename, &output, width, height);
+        bsp::write_rgb(filename, &output, width, height);
+    }
 }
 
 fn get_mlx_output(color_type: ColorTypes, temp_min: f32, temp_max: f32) -> [u8; mlx::PIXEL_COUNT * 3] {
