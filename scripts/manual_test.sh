@@ -4,9 +4,8 @@ ORANGE='\033[0;33m'
 NOCOL='\033[0m'
 
 (
-    cd thermal-camera
-    cargo build
-    scp target/armv7-unknown-linux-gnueabihf/debug/thermal-camera thermal-camera@raspberrypi:~/thermal-camera/thermal-camera
+    cd scripts
+    ./upload_bin.sh
 )
 
 echo -e "${ORANGE}You will now be ssh-redirected onto the Thermal Camera."
