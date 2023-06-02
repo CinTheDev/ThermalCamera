@@ -55,9 +55,11 @@ We first have to add the correct Rust toolchain:
 
 `rustup target add armv7-unknown-linux-gnueabihf`
 
-For our program to link correctly, we have to manually download the gnu toolchain and add it to our PATH. I got my toolchain from here: <https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads>
+For our program to link correctly, we have to manually download the gnu toolchain and add it to our PATH. I got my toolchain from here: <https://developer.arm.com/downloads/-/gnu-a>
 
-I chose **gcc-arm-11.2-2022.02-x86_64-arm-none-linux-gnueabihf.tar.xz**, extracted it somewhere in my home directory, and prepened the binary directory to PATH inside ~/.bashrc
+**IMPORTANT: The glibc version of the toolchain must NOT be higher than 2.31!! Otherwise the program will crash on the raspi.**
+
+I chose **gcc-arm-10.2-2020.11-x86_64-arm-none-linux-gnueabihf.tar.xz**, extracted it somewhere in my home directory, and prepened the binary directory to PATH inside ~/.bashrc
 
 Verify the installation by running `cargo clean` (if there's some build files already) and `cargo build`. If it compiles successfully, that's a good sign. Finally, upload the binary to the raspi using the **manual_test.sh** script, and do a test run on the raspi with ssh.
 
