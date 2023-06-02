@@ -3,7 +3,7 @@
 (
     cd thermal-camera
     cargo build
-    scp target/armv7-unknown-linux-musleabihf/debug/thermal-camera thermal-camera@raspberrypi:~/thermal-camera/thermal-camera
+    scp target/armv7-unknown-linux-gnueabihf/debug/thermal-camera thermal-camera@raspberrypi:~/thermal-camera/thermal-camera
 )
 
 ssh -Y thermal-camera@raspberrypi << EOF

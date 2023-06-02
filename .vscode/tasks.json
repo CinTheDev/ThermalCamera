@@ -5,6 +5,12 @@
             "label": "Run manual test",
             "type": "shell",
             "command": "./scripts/manual_test.sh"
-        }
+        },
+
+        {
+            "label": "Run window",
+            "type": "shell",
+            "command": "./scripts/launch.sh"
+        },
     ]
 }
