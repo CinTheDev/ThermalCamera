@@ -71,3 +71,15 @@ pub struct Opt {
     #[structopt(long, default_value = "40")]
     max: f32,
 }
+
+impl Default for Opt {
+    fn default() -> Self {
+        Self {
+            filename: "out.png".to_string(),
+            color_type: ColorTypes::Cheap,
+            windowed: false,
+            min: 20.0,
+            max: 40.0,
+        }
+    }
+}

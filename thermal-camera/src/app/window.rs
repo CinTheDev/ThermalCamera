@@ -1,24 +1,28 @@
 use eframe::egui;
 pub use super::Opt;
+use super::mlx;
 
 pub fn open_window(args: Opt) {
     let native_options = eframe::NativeOptions::default();
     eframe::run_native(
         "Thermal Camera",
         native_options,
-        Box::new(|cc| Box::new(ThermalApp::new(cc))),
+        Box::new(|cc| Box::new(ThermalApp::new(cc, args))),
     )
     .unwrap();
 }
 
 #[derive(Default)]
 struct ThermalApp {
-
+    options: Opt,
 }
 
 impl ThermalApp {
-    fn new(_cc: &eframe::CreationContext<'_>) -> Self {
-        return Self::default();
+    fn new(_cc: &eframe::CreationContext<'_>, args: Opt) -> Self {
+        Self {
+            options: args,
+            ..Default::default()
+        }
     }
 }
 
