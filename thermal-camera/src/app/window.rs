@@ -37,7 +37,12 @@ impl ThermalApp {
                 .load_texture("Picture", img, Default::default())
         });
 
-        ui.image(texture, texture.size_vec2());
+        ui.painter().image(
+            texture.id(),
+            ui.available_rect_before_wrap(),
+            egui::Rect::from_min_max(egui::pos2(0.0, 0.0), egui::pos2(1.0, 1.0)),
+            egui::Color32::WHITE
+        );
     }
 
     fn take_image(&mut self, ui: &mut egui::Ui) {
@@ -57,9 +62,11 @@ impl eframe::App for ThermalApp {
                 if ui.button("Test picture").clicked() {
                     self.take_image(ui);
                 }
-    
+            });
+
+            ui.with_layout(egui::Layout::top_down_justified(egui::Align::Center).with_main_justify(true), |ui| {
                 self.show_image(ui);
-            })
+            });
         });
     }
 }
