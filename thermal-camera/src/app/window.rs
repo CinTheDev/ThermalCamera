@@ -20,6 +20,7 @@ struct ThermalApp {
     options: Opt,
     picture: Option<egui::TextureHandle>,
     image_rx: Option<mpsc::Receiver<[u8; mlx::PIXEL_COUNT * 3]>>,
+    rx_active: bool,
 }
 
 impl ThermalApp {
@@ -70,6 +71,9 @@ impl ThermalApp {
     }
     
     fn update_image(&mut self, ctx: &egui::Context, ui: &mut egui::Ui) {
+        // Don't update image if not supposed to
+        if !self.rx_active { return }
+
         let rx = self.get_thread_receiver(ctx);
 
         let rx_img = rx.try_recv();
@@ -89,13 +93,12 @@ impl eframe::App for ThermalApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
             // TODO: format this in a more sensical way
-            /*
             ui.with_layout(egui::Layout::top_down_justified(egui::Align::Center), |ui| {
-                if ui.button("Test picture").clicked() {
-                    self.take_image(ui);
+                if ui.button("Freeze image").clicked() {
+                    self.rx_active = !self.rx_active;
                 }
             });
-            */
+
             self.update_image(ctx, ui);
 
             ui.with_layout(egui::Layout::top_down_justified(egui::Align::Center).with_main_justify(true), |ui| {
