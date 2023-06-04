@@ -18,6 +18,7 @@ pub fn open_window(args: Opt) {
 #[derive(Default)]
 struct ThermalApp {
     options: Opt,
+    raw_picture: Option<[u8; mlx::PIXEL_COUNT * 3]>,
     picture: Option<egui::TextureHandle>,
     image_rx: Option<mpsc::Receiver<[u8; mlx::PIXEL_COUNT * 3]>>,
     rx_active: bool,
@@ -54,9 +55,13 @@ impl ThermalApp {
 
     fn show_image(&mut self, ui: &mut egui::Ui) {
         let texture: &egui::TextureHandle = self.picture.get_or_insert_with(|| {
+            let raw_img = self.raw_picture.get_or_insert_with(|| {
+                [0x00; mlx::PIXEL_COUNT * 3]
+            });
+
             let img = egui::ColorImage::from_rgb(
                 [mlx::PIXELS_WIDTH, mlx::PIXELS_HEIGHT],
-                &[0x00; mlx::PIXEL_COUNT * 3]
+                raw_img
             );
 
             ui.ctx()
@@ -80,9 +85,12 @@ impl ThermalApp {
         let rx_img = rx.try_recv();
 
         if rx_img.is_ok() {
+            let raw_img = rx_img.unwrap();
+            self.raw_picture.replace(raw_img);
+
             let img = egui::ColorImage::from_rgb(
                 [mlx::PIXELS_WIDTH, mlx::PIXELS_HEIGHT],
-                &rx_img.unwrap()
+                &raw_img
             );
 
             self.picture.replace(ui.ctx().load_texture("Picture", img, Default::default()));
@@ -92,7 +100,7 @@ impl ThermalApp {
     fn save_image(&mut self) {
         if self.picture.is_none() { return }
 
-        let pic = self.picture.as_ref().unwrap();
+        let pic = self.raw_picture.as_ref().unwrap();
 
         // TODO: Read and save picture
     }
