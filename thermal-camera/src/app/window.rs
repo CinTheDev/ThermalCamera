@@ -27,6 +27,7 @@ impl ThermalApp {
     fn new(_cc: &eframe::CreationContext<'_>, args: Opt) -> Self {
         Self {
             options: args,
+            rx_active: true,
             ..Default::default()
         }
     }
