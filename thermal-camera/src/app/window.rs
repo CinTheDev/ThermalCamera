@@ -58,6 +58,7 @@ impl ThermalApp {
 impl eframe::App for ThermalApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
+            // TODO: format this in a more sensical way
             ui.with_layout(egui::Layout::top_down_justified(egui::Align::Center), |ui| {
                 if ui.button("Test picture").clicked() {
                     self.take_image(ui);

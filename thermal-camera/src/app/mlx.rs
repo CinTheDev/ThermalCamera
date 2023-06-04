@@ -19,6 +19,17 @@ pub fn colored_cheap(temp_min: f32, temp_max: f32) -> [u8; PIXEL_COUNT * 3] {
     return mlx_image::rgb_cheap(temperature_grid, temp_min, temp_max);
 }
 
+// This function is designed to run inside a thread
+pub fn continuuos_read(image: &mut [u8; PIXEL_COUNT * 3], image_ready: &mut bool) -> ! {
+    loop {
+        let temperature_grid = read_temperatures();
+        // TODO: Implement args
+        let img = mlx_image::rgb_cheap(temperature_grid, 20.0, 40.0);
+        *image = img;
+        *image_ready = true;
+    }
+}
+
 fn read_temperatures() -> [f32; PIXEL_COUNT] {
     let image_raw = read_raw_image();
     return bsp_mlx::evaluate_image(image_raw);
