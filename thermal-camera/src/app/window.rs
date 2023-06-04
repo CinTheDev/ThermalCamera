@@ -16,7 +16,7 @@ pub fn open_window(args: Opt) {
 struct ThermalApp {
     options: Opt,
     picture: Option<egui::TextureHandle>,
-    mlx_thread: Option<thread::Thread>,
+    mlx_thread: Option<thread::JoinHandle<egui::Key>>,
     image_ready: bool,
     raw_image: [u8; mlx::PIXEL_COUNT * 3],
 }
@@ -26,7 +26,7 @@ impl Default for ThermalApp {
         Self {
             options: Default::default(),
             picture: Default::default(),
-            mlx_thread: Default::default(),
+            mlx_thread: None,
             image_ready: false,
             raw_image: [0x00; mlx::PIXEL_COUNT * 3],
         }
@@ -39,6 +39,15 @@ impl ThermalApp {
             options: args,
             ..Default::default()
         }
+    }
+
+    fn start_thread_once(&mut self) {
+        let a = self.mlx_thread.get_or_insert_with(|| {
+            thread::spawn(|| mlx::continuuos_read(
+                &mut self.raw_image,
+                &mut self.image_ready
+            ))
+        });
     }
 
     fn show_image(&mut self, ui: &mut egui::Ui) {

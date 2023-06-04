@@ -1,3 +1,5 @@
+use std::sync::mpsc;
+
 mod bsp_mlx;
 mod mlx_image;
 
@@ -20,13 +22,12 @@ pub fn colored_cheap(temp_min: f32, temp_max: f32) -> [u8; PIXEL_COUNT * 3] {
 }
 
 // This function is designed to run inside a thread
-pub fn continuuos_read(image: &mut [u8; PIXEL_COUNT * 3], image_ready: &mut bool) -> ! {
+pub fn continuuos_read(tx: mpsc::Sender<[u8; PIXEL_COUNT * 3]>) -> ! {
     loop {
         let temperature_grid = read_temperatures();
         // TODO: Implement args
         let img = mlx_image::rgb_cheap(temperature_grid, 20.0, 40.0);
-        *image = img;
-        *image_ready = true;
+        tx.send(img).unwrap();
     }
 }
 
