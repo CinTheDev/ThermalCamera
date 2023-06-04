@@ -12,10 +12,20 @@ pub fn open_window(args: Opt) {
     .unwrap();
 }
 
-#[derive(Default)]
 struct ThermalApp {
     options: Opt,
     picture: Option<egui::TextureHandle>,
+    raw_image: [u8; mlx::PIXEL_COUNT * 3],
+}
+
+impl Default for ThermalApp {
+    fn default() -> Self {
+        Self {
+            options: Default::default(),
+            picture: Default::default(),
+            raw_image: [0x00; mlx::PIXEL_COUNT * 3]
+        }
+    }
 }
 
 impl ThermalApp {
