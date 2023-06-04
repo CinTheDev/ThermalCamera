@@ -1,5 +1,6 @@
 use eframe::egui;
 use super::mlx;
+use super::bsp;
 use std::thread;
 use std::sync::mpsc;
 
@@ -100,9 +101,14 @@ impl ThermalApp {
     fn save_image(&mut self) {
         if self.picture.is_none() { return }
 
-        let pic = self.raw_picture.as_ref().unwrap();
+        let raw_img = self.raw_picture.as_ref().unwrap();
 
-        // TODO: Read and save picture
+        bsp::write_rgb(
+            &self.options.filename,
+            raw_img,
+            mlx::PIXELS_WIDTH,
+            mlx::PIXELS_HEIGHT,
+        );
     }
 }
 
