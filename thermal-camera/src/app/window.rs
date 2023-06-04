@@ -2,6 +2,7 @@ use eframe::egui;
 pub use super::Opt;
 use super::mlx;
 use std::thread;
+use std::sync::mpsc;
 
 pub fn open_window(args: Opt) {
     let native_options = eframe::NativeOptions::default();
@@ -13,24 +14,11 @@ pub fn open_window(args: Opt) {
     .unwrap();
 }
 
+#[derive(Default)]
 struct ThermalApp {
     options: Opt,
     picture: Option<egui::TextureHandle>,
-    mlx_thread: Option<thread::JoinHandle<egui::Key>>,
-    image_ready: bool,
-    raw_image: [u8; mlx::PIXEL_COUNT * 3],
-}
-
-impl Default for ThermalApp {
-    fn default() -> Self {
-        Self {
-            options: Default::default(),
-            picture: Default::default(),
-            mlx_thread: None,
-            image_ready: false,
-            raw_image: [0x00; mlx::PIXEL_COUNT * 3],
-        }
-    }
+    image_rx: Option<mpsc::Receiver<[u8; mlx::PIXEL_COUNT * 3]>>,
 }
 
 impl ThermalApp {
