@@ -1,5 +1,3 @@
-use std::sync::mpsc;
-
 mod bsp_mlx;
 mod mlx_image;
 
@@ -19,16 +17,6 @@ pub fn grayscale(temp_min: f32, temp_max: f32) -> [u8; PIXEL_COUNT * 3] {
 pub fn colored_cheap(temp_min: f32, temp_max: f32) -> [u8; PIXEL_COUNT * 3] {
     let temperature_grid = read_temperatures();
     return mlx_image::rgb_cheap(temperature_grid, temp_min, temp_max);
-}
-
-// This function is designed to run inside a thread
-pub fn continuuos_read(tx: mpsc::Sender<[u8; PIXEL_COUNT * 3]>) -> ! {
-    loop {
-        let temperature_grid = read_temperatures();
-        // TODO: Implement args
-        let img = mlx_image::rgb_cheap(temperature_grid, 20.0, 40.0);
-        tx.send(img).unwrap();
-    }
 }
 
 fn read_temperatures() -> [f32; PIXEL_COUNT] {

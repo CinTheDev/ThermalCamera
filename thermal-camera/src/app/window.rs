@@ -1,6 +1,6 @@
 use eframe::egui;
 pub use super::Opt;
-use super::mlx;
+use super::mlx::{self, PIXEL_COUNT};
 use std::thread;
 use std::sync::mpsc;
 
@@ -33,10 +33,17 @@ impl ThermalApp {
         self.image_rx.get_or_insert_with(|| {
             let (tx, rx) = mpsc::channel();
 
-            thread::spawn(move || mlx::continuuos_read(tx));
+            thread::spawn(move || ThermalApp::continuuos_read(tx));
 
             return rx;
         })
+    }
+
+    fn continuuos_read(tx: mpsc::Sender<[u8; PIXEL_COUNT * 3]>) -> ! {
+        loop {
+            let img = mlx::colored_cheap(20.0, 40.0);
+            tx.send(img).unwrap();
+        }
     }
 
     fn show_image(&mut self, ui: &mut egui::Ui) {
