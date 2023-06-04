@@ -1,8 +1,9 @@
 use eframe::egui;
-pub use super::Opt;
 use super::mlx::{self, PIXEL_COUNT};
 use std::thread;
 use std::sync::mpsc;
+
+pub use mlx::Opt;
 
 pub fn open_window(args: Opt) {
     let native_options = eframe::NativeOptions::default();

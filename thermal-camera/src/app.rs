@@ -5,6 +5,8 @@ mod bsp;
 mod mlx;
 mod window;
 
+use mlx::ColorTypes;
+
 pub fn run() {
     mlx::init();
 
@@ -32,12 +34,6 @@ fn get_mlx_output(color_type: ColorTypes, temp_min: f32, temp_max: f32) -> [u8; 
         ColorTypes::Gray => return mlx::grayscale(temp_min, temp_max),
         ColorTypes::Cheap => return mlx::colored_cheap(temp_min, temp_max),
     }
-}
-
-#[derive(Debug)]
-enum ColorTypes {
-    Gray,
-    Cheap,
 }
 
 impl FromStr for ColorTypes {
