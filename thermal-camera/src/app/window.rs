@@ -1,5 +1,5 @@
 use eframe::egui;
-use super::mlx::{self, PIXEL_COUNT};
+use super::mlx;
 use std::thread;
 use std::sync::mpsc;
 
@@ -44,7 +44,7 @@ impl ThermalApp {
         })
     }
 
-    fn continuuos_read(args: Opt, ctx: egui::Context, tx: mpsc::Sender<[u8; PIXEL_COUNT * 3]>) -> ! {
+    fn continuuos_read(args: Opt, ctx: egui::Context, tx: mpsc::Sender<[u8; mlx::PIXEL_COUNT * 3]>) -> ! {
         loop {
             let img = mlx::take_image(&args);
             tx.send(img).unwrap();
