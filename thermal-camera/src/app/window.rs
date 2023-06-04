@@ -88,6 +88,14 @@ impl ThermalApp {
             self.picture.replace(ui.ctx().load_texture("Picture", img, Default::default()));
         }
     }
+
+    fn save_image(&mut self) {
+        if self.picture.is_none() { return }
+
+        let pic = self.picture.as_ref().unwrap();
+
+        // TODO: Read and save picture
+    }
 }
 
 impl eframe::App for ThermalApp {
