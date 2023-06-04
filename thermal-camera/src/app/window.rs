@@ -29,20 +29,22 @@ impl ThermalApp {
         }
     }
 
-    fn get_thread_receiver(&mut self) -> &mut mpsc::Receiver<[u8; mlx::PIXEL_COUNT * 3]> {
+    fn get_thread_receiver(&mut self, ctx: &egui::Context) -> &mut mpsc::Receiver<[u8; mlx::PIXEL_COUNT * 3]> {
         self.image_rx.get_or_insert_with(|| {
             let (tx, rx) = mpsc::channel();
+            let ctx_clone = ctx.clone();
 
-            thread::spawn(move || ThermalApp::continuuos_read(tx));
+            thread::spawn(move || ThermalApp::continuuos_read(ctx_clone, tx));
 
             return rx;
         })
     }
 
-    fn continuuos_read(tx: mpsc::Sender<[u8; PIXEL_COUNT * 3]>) -> ! {
+    fn continuuos_read(ctx: egui::Context, tx: mpsc::Sender<[u8; PIXEL_COUNT * 3]>) -> ! {
         loop {
             let img = mlx::colored_cheap(20.0, 40.0);
             tx.send(img).unwrap();
+            ctx.request_repaint();
         }
     }
 
@@ -74,8 +76,8 @@ impl ThermalApp {
         self.picture.replace(ui.ctx().load_texture("Picture", img, Default::default()));
     }
     
-    fn update_image(&mut self, ui: &mut egui::Ui) {
-        let rx = self.get_thread_receiver();
+    fn update_image(&mut self, ctx: &egui::Context, ui: &mut egui::Ui) {
+        let rx = self.get_thread_receiver(ctx);
 
         let rx_img = rx.try_recv();
 
@@ -101,7 +103,7 @@ impl eframe::App for ThermalApp {
                 }
             });
             */
-            self.update_image(ui);
+            self.update_image(ctx, ui);
 
             ui.with_layout(egui::Layout::top_down_justified(egui::Align::Center).with_main_justify(true), |ui| {
                 self.show_image(ui);
