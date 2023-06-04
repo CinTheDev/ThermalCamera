@@ -66,17 +66,35 @@ impl ThermalApp {
 
         self.picture.replace(ui.ctx().load_texture("Picture", img, Default::default()));
     }
+    
+    fn update_image(&mut self, ui: &mut egui::Ui) {
+        let rx = self.get_thread_receiver();
+
+        let rx_img = rx.try_recv();
+
+        if rx_img.is_ok() {
+            let img = egui::ColorImage::from_rgb(
+                [mlx::PIXELS_WIDTH, mlx::PIXELS_HEIGHT],
+                &rx_img.unwrap()
+            );
+
+            self.picture.replace(ui.ctx().load_texture("Picture", img, Default::default()));
+        }
+    }
 }
 
 impl eframe::App for ThermalApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
             // TODO: format this in a more sensical way
+            /*
             ui.with_layout(egui::Layout::top_down_justified(egui::Align::Center), |ui| {
                 if ui.button("Test picture").clicked() {
                     self.take_image(ui);
                 }
             });
+            */
+            self.update_image(ui);
 
             ui.with_layout(egui::Layout::top_down_justified(egui::Align::Center).with_main_justify(true), |ui| {
                 self.show_image(ui);
