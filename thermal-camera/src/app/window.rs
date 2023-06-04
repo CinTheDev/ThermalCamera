@@ -29,13 +29,14 @@ impl ThermalApp {
         }
     }
 
-    fn start_thread_once(&mut self) {
-        let a = self.mlx_thread.get_or_insert_with(|| {
-            thread::spawn(|| mlx::continuuos_read(
-                &mut self.raw_image,
-                &mut self.image_ready
-            ))
-        });
+    fn get_thread_receiver(&mut self) -> &mut mpsc::Receiver<[u8; mlx::PIXEL_COUNT * 3]> {
+        self.image_rx.get_or_insert_with(|| {
+            let (tx, rx) = mpsc::channel();
+
+            thread::spawn(move || mlx::continuuos_read(tx));
+
+            return rx;
+        })
     }
 
     fn show_image(&mut self, ui: &mut egui::Ui) {
