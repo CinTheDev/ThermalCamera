@@ -120,6 +120,11 @@ impl eframe::App for ThermalApp {
                 if ui.button("Freeze image").clicked() {
                     self.rx_active = !self.rx_active;
                 }
+
+                if ui.button("Save image").clicked() {
+                    self.save_image();
+                    println!("Image saved");
+                }
             });
 
             self.update_image(ctx, ui);
