@@ -1,6 +1,7 @@
 use eframe::egui;
 pub use super::Opt;
 use super::mlx;
+use std::thread;
 
 pub fn open_window(args: Opt) {
     let native_options = eframe::NativeOptions::default();
@@ -15,6 +16,8 @@ pub fn open_window(args: Opt) {
 struct ThermalApp {
     options: Opt,
     picture: Option<egui::TextureHandle>,
+    mlx_thread: Option<thread::Thread>,
+    image_ready: bool,
     raw_image: [u8; mlx::PIXEL_COUNT * 3],
 }
 
@@ -23,7 +26,9 @@ impl Default for ThermalApp {
         Self {
             options: Default::default(),
             picture: Default::default(),
-            raw_image: [0x00; mlx::PIXEL_COUNT * 3]
+            mlx_thread: Default::default(),
+            image_ready: false,
+            raw_image: [0x00; mlx::PIXEL_COUNT * 3],
         }
     }
 }
