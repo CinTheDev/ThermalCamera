@@ -78,3 +78,4 @@ The Thermal Camera is connected in the following fashion:
 ## TODOs
 
 - Add Bad Pixel correction
+- Improve eframe UI (aspect ratio correction, nicer buttons, ...)
