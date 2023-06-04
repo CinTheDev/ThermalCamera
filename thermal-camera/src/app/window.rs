@@ -3,7 +3,7 @@ use super::mlx::{self, PIXEL_COUNT};
 use std::thread;
 use std::sync::mpsc;
 
-pub use mlx::Opt;
+pub use super::Opt;
 
 pub fn open_window(args: Opt) {
     let native_options = eframe::NativeOptions::default();
@@ -34,16 +34,17 @@ impl ThermalApp {
         self.image_rx.get_or_insert_with(|| {
             let (tx, rx) = mpsc::channel();
             let ctx_clone = ctx.clone();
+            let args_clone = self.options.clone();
 
-            thread::spawn(move || ThermalApp::continuuos_read(ctx_clone, tx));
+            thread::spawn(move || ThermalApp::continuuos_read(args_clone, ctx_clone, tx));
 
             return rx;
         })
     }
 
-    fn continuuos_read(ctx: egui::Context, tx: mpsc::Sender<[u8; PIXEL_COUNT * 3]>) -> ! {
+    fn continuuos_read(args: Opt, ctx: egui::Context, tx: mpsc::Sender<[u8; PIXEL_COUNT * 3]>) -> ! {
         loop {
-            let img = mlx::colored_cheap(20.0, 40.0);
+            let img = mlx::take_image(&args);
             tx.send(img).unwrap();
             ctx.request_repaint();
         }

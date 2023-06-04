@@ -7,7 +7,7 @@ pub const PIXELS_WIDTH: usize = 32;
 pub const PIXELS_HEIGHT: usize = 24;
 pub const PIXEL_COUNT: usize = PIXELS_WIDTH * PIXELS_HEIGHT;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum ColorTypes {
     Gray,
     Cheap,
@@ -27,7 +27,7 @@ pub fn colored_cheap(temp_min: f32, temp_max: f32) -> [u8; PIXEL_COUNT * 3] {
     return mlx_image::rgb_cheap(temperature_grid, temp_min, temp_max);
 }
 
-pub fn take_image(args: Opt) -> [u8; PIXEL_COUNT * 3] {
+pub fn take_image(args: &Opt) -> [u8; PIXEL_COUNT * 3] {
     match args.color_type {
         ColorTypes::Gray => grayscale(args.min, args.max),
         ColorTypes::Cheap => colored_cheap(args.min, args.max),
