@@ -68,15 +68,6 @@ impl ThermalApp {
             egui::Color32::WHITE
         );
     }
-
-    fn take_image(&mut self, ui: &mut egui::Ui) {
-        let img = egui::ColorImage::from_rgb(
-            [mlx::PIXELS_WIDTH, mlx::PIXELS_HEIGHT],
-            &mlx::colored_cheap(self.options.min, self.options.max)
-        );
-
-        self.picture.replace(ui.ctx().load_texture("Picture", img, Default::default()));
-    }
     
     fn update_image(&mut self, ctx: &egui::Context, ui: &mut egui::Ui) {
         let rx = self.get_thread_receiver(ctx);
