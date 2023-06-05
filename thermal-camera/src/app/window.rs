@@ -8,7 +8,7 @@ pub use super::Opt;
 
 pub fn open_window(args: Opt) {
     let native_options = eframe::NativeOptions {
-        fullscreen: true,
+        fullscreen: false,
         ..Default::default()
     };
 
@@ -28,6 +28,7 @@ struct ThermalApp {
     picture_options: egui::TextureOptions,
     image_rx: Option<mpsc::Receiver<[u8; mlx::PIXEL_COUNT * 3]>>,
     rx_active: bool,
+    usb_detected: bool,
 }
 
 impl ThermalApp {
@@ -141,6 +142,10 @@ impl ThermalApp {
             mlx::PIXELS_HEIGHT,
         );
     }
+
+    fn check_usb(&mut self, ui: &mut egui::Ui) {
+
+    }
 }
 
 impl eframe::App for ThermalApp {
@@ -153,7 +158,11 @@ impl eframe::App for ThermalApp {
                         self.rx_active = !self.rx_active;
                     }
 
-                    if ui.button("Save image").clicked() {
+                    let save_button = ui.add_enabled(
+                        self.usb_detected,
+                        egui::Button::new("Save image")
+                    );
+                    if save_button.clicked() {
                         self.save_image();
                         println!("Image saved");
                     }
