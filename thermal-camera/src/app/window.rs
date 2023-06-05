@@ -25,6 +25,7 @@ struct ThermalApp {
     options: Opt,
     raw_picture: Option<[u8; mlx::PIXEL_COUNT * 3]>,
     picture: Option<egui::TextureHandle>,
+    picture_options: egui::TextureOptions,
     image_rx: Option<mpsc::Receiver<[u8; mlx::PIXEL_COUNT * 3]>>,
     rx_active: bool,
 }
@@ -34,6 +35,7 @@ impl ThermalApp {
         Self {
             options: args,
             rx_active: true,
+            picture_options: egui::TextureOptions::NEAREST,
             ..Default::default()
         }
     }
@@ -70,7 +72,7 @@ impl ThermalApp {
             );
 
             ui.ctx()
-                .load_texture("Picture", img, Default::default())
+                .load_texture("Picture", img, self.picture_options)
         });
 
         let space = ui.available_rect_before_wrap();
@@ -120,7 +122,7 @@ impl ThermalApp {
                 &raw_img
             );
 
-            self.picture.as_mut().unwrap().set(img, Default::default());
+            self.picture.as_mut().unwrap().set(img, self.picture_options);
         }
     }
 
