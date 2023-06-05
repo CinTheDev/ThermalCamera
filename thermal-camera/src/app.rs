@@ -9,6 +9,7 @@ use mlx::ColorTypes;
 
 pub fn run() {
     mlx::init();
+    bsp::usb_test();
 
     let opt = Opt::from_args();
 
