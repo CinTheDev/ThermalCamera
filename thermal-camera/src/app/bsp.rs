@@ -2,22 +2,6 @@ use image::{RgbImage, Rgb};
 use std::time::SystemTime;
 use std::fs;
 
-// If this function is used the program fails to compile
-/*
-pub fn usb_test() {
-    for device in rusb::devices().unwrap().iter() {
-        let device_desc = device.device_descriptor().unwrap();
-
-        println!("Bus {:03} Device {:03} ID {:04x}:{:04x}",
-            device.bus_number(),
-            device.address(),
-            device_desc.vendor_id(),
-            device_desc.product_id(),
-        );
-    }
-}
-*/
-
 pub fn check_usb() -> bool {
     let mut paths = fs::read_dir("/media/thermal-camera").unwrap().peekable();
     return paths.peek().is_some();
@@ -64,7 +48,7 @@ fn write_png(path: &str, image: &[u8], width: u32, height: u32) {
 
     let filename = path.split("/").last().unwrap();
     let without_file = path.replace(filename, "");
-    
+
     fs::create_dir_all(without_file).unwrap();
     img_png.save(path).unwrap();
 }
