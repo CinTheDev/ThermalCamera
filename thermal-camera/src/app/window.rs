@@ -7,7 +7,11 @@ use std::sync::mpsc;
 pub use super::Opt;
 
 pub fn open_window(args: Opt) {
-    let native_options = eframe::NativeOptions::default();
+    let native_options = eframe::NativeOptions {
+        fullscreen: true,
+        ..Default::default()
+    };
+
     eframe::run_native(
         "Thermal Camera",
         native_options,
