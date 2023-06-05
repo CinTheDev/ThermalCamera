@@ -4,14 +4,14 @@ PURPLE="\033[0;35m"
 RED="\033[1;31m"
 NOCOL="\033[0m"
 
-SYSROOT=/opt/arm-none-linux-gnueabihf
+#SYSROOT=/opt/arm-none-linux-gnueabihf
 
 cd thermal-camera
 
-export PKG_CONFIG_DIR=
-export PKG_CONFIG_LIBDIR=${SYSROOT}/usr/lib/pkgconfig:${SYSROOT}/usr/share/pkgconfig
-export PKG_CONFIG_SYSROOT_DIR=${SYSROOT}
-export PKG_CONFIG_ALLOW_CROSS=1
+#export PKG_CONFIG_DIR=
+#export PKG_CONFIG_LIBDIR=${SYSROOT}/usr/lib/pkgconfig:${SYSROOT}/usr/share/pkgconfig
+#export PKG_CONFIG_SYSROOT_DIR=${SYSROOT}
+#export PKG_CONFIG_ALLOW_CROSS=1
 
 cargo build
 

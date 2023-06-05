@@ -1,7 +1,7 @@
 use image::{RgbImage, Rgb};
-use rusb;
 
 // If this function is used the program fails to compile
+/*
 pub fn usb_test() {
     for device in rusb::devices().unwrap().iter() {
         let device_desc = device.device_descriptor().unwrap();
@@ -14,6 +14,7 @@ pub fn usb_test() {
         );
     }
 }
+*/
 
 pub fn write_rgb(path: &str, image: &[u8], width: usize, height: usize) {
     let file_suffix = path.split('.').last().expect("Unrecognised file suffix");
