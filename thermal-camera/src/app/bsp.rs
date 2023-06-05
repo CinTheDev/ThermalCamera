@@ -1,6 +1,6 @@
 use image::{RgbImage, Rgb};
-use std::time::SystemTime;
 use std::fs;
+use chrono;
 
 pub fn check_usb() -> bool {
     let mut paths = fs::read_dir("/media/thermal-camera").unwrap().peekable();
@@ -12,7 +12,12 @@ pub fn get_usb_path(filetype: String) -> String {
 }
 
 fn get_time() -> String {
-    return "test".to_string();
+    let t = chrono::offset::Local::now();
+    let date = t.date_naive().format("%Y-%m-%d");
+    let time = t.time().format("%H-%M-%S");
+    
+    let res = format!("{}_{}", date, time);
+    return res;
 }
 
 fn get_usb_dir() -> String {
