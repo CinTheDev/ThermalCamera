@@ -1,9 +1,6 @@
 #!/bin/bash
 
-(
-    cd scripts
-    ./upload_bin.sh
-)
+./scripts/upload_bin.sh
 
 ssh thermal-camera@raspberrypi << EOF
     cd thermal-camera

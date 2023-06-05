@@ -6,14 +6,13 @@ NOCOL="\033[0m"
 
 SYSROOT=/opt/arm-none-linux-gnueabihf
 
-cd ../thermal-camera
+cd thermal-camera
 
 export PKG_CONFIG_DIR=
 export PKG_CONFIG_LIBDIR=${SYSROOT}/usr/lib/pkgconfig:${SYSROOT}/usr/share/pkgconfig
 export PKG_CONFIG_SYSROOT_DIR=${SYSROOT}
 export PKG_CONFIG_ALLOW_CROSS=1
 
-cargo clean
 cargo build
 
 if ! command -v rsync > /dev/null
