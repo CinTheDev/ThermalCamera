@@ -59,7 +59,9 @@ For our program to link correctly, we have to manually download the gnu toolchai
 
 **IMPORTANT: The glibc version of the toolchain must NOT be higher than 2.31!! Otherwise the program will crash on the raspi.**
 
-I chose **gcc-arm-10.2-2020.11-x86_64-arm-none-linux-gnueabihf.tar.xz**, extracted it somewhere in my home directory, and prepened the binary directory to PATH inside ~/.bashrc
+Choose **gcc-arm-10.2-2020.11-x86_64-arm-none-linux-gnueabihf.tar.xz** and extract it to /opt.
+
+Additionally, ...
 
 Verify the installation by running `cargo clean` (if there's some build files already) and `cargo build`. If it compiles successfully, that's a good sign. Finally, upload the binary to the raspi using the **manual_test.sh** script, and do a test run on the raspi with ssh.
 
