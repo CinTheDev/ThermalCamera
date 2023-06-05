@@ -61,9 +61,9 @@ For our program to link correctly, we have to manually download the gnu toolchai
 
 Choose **gcc-arm-10.2-2020.11-x86_64-arm-none-linux-gnueabihf.tar.xz** and extract it to /opt.
 
-Additionally, ...
+Additionally, follow the steps inside external/README.md
 
-Verify the installation by running `cargo clean` (if there's some build files already) and `cargo build`. If it compiles successfully, that's a good sign. Finally, upload the binary to the raspi using the **manual_test.sh** script, and do a test run on the raspi with ssh.
+Finally, run `cargo clean` inside thermal-camera/ (if there's some build files already), and run a build task from VSCode to verify the configuration (e.g. "Run manual test"). If VSCode somehow doesn't work, just run `./scripts/manual_test.sh` from the project's root directory.
 
 ## Hardware setup & Used pins
 
