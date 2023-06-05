@@ -1,4 +1,5 @@
 use image::{RgbImage, Rgb};
+use std::time::SystemTime;
 use std::fs;
 
 // If this function is used the program fails to compile
@@ -22,7 +23,15 @@ pub fn check_usb() -> bool {
     return paths.peek().is_some();
 }
 
-pub fn get_usb_dir() -> String {
+pub fn get_usb_path(filetype: String) -> String {
+    return format!("{}/capture/{}.{}", get_usb_dir(), get_time(), filetype);
+}
+
+fn get_time() -> String {
+    return "test".to_string();
+}
+
+fn get_usb_dir() -> String {
     // Simply return last directory
     let paths = fs::read_dir("/media/thermal-camera").unwrap();
     return paths.last().unwrap().unwrap().path().to_str().unwrap().to_string();
@@ -53,5 +62,9 @@ fn write_png(path: &str, image: &[u8], width: u32, height: u32) {
         }
     }
 
+    let filename = path.split("/").last().unwrap();
+    let without_file = path.replace(filename, "");
+    
+    fs::create_dir_all(without_file).unwrap();
     img_png.save(path).unwrap();
 }

@@ -128,11 +128,14 @@ impl ThermalApp {
 
     fn save_image(&mut self) {
         if self.picture.is_none() { return }
+        if !bsp::check_usb() { return }
 
         let raw_img = self.raw_picture.as_ref().unwrap();
 
+        let path = bsp::get_usb_path("png".to_string());
+
         bsp::write_rgb(
-            &self.options.filename,
+            &path,
             raw_img,
             mlx::PIXELS_WIDTH,
             mlx::PIXELS_HEIGHT,
