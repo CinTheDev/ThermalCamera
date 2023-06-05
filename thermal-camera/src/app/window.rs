@@ -143,13 +143,15 @@ impl ThermalApp {
         );
     }
 
-    fn check_usb(&mut self, ui: &mut egui::Ui) {
-
+    fn check_usb(&mut self) {
+        self.usb_detected = bsp::check_usb();
     }
 }
 
 impl eframe::App for ThermalApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        self.check_usb();
+
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.with_layout(
                 egui::Layout::top_down_justified(egui::Align::Center),
