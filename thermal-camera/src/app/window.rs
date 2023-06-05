@@ -103,7 +103,7 @@ impl ThermalApp {
         );
     }
     
-    fn update_image(&mut self, ctx: &egui::Context, ui: &mut egui::Ui) {
+    fn update_image(&mut self, ctx: &egui::Context) {
         // Don't update image if not supposed to
         if !self.rx_active { return }
 
@@ -120,7 +120,7 @@ impl ThermalApp {
                 &raw_img
             );
 
-            self.picture.replace(ui.ctx().load_texture("Picture", img, Default::default()));
+            self.picture.as_mut().unwrap().set(img, Default::default());
         }
     }
 
@@ -154,7 +154,7 @@ impl eframe::App for ThermalApp {
                     }
             });
 
-            self.update_image(ctx, ui);
+            self.update_image(ctx);
 
             ui.with_layout(
                 egui::Layout::top_down_justified(egui::Align::Center)
