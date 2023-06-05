@@ -1,6 +1,7 @@
 use image::{RgbImage, Rgb};
 use rusb;
 
+// If this function is used the program fails to compile
 pub fn usb_test() {
     for device in rusb::devices().unwrap().iter() {
         let device_desc = device.device_descriptor().unwrap();
