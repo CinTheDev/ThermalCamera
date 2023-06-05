@@ -1,4 +1,5 @@
 use image::{RgbImage, Rgb};
+use std::fs;
 
 // If this function is used the program fails to compile
 /*
@@ -15,6 +16,17 @@ pub fn usb_test() {
     }
 }
 */
+
+pub fn check_usb() -> bool {
+    let mut paths = fs::read_dir("/media/thermal-camera").unwrap().peekable();
+    return paths.peek().is_some();
+}
+
+pub fn get_usb_dir() -> String {
+    // Simply return last directory
+    let paths = fs::read_dir("/media/thermal-camera").unwrap();
+    return paths.last().unwrap().unwrap().path().to_str().unwrap().to_string();
+}
 
 pub fn write_rgb(path: &str, image: &[u8], width: usize, height: usize) {
     let file_suffix = path.split('.').last().expect("Unrecognised file suffix");
