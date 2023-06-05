@@ -8,7 +8,7 @@ pub use super::Opt;
 
 pub fn open_window(args: Opt) {
     let native_options = eframe::NativeOptions {
-        fullscreen: false,
+        fullscreen: true,
         ..Default::default()
     };
 

@@ -61,8 +61,6 @@ For our program to link correctly, we have to manually download the gnu toolchai
 
 Choose **gcc-arm-10.2-2020.11-x86_64-arm-none-linux-gnueabihf.tar.xz** and extract it to /opt.
 
-Additionally, follow the steps inside external/README.md
-
 Finally, run `cargo clean` inside thermal-camera/ (if there's some build files already), and run a build task from VSCode to verify the configuration (e.g. "Run manual test"). If VSCode somehow doesn't work, just run `./scripts/manual_test.sh` from the project's root directory.
 
 ## Hardware setup & Used pins
