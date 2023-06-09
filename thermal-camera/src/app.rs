@@ -3,23 +3,30 @@ use structopt::StructOpt;
 
 mod bsp;
 mod mlx;
+mod window;
+
+use mlx::ColorTypes;
 
 pub fn run() {
     mlx::init();
 
     let opt = Opt::from_args();
 
-    let filename = opt.filename.as_str();
-    let min = opt.min;
-    let max = opt.max;
-    let col = opt.color_type;
+    if opt.windowed {
+        window::open_window(opt);
+    }
+    else {
+        let filename = opt.filename.as_str();
+        let col = opt.color_type;
+        let min = opt.min;
+        let max = opt.max;
+        let width = mlx::PIXELS_WIDTH;
+        let height = mlx::PIXELS_HEIGHT;
 
-    let width = mlx::PIXELS_WIDTH;
-    let height = mlx::PIXELS_HEIGHT;
+        let output = get_mlx_output(col, min, max);
 
-    let output = get_mlx_output(col, min, max);
-
-    bsp::write_rgb(filename, &output, width, height);
+        bsp::write_rgb(filename, &output, width, height);
+    }
 }
 
 fn get_mlx_output(color_type: ColorTypes, temp_min: f32, temp_max: f32) -> [u8; mlx::PIXEL_COUNT * 3] {
@@ -27,12 +34,6 @@ fn get_mlx_output(color_type: ColorTypes, temp_min: f32, temp_max: f32) -> [u8; 
         ColorTypes::Gray => return mlx::grayscale(temp_min, temp_max),
         ColorTypes::Cheap => return mlx::colored_cheap(temp_min, temp_max),
     }
-}
-
-#[derive(Debug)]
-enum ColorTypes {
-    Gray,
-    Cheap,
 }
 
 impl FromStr for ColorTypes {
@@ -48,18 +49,33 @@ impl FromStr for ColorTypes {
     }
 }
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, StructOpt, Clone)]
 #[structopt(name = "MLX driver")]
-struct Opt {
+pub struct Opt {
     #[structopt(default_value = "out.png")]
     filename: String,
 
     #[structopt(default_value = "cheap")]
     color_type: ColorTypes,
 
+    #[structopt(short, long)]
+    windowed: bool,
+
     #[structopt(long, default_value = "20")]
     min: f32,
 
     #[structopt(long, default_value = "40")]
     max: f32,
+}
+
+impl Default for Opt {
+    fn default() -> Self {
+        Self {
+            filename: "out.png".to_string(),
+            color_type: ColorTypes::Cheap,
+            windowed: false,
+            min: 20.0,
+            max: 40.0,
+        }
+    }
 }

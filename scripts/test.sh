@@ -1,10 +1,6 @@
 #!/bin/bash
 
-( 
-    cd thermal-camera &&
-    cargo build &&
-    scp target/armv7-unknown-linux-musleabihf/debug/thermal-camera thermal-camera@raspberrypi:~/thermal-camera/thermal-camera
-)
+./scripts/upload_bin.sh
 
 ssh thermal-camera@raspberrypi << EOF
     cd thermal-camera
