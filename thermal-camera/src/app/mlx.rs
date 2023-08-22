@@ -36,7 +36,20 @@ pub fn take_image(args: &Opt) -> [u8; PIXEL_COUNT * 3] {
 
 fn read_temperatures() -> [f32; PIXEL_COUNT] {
     let image_raw = read_raw_image();
-    return bsp_mlx::evaluate_image(image_raw);
+    let image_eval = bsp_mlx::evaluate_image(image_raw);
+
+    let mut image_flip: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
+
+    for i in 0..PIXEL_COUNT {
+        // Flip along horizontal axis
+        let x = i % PIXELS_WIDTH;
+        let y_flip = PIXELS_HEIGHT - (i / PIXELS_WIDTH) - 1;
+        let new_index = y_flip * PIXELS_WIDTH + x;
+
+        image_flip[new_index] = image_eval[i];
+    }
+
+    return image_flip;
 }
 
 fn read_raw_image() -> [u16; PIXEL_COUNT] {
@@ -57,7 +70,7 @@ fn read_raw_image() -> [u16; PIXEL_COUNT] {
     
                 let meas = bsp_mlx::read_value(0x0400 + addr);
     
-                img[addr as usize] = meas;
+                img[addr as usize ] = meas;
             }
         }
 
