@@ -16,4 +16,6 @@ then
     exit
 fi
 
+ssh thermal-camera@raspberrypi "mkdir thermal-camera"
+
 rsync -P target/armv7-unknown-linux-gnueabihf/debug/thermal-camera thermal-camera@raspberrypi:~/thermal-camera/thermal-camera
