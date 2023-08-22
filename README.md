@@ -51,6 +51,14 @@ And restart again.
 
 In order to use the display, some things still have to be configured.
 
+<https://www.waveshare.com/wiki/3.5inch_RPi_LCD_(A)#Getting_Started>
+
+Follow the first part of the guide with the driver installaion, skip the rest.
+
+If the touchscreen axes are "inverted" in some way after reboot, you must edit `/usr/share/X11/xorg.conf.d/99-callibration.conf` and change "SwapAxes" to "0" (or to "1" if it's already 0)
+
+Now the touchscreen should behave properly.
+
 ## Development setup
 
 On our working machine, we have to make sure we can cross compile the program and upload it to the raspi.
