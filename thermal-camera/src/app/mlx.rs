@@ -38,6 +38,7 @@ fn read_temperatures() -> [f32; PIXEL_COUNT] {
     let image_raw = read_raw_image();
     let image_eval = bsp_mlx::evaluate_image(image_raw);
 
+    /*
     let mut image_flip: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
 
     for i in 0..PIXEL_COUNT {
@@ -50,6 +51,8 @@ fn read_temperatures() -> [f32; PIXEL_COUNT] {
     }
 
     return image_flip;
+    */
+    return image_eval;
 }
 
 fn read_raw_image() -> [u16; PIXEL_COUNT] {
