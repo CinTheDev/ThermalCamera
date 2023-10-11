@@ -45,3 +45,55 @@ pub fn rgb_cheap(temperatures: [f32; PIXEL_COUNT], temp_min: f32, temp_max: f32)
 
     return res;
 }
+
+pub fn rgb_hue(temperatures: [f32; PIXEL_COUNT], temp_min: f32, temp_max :f32) -> [u8; PIXEL_COUNT * 3] {
+    let mut res: [u8; PIXEL_COUNT * 3] = [0x00; PIXEL_COUNT * 3];
+
+    for i in 0..PIXEL_COUNT {
+        let index = i * 3;
+
+        // Calculate interpolation value t, it is always between 0 and 1
+        let mut t = (temperatures[i] - temp_min) / (temp_max - temp_min);
+        t = t.max(0.0).min(1.0);
+
+        let hue = t * 275.0;
+
+        let c: f32 = 1.0;
+        let x = c * (1.0 - ((hue / 60.0) % 2.0 - 1.0).abs());
+
+        let mut r: f32 = 0.0;
+        let mut g: f32 = 0.0;
+        let mut b: f32 = 0.0;
+        
+        if hue < 60.0 {
+            r = c;
+            g = x;
+        }
+        else if hue < 120.0 {
+            r = x;
+            g = c;
+        }
+        else if hue < 180.0 {
+            g = c;
+            b = x;
+        }
+        else if hue < 240.0 {
+            g = x;
+            b = c;
+        }
+        else if hue < 300.0 {
+            r = x;
+            b = c;
+        }
+        else if hue < 360.0 {
+            r = c;
+            b = x;
+        }
+
+        res[index + 0] = (r * 255.0).round() as u8;
+        res[index + 1] = (g * 255.0).round() as u8;
+        res[index + 2] = (b * 255.0).round() as u8;
+    }
+
+    return res;
+}

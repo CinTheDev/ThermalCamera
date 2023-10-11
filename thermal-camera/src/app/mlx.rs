@@ -27,6 +27,11 @@ pub fn colored_cheap(temp_min: f32, temp_max: f32) -> [u8; PIXEL_COUNT * 3] {
     return mlx_image::rgb_cheap(temperature_grid, temp_min, temp_max);
 }
 
+pub fn colored_hue(temp_min: f32, temp_max: f32) -> [u8; PIXEL_COUNT * 3] {
+    let temperature_grid = read_temperatures();
+    return mlx_image::rgb_hue(temperature_grid, temp_min, temp_max);
+}
+
 pub fn take_image(args: &Opt) -> [u8; PIXEL_COUNT * 3] {
     match args.color_type {
         ColorTypes::Gray => grayscale(args.min, args.max),
