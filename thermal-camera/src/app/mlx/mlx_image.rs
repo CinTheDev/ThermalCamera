@@ -56,7 +56,7 @@ pub fn rgb_hue(temperatures: [f32; PIXEL_COUNT], temp_min: f32, temp_max :f32) -
         let mut t = (temperatures[i] - temp_min) / (temp_max - temp_min);
         t = t.max(0.0).min(1.0);
 
-        let hue = t * 275.0;
+        let hue = (1.0 - t) * 275.0;
 
         let c: f32 = 1.0;
         let x = c * (1.0 - ((hue / 60.0) % 2.0 - 1.0).abs());
