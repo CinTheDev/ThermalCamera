@@ -40,14 +40,16 @@ fn read_temperatures() -> [f32; PIXEL_COUNT] {
 
     let mut image_flip: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
 
-    for i in 0..PIXEL_COUNT {
+    for y in 0..PIXELS_HEIGHT {
         // Flip around vertical axis
-        let x = i % PIXELS_WIDTH;
-        let y = i / PIXELS_WIDTH;
-        let x_flip = PIXELS_WIDTH - x - 1;
-        let new_index = y * PIXELS_WIDTH + x_flip;
+        for x in 0..PIXELS_WIDTH {
+            let x_flip = PIXELS_WIDTH - x - 1;
 
-        image_flip[new_index] = image_eval[i];
+            let old_index = y * PIXELS_WIDTH + x;
+            let new_index = y * PIXELS_WIDTH + x_flip;
+
+            image_flip[new_index] = image_eval[old_index];
+        }
     }
 
     return image_flip;
