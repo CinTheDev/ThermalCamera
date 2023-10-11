@@ -33,6 +33,7 @@ fn get_mlx_output(color_type: ColorTypes, temp_min: f32, temp_max: f32) -> [u8; 
     match color_type {
         ColorTypes::Gray => return mlx::grayscale(temp_min, temp_max),
         ColorTypes::Cheap => return mlx::colored_cheap(temp_min, temp_max),
+        ColorTypes::Hue => return mlx::colored_hue(temp_min, temp_max),
     }
 }
 
@@ -43,6 +44,7 @@ impl FromStr for ColorTypes {
         match color_type {
             "gray" => Ok(ColorTypes::Gray),
             "cheap" => Ok(ColorTypes::Cheap),
+            "hue" => Ok(ColorTypes::Hue),
 
             _ => Err("Unrecognised color type"),
         }
@@ -55,7 +57,7 @@ pub struct Opt {
     #[structopt(default_value = "out.png")]
     filename: String,
 
-    #[structopt(default_value = "cheap")]
+    #[structopt(default_value = "hue")]
     color_type: ColorTypes,
 
     #[structopt(short, long)]

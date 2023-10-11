@@ -11,6 +11,7 @@ pub const PIXEL_COUNT: usize = PIXELS_WIDTH * PIXELS_HEIGHT;
 pub enum ColorTypes {
     Gray,
     Cheap,
+    Hue,
 }
 
 pub fn init() {
@@ -36,6 +37,7 @@ pub fn take_image(args: &Opt) -> [u8; PIXEL_COUNT * 3] {
     match args.color_type {
         ColorTypes::Gray => grayscale(args.min, args.max),
         ColorTypes::Cheap => colored_cheap(args.min, args.max),
+        ColorTypes::Hue => colored_hue(args.min, args.max),
     }
 }
 
