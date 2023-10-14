@@ -105,6 +105,10 @@ impl ThermalApp {
             egui::Color32::WHITE
         );
     }
+
+    fn show_scale(&mut self, ui: &mut egui::Ui) {
+
+    }
     
     fn update_image(&mut self, ctx: &egui::Context) {
         // Don't update image if not supposed to
@@ -177,6 +181,7 @@ impl eframe::App for ThermalApp {
                     .with_main_justify(true),
                 |ui| {
                     self.show_image(ui);
+                    self.show_scale(ui);
             });
         });
     }
