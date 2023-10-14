@@ -14,7 +14,7 @@ pub fn grayscale(temperatures: TemperatureRead, temp_min: f32, temp_max: f32) ->
         let index = i * 3;
 
         let color = grayscale_function(temperatures.temperature_grid[i], temp_min, temp_max);
-        
+
         res_pixels[index..index+2].clone_from_slice(&color);
     }
 
@@ -28,33 +28,48 @@ pub fn grayscale(temperatures: TemperatureRead, temp_min: f32, temp_max: f32) ->
     }
 }
 
+fn rgb_cheap_function(temp: f32, temp_min: f32, temp_max :f32) -> [u8; 3] {
+    // Calculate interpolation value t, it is always between 0 and 1
+    let mut t = (temp - temp_min) / (temp_max - temp_min);
+    t = t.max(0.0).min(1.0);
+
+    // Use special formulas to get rgb colors, I created a really simple and cheap one here.
+    // Usually the rgb colors will be between 0 and 1, but sometimes it overshoots
+    // Later it's being clamped
+    let factor = 2.0;
+
+    let r = 0_f32.max(-factor * (1.0 - t) + 1.0);
+    let b = 0_f32.max(-factor * t         + 1.0);
+
+    let g = 1.0 - r - b;
+
+    let r_byte = (r * 255.0).round().max(0.0).min(255.0) as u8;
+    let g_byte = (g * 255.0).round().max(0.0).min(255.0) as u8;
+    let b_byte = (b * 255.0).round().max(0.0).min(255.0) as u8;
+
+    return [r_byte, g_byte, b_byte];
+}
+
 pub fn rgb_cheap(temperatures: TemperatureRead, temp_min: f32, temp_max: f32) -> ImageRead {
-    let mut res: [u8; PIXEL_COUNT * 3] = [0x00; PIXEL_COUNT * 3];
+    let mut res_pixels: [u8; PIXEL_COUNT * 3] = [0x00; PIXEL_COUNT * 3];
 
     for i in 0..PIXEL_COUNT {
         let index = i * 3;
 
-        // Calculate interpolation value t, it is always between 0 and 1
-        let mut t = (temperatures[i] - temp_min) / (temp_max - temp_min);
-        t = t.max(0.0).min(1.0);
-
-        // Use special formulas to get rgb colors, I created a really simple and cheap one here.
-        // Usually the rgb colors will be between 0 and 1, but sometimes it overshoots
-        // Later it's being clamped
-        let factor = 2.0;
-
-        let r = 0_f32.max(-factor * (1.0 - t) + 1.0);
-        let b = 0_f32.max(-factor * t         + 1.0);
-
-        let g = 1.0 - r - b;
+        let color = rgb_cheap_function(temperatures.temperature_grid[i], temp_min, temp_max);
 
         // Convert to byte
-        res[index + 0] = (r * 255.0).round().max(0.0).min(255.0) as u8;
-        res[index + 1] = (g * 255.0).round().max(0.0).min(255.0) as u8;
-        res[index + 2] = (b * 255.0).round().max(0.0).min(255.0) as u8;
+        res_pixels[index..index+2].copy_from_slice(&color);
     }
 
-    return res;
+    let color_min = rgb_cheap_function(temperatures.min_temp, temp_min, temp_max);
+    let color_max = rgb_cheap_function(temperatures.max_temp, temp_min, temp_max);
+
+    return ImageRead {
+        pixels: res_pixels,
+        min_col: color_min,
+        max_col: color_max,
+    }
 }
 
 pub fn rgb_hue(temperatures: TemperatureRead, temp_min: f32, temp_max :f32) -> ImageRead {
