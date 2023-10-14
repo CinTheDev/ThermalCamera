@@ -103,11 +103,18 @@ impl ThermalApp {
             ui.ctx().load_texture("Scale", img, self.picture_options)
         });
 
-        let height = ui.available_height();
-        let width = height * (20.0 / 127.0);
-        let size = egui::Vec2 {x: width, y: height};
+        ui.vertical(
+            |ui| {
+                ui.label("Test");
 
-        ui.image(texture, size);
+                let height = ui.available_height() - 50.0;
+                let width = height * (20.0 / 127.0);
+                let size = egui::Vec2 {x: width, y: height};
+                ui.image(texture, size);
+
+                ui.label("Test 2");
+            }
+        );
     }
     
     fn update_image(&mut self, ctx: &egui::Context) {
