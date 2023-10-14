@@ -15,7 +15,7 @@ pub fn grayscale(temperatures: TemperatureRead, temp_min: f32, temp_max: f32) ->
 
         let color = grayscale_function(temperatures.temperature_grid[i], temp_min, temp_max);
 
-        res_pixels[index..index+2].clone_from_slice(&color);
+        res_pixels[index..index+3].clone_from_slice(&color);
     }
 
     return ImageRead {
@@ -56,7 +56,7 @@ pub fn rgb_cheap(temperatures: TemperatureRead, temp_min: f32, temp_max: f32) ->
         let color = rgb_cheap_function(temperatures.temperature_grid[i], temp_min, temp_max);
 
         // Convert to byte
-        res_pixels[index..index+2].copy_from_slice(&color);
+        res_pixels[index..index+3].copy_from_slice(&color);
     }
 
     return ImageRead {
@@ -120,7 +120,7 @@ pub fn rgb_hue(temperatures: TemperatureRead, temp_min: f32, temp_max :f32) -> I
 
         let color = rgb_hue_function(temperatures.temperature_grid[i], temp_min, temp_max);
 
-        res_pixels[index..index+2].copy_from_slice(&color);
+        res_pixels[index..index+3].copy_from_slice(&color);
     }
 
     return ImageRead {
