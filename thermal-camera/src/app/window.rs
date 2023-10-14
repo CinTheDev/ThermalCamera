@@ -100,11 +100,11 @@ impl ThermalApp {
     fn show_scale(&mut self, ui: &mut egui::Ui) {
         let texture: &egui::TextureHandle = self.scale.get_or_insert_with(|| {
             let raw_scale = self.raw_scale.get_or_insert_with(|| {
-                [0x00; 127 * 20 * 3]
+                [0x00; mlx::GRADIENT_COUNT * 3]
             });
 
             let img = egui::ColorImage::from_rgb(
-                [20, 127],
+                [mlx::GRADIENT_WIDTH, mlx::GRADIENT_HEIGHT],
                 raw_scale
             );
 
@@ -118,7 +118,7 @@ impl ThermalApp {
                 ui.label(string_max_temp);
 
                 let height = ui.available_height() - 20.0;
-                let width = height * (20.0 / 127.0);
+                let width = height * (mlx::GRADIENT_WIDTH as f32 / mlx::GRADIENT_HEIGHT as f32);
                 let size = egui::Vec2 {x: width, y: height};
                 ui.image(texture, size);
 
