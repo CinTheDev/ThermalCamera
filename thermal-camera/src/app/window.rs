@@ -42,13 +42,17 @@ struct ThermalApp {
 
 impl ThermalApp {
     fn new(_cc: &eframe::CreationContext<'_>, args: Opt) -> Self {
-        Self {
+        let mut s = Self {
             options: args,
             rx_active: true,
             picture_options: egui::TextureOptions::NEAREST,
             scale_bound: (20.0, 40.0),
             ..Default::default()
-        }
+        };
+
+        s.update_scale(s.options.color_type);
+
+        return s;
     }
 
     fn get_thread_receiver(&mut self, ctx: &egui::Context) -> &mut mpsc::Receiver<ImageRead> {
@@ -151,6 +155,12 @@ impl ThermalApp {
 
             self.scale_bound = (raw_img.min_temp, raw_img.max_temp);
         }
+    }
+
+    fn update_scale(&mut self, color_type: mlx::ColorTypes) {
+        let gradient = mlx::get_scale(color_type);
+
+        self.raw_scale.replace(gradient);
     }
 
     fn save_image(&mut self) {
