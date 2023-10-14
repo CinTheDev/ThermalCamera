@@ -183,17 +183,13 @@ impl eframe::App for ThermalApp {
 
             self.update_image(ctx);
 
-            ui.with_layout(
-                egui::Layout::top_down_justified(egui::Align::Center)
-                    .with_main_justify(true),
+            ui.vertical_centered(
                 |ui| {
-                    ui.with_layout(
-                        egui::Layout::left_to_right(egui::Align::Min)
-                            .with_main_justify(false),
-                            |ui| {
-                                self.show_scale(ui);
-                                self.show_image(ui);
-                            }
+                    ui.horizontal_centered(
+                        |ui| {
+                            self.show_scale(ui);
+                            self.show_image(ui);
+                        }
                     );
             });
         });
