@@ -1,4 +1,7 @@
-use super::{PIXEL_COUNT, TemperatureRead, ImageRead};
+use super::{
+    PIXEL_COUNT, GRADIENT_WIDTH, GRADIENT_HEIGHT, GRADIENT_COUNT,
+    TemperatureRead, ImageRead, ColorTypes
+};
 
 fn grayscale_function(temp: f32, temp_min: f32, temp_max: f32) -> [u8; 3] {
     let value: f32 = (temp - temp_min) * (255.0 / temp_max);
@@ -7,6 +10,7 @@ fn grayscale_function(temp: f32, temp_min: f32, temp_max: f32) -> [u8; 3] {
     return [value_byte; 3];
 }
 
+/*
 pub fn grayscale(temperatures: TemperatureRead, temp_min: f32, temp_max: f32) -> ImageRead {
     let mut res_pixels: [u8; PIXEL_COUNT * 3] = [0x00; PIXEL_COUNT * 3];
 
@@ -18,12 +22,28 @@ pub fn grayscale(temperatures: TemperatureRead, temp_min: f32, temp_max: f32) ->
         res_pixels[index..index+3].clone_from_slice(&color);
     }
 
+
+    let mut gradient: [u8; GRADIENT_COUNT * 3] = [0x00; GRADIENT_COUNT * 3];
+    for y in 0..GRADIENT_HEIGHT {
+        let t = y as f32 / GRADIENT_HEIGHT as f32;
+        let temp = temp_min + t * (temp_max - temp_min);
+        let color = grayscale_function(temp, temp_min, temp_max);
+
+        for x in 0..GRADIENT_WIDTH {
+            let index = y * GRADIENT_WIDTH * 3 + x * 3;
+
+            gradient[index..index+3].copy_from_slice(&color);
+        }
+    }
+
     return ImageRead {
         pixels: res_pixels,
         min_temp: temp_min,
-        max_temp: temp_max
+        max_temp: temp_max,
+        gradient,
     }
 }
+*/
 
 fn rgb_cheap_function(temp: f32, temp_min: f32, temp_max :f32) -> [u8; 3] {
     // Calculate interpolation value t, it is always between 0 and 1
@@ -47,6 +67,7 @@ fn rgb_cheap_function(temp: f32, temp_min: f32, temp_max :f32) -> [u8; 3] {
     return [r_byte, g_byte, b_byte];
 }
 
+/*
 pub fn rgb_cheap(temperatures: TemperatureRead, temp_min: f32, temp_max: f32) -> ImageRead {
     let mut res_pixels: [u8; PIXEL_COUNT * 3] = [0x00; PIXEL_COUNT * 3];
 
@@ -65,6 +86,7 @@ pub fn rgb_cheap(temperatures: TemperatureRead, temp_min: f32, temp_max: f32) ->
         max_temp: temp_max,
     }
 }
+*/
 
 fn rgb_hue_function(temp: f32, temp_min: f32, temp_max :f32) -> [u8; 3] {
     // Calculate interpolation value t, it is always between 0 and 1
@@ -112,6 +134,7 @@ fn rgb_hue_function(temp: f32, temp_min: f32, temp_max :f32) -> [u8; 3] {
     return [r_byte, g_byte, b_byte];
 }
 
+/*
 pub fn rgb_hue(temperatures: TemperatureRead, temp_min: f32, temp_max :f32) -> ImageRead {
     let mut res_pixels: [u8; PIXEL_COUNT * 3] = [0x00; PIXEL_COUNT * 3];
 
@@ -127,5 +150,47 @@ pub fn rgb_hue(temperatures: TemperatureRead, temp_min: f32, temp_max :f32) -> I
         pixels: res_pixels,
         min_temp: temp_min,
         max_temp: temp_max,
+    }
+}
+*/
+
+pub fn color_image(color_type: ColorTypes, temperatures: TemperatureRead, temp_min: f32, temp_max: f32) -> ImageRead {
+    let mut res_pixels: [u8; PIXEL_COUNT * 3] = [0x00; PIXEL_COUNT * 3];
+
+    for i in 0..PIXEL_COUNT {
+        let index = i * 3;
+        let temp = temperatures.temperature_grid[i];
+
+        let color = match color_type {
+            ColorTypes::Gray => grayscale_function(temp, temp_min, temp_max),
+            ColorTypes::Cheap => rgb_cheap_function(temp, temp_min, temp_max),
+            ColorTypes::Hue => rgb_hue_function(temp, temp_min, temp_max),
+        };
+
+        res_pixels[index..index+3].copy_from_slice(&color);
+    }
+
+    let mut gradient: [u8; GRADIENT_COUNT * 3] = [0x00; GRADIENT_COUNT * 3];
+    for y in 0..GRADIENT_HEIGHT {
+        let t = y as f32 / GRADIENT_HEIGHT as f32;
+        let temp = temp_min + t * (temp_max - temp_min);
+        let color = match color_type {
+            ColorTypes::Gray => grayscale_function(temp, temp_min, temp_max),
+            ColorTypes::Cheap => rgb_cheap_function(temp, temp_min, temp_max),
+            ColorTypes::Hue => rgb_hue_function(temp, temp_min, temp_max),
+        };
+
+        for x in 0..GRADIENT_WIDTH {
+            let index = y * GRADIENT_WIDTH * 3 + x * 3;
+
+            gradient[index..index+3].copy_from_slice(&color);
+        }
+    }
+
+    return ImageRead {
+        pixels: res_pixels,
+        min_temp: temp_min,
+        max_temp: temp_max,
+        gradient,
     }
 }

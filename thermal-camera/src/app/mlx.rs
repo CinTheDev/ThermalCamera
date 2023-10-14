@@ -7,7 +7,11 @@ pub const PIXELS_WIDTH: usize = 32;
 pub const PIXELS_HEIGHT: usize = 24;
 pub const PIXEL_COUNT: usize = PIXELS_WIDTH * PIXELS_HEIGHT;
 
-#[derive(Debug, Clone)]
+pub const GRADIENT_WIDTH: usize = 20;
+pub const GRADIENT_HEIGHT: usize = 127;
+pub const GRADIENT_COUNT: usize = GRADIENT_WIDTH * GRADIENT_HEIGHT;
+
+#[derive(Debug, Clone, Copy)]
 pub enum ColorTypes {
     Gray,
     Cheap,
@@ -24,12 +28,15 @@ pub struct ImageRead {
     pub pixels: [u8; PIXEL_COUNT * 3],
     pub min_temp: f32,
     pub max_temp: f32,
+
+    pub gradient: [u8; GRADIENT_COUNT * 3],
 }
 
 pub fn init() {
     bsp_mlx::init();
 }
 
+/*
 pub fn grayscale(temp_min: f32, temp_max: f32) -> ImageRead {
     let temperature_grid = read_temperatures();
 
@@ -45,13 +52,19 @@ pub fn colored_hue(temp_min: f32, temp_max: f32) -> ImageRead {
     let temperature_grid = read_temperatures();
     return mlx_image::rgb_hue(temperature_grid, temp_min, temp_max);
 }
+*/
 
 pub fn take_image(args: &Opt) -> ImageRead {
+    /*
     match args.color_type {
         ColorTypes::Gray => grayscale(args.min, args.max),
         ColorTypes::Cheap => colored_cheap(args.min, args.max),
         ColorTypes::Hue => colored_hue(args.min, args.max),
     }
+    */
+    let temperature_grid = read_temperatures();
+
+    return mlx_image::color_image(args.color_type, temperature_grid, args.min, args.max);
 }
 
 fn read_temperatures() -> TemperatureRead {

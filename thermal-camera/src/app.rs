@@ -18,24 +18,26 @@ pub fn run() {
     }
     else {
         let filename = opt.filename.as_str();
-        let col = opt.color_type;
-        let min = opt.min;
-        let max = opt.max;
+        //let col = opt.color_type;
+        //let min = opt.min;
+        //let max = opt.max;
         let width = mlx::PIXELS_WIDTH;
         let height = mlx::PIXELS_HEIGHT;
 
-        let output = get_mlx_output(col, min, max);
+        let output = get_mlx_output(&opt);
 
         bsp::write_rgb(filename, &output.pixels, width, height);
     }
 }
 
-fn get_mlx_output(color_type: ColorTypes, temp_min: f32, temp_max: f32) -> ImageRead {
+fn get_mlx_output(args: &Opt) -> ImageRead {
+    /*
     match color_type {
         ColorTypes::Gray => return mlx::grayscale(temp_min, temp_max),
         ColorTypes::Cheap => return mlx::colored_cheap(temp_min, temp_max),
         ColorTypes::Hue => return mlx::colored_hue(temp_min, temp_max),
-    }
+    */
+    return mlx::take_image(args);
 }
 
 impl FromStr for ColorTypes {
