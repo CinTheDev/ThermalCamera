@@ -18,9 +18,6 @@ pub fn run() {
     }
     else {
         let filename = opt.filename.as_str();
-        //let col = opt.color_type;
-        //let min = opt.min;
-        //let max = opt.max;
         let width = mlx::PIXELS_WIDTH;
         let height = mlx::PIXELS_HEIGHT;
 
@@ -31,12 +28,6 @@ pub fn run() {
 }
 
 fn get_mlx_output(args: &Opt) -> ImageRead {
-    /*
-    match color_type {
-        ColorTypes::Gray => return mlx::grayscale(temp_min, temp_max),
-        ColorTypes::Cheap => return mlx::colored_cheap(temp_min, temp_max),
-        ColorTypes::Hue => return mlx::colored_hue(temp_min, temp_max),
-    */
     return mlx::take_image(args);
 }
 

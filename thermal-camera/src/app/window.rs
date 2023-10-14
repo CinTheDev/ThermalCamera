@@ -138,20 +138,13 @@ impl ThermalApp {
         if rx_img.is_ok() {
             let raw_img = rx_img.unwrap();
             self.raw_picture.replace(raw_img.pixels);
-            //self.raw_scale.replace(raw_img.gradient);
 
             let img = egui::ColorImage::from_rgb(
                 [mlx::PIXELS_WIDTH, mlx::PIXELS_HEIGHT],
                 &raw_img.pixels
             );
 
-            //let scale = egui::ColorImage::from_rgb(
-            //    [mlx::GRADIENT_WIDTH, mlx::GRADIENT_HEIGHT],
-            //    &raw_img.gradient
-            //);
-
             self.picture.as_mut().unwrap().set(img, self.picture_options);
-            //self.scale.as_mut().unwrap().set(scale, self.picture_options);
 
             self.scale_bound = (raw_img.min_temp, raw_img.max_temp);
         }
