@@ -56,12 +56,6 @@ pub struct Opt {
 
     #[structopt(short, long)]
     windowed: bool,
-
-    #[structopt(long, default_value = "20")]
-    min: f32,
-
-    #[structopt(long, default_value = "40")]
-    max: f32,
 }
 
 impl Default for Opt {
@@ -70,8 +64,6 @@ impl Default for Opt {
             filename: "out.png".to_string(),
             color_type: ColorTypes::Cheap,
             windowed: false,
-            min: 20.0,
-            max: 40.0,
         }
     }
 }

@@ -37,7 +37,7 @@ pub fn init() {
 pub fn take_image(args: &Opt) -> ImageRead {
     let temperature_grid = read_temperatures();
 
-    return mlx_image::color_image(args.color_type, temperature_grid, args.min, args.max);
+    return mlx_image::color_image(args.color_type, temperature_grid);
 }
 
 pub fn get_scale(color_type: ColorTypes) -> [u8; GRADIENT_COUNT * 3] {

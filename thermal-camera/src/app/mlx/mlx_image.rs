@@ -3,16 +3,16 @@ use super::{
     TemperatureRead, ImageRead, ColorTypes
 };
 
-fn grayscale_function(temp: f32, temp_min: f32, temp_max: f32) -> [u8; 3] {
-    let value: f32 = (temp - temp_min) * (255.0 / temp_max);
+fn grayscale_function(temp: f32, min_temp: f32, max_temp: f32) -> [u8; 3] {
+    let value: f32 = (temp - min_temp) * (255.0 / max_temp);
     let value_byte: u8 = value.round().max(0.0).min(255.0) as u8;
 
     return [value_byte; 3];
 }
 
-fn rgb_cheap_function(temp: f32, temp_min: f32, temp_max :f32) -> [u8; 3] {
+fn rgb_cheap_function(temp: f32, min_temp: f32, max_temp :f32) -> [u8; 3] {
     // Calculate interpolation value t, it is always between 0 and 1
-    let mut t = (temp - temp_min) / (temp_max - temp_min);
+    let mut t = (temp - min_temp) / (max_temp - min_temp);
     t = t.max(0.0).min(1.0);
 
     // Use special formulas to get rgb colors, I created a really simple and cheap one here.
@@ -32,9 +32,9 @@ fn rgb_cheap_function(temp: f32, temp_min: f32, temp_max :f32) -> [u8; 3] {
     return [r_byte, g_byte, b_byte];
 }
 
-fn rgb_hue_function(temp: f32, temp_min: f32, temp_max :f32) -> [u8; 3] {
+fn rgb_hue_function(temp: f32, min_temp: f32, max_temp :f32) -> [u8; 3] {
     // Calculate interpolation value t, it is always between 0 and 1
-    let mut t = (temp - temp_min) / (temp_max - temp_min);
+    let mut t = (temp - min_temp) / (max_temp - min_temp);
     t = t.max(0.0).min(1.0);
 
     let hue = (1.0 - t) * 275.0;
@@ -78,17 +78,19 @@ fn rgb_hue_function(temp: f32, temp_min: f32, temp_max :f32) -> [u8; 3] {
     return [r_byte, g_byte, b_byte];
 }
 
-pub fn color_image(color_type: ColorTypes, temperatures: TemperatureRead, temp_min: f32, temp_max: f32) -> ImageRead {
+pub fn color_image(color_type: ColorTypes, temperatures: TemperatureRead) -> ImageRead {
     let mut res_pixels: [u8; PIXEL_COUNT * 3] = [0x00; PIXEL_COUNT * 3];
+    let min_temp = temperatures.min_temp;
+    let max_temp = temperatures.max_temp;
 
     for i in 0..PIXEL_COUNT {
         let index = i * 3;
         let temp = temperatures.temperature_grid[i];
 
         let color = match color_type {
-            ColorTypes::Gray => grayscale_function(temp, temp_min, temp_max),
-            ColorTypes::Cheap => rgb_cheap_function(temp, temp_min, temp_max),
-            ColorTypes::Hue => rgb_hue_function(temp, temp_min, temp_max),
+            ColorTypes::Gray => grayscale_function(temp, min_temp, max_temp),
+            ColorTypes::Cheap => rgb_cheap_function(temp, min_temp, max_temp),
+            ColorTypes::Hue => rgb_hue_function(temp, min_temp, max_temp),
         };
 
         res_pixels[index..index+3].copy_from_slice(&color);
@@ -96,8 +98,8 @@ pub fn color_image(color_type: ColorTypes, temperatures: TemperatureRead, temp_m
 
     return ImageRead {
         pixels: res_pixels,
-        min_temp: temp_min,
-        max_temp: temp_max,
+        min_temp,
+        max_temp,
     }
 }
 
