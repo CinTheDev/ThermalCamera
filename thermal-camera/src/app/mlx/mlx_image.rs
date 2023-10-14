@@ -18,13 +18,10 @@ pub fn grayscale(temperatures: TemperatureRead, temp_min: f32, temp_max: f32) ->
         res_pixels[index..index+2].clone_from_slice(&color);
     }
 
-    let color_min = grayscale_function(temperatures.min_temp, temp_min, temp_max);
-    let color_max = grayscale_function(temperatures.max_temp, temp_min, temp_max);
-
     return ImageRead {
         pixels: res_pixels,
-        min_col: color_min,
-        max_col: color_max,
+        min_temp: temp_min,
+        max_temp: temp_max
     }
 }
 
@@ -62,13 +59,10 @@ pub fn rgb_cheap(temperatures: TemperatureRead, temp_min: f32, temp_max: f32) ->
         res_pixels[index..index+2].copy_from_slice(&color);
     }
 
-    let color_min = rgb_cheap_function(temperatures.min_temp, temp_min, temp_max);
-    let color_max = rgb_cheap_function(temperatures.max_temp, temp_min, temp_max);
-
     return ImageRead {
         pixels: res_pixels,
-        min_col: color_min,
-        max_col: color_max,
+        min_temp: temp_min,
+        max_temp: temp_max,
     }
 }
 
@@ -129,12 +123,9 @@ pub fn rgb_hue(temperatures: TemperatureRead, temp_min: f32, temp_max :f32) -> I
         res_pixels[index..index+2].copy_from_slice(&color);
     }
 
-    let color_min = rgb_hue_function(temperatures.min_temp, temp_min, temp_max);
-    let color_max = rgb_hue_function(temperatures.max_temp, temp_min, temp_max);
-
     return ImageRead {
         pixels: res_pixels,
-        min_col: color_min,
-        max_col: color_max,
+        min_temp: temp_min,
+        max_temp: temp_max,
     }
 }

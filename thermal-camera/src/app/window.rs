@@ -139,6 +139,8 @@ impl ThermalApp {
             );
 
             self.picture.as_mut().unwrap().set(img, self.picture_options);
+
+            self.scale_bound = (raw_img.min_temp, raw_img.max_temp);
         }
     }
 
