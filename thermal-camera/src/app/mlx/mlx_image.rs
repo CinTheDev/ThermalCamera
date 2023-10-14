@@ -95,6 +95,7 @@ pub fn color_image(color_type: ColorTypes, temperatures: TemperatureRead, temp_m
     }
 
     // TODO: Calculate gradient once, not every time
+    /*
     let mut gradient: [u8; GRADIENT_COUNT * 3] = [0x00; GRADIENT_COUNT * 3];
     for y in 0..GRADIENT_HEIGHT {
         let t = 1.0 - y as f32 / GRADIENT_HEIGHT as f32;
@@ -111,11 +112,32 @@ pub fn color_image(color_type: ColorTypes, temperatures: TemperatureRead, temp_m
             gradient[index..index+3].copy_from_slice(&color);
         }
     }
+    */
 
     return ImageRead {
         pixels: res_pixels,
         min_temp: temp_min,
         max_temp: temp_max,
-        gradient,
+        //gradient,
     }
+}
+
+pub fn color_gradient(color_type: ColorTypes) -> [u8; GRADIENT_COUNT * 3] {
+    let mut gradient: [u8; GRADIENT_COUNT * 3] = [0x00; GRADIENT_COUNT * 3];
+    for y in 0..GRADIENT_HEIGHT {
+        let t = 1.0 - y as f32 / GRADIENT_HEIGHT as f32;
+        let color = match color_type {
+            ColorTypes::Gray => grayscale_function(t, 0.0, 1.0),
+            ColorTypes::Cheap => rgb_cheap_function(t, 0.0, 1.0),
+            ColorTypes::Hue => rgb_hue_function(t, 0.0, 1.0),
+        };
+
+        for x in 0..GRADIENT_WIDTH {
+            let index = y * GRADIENT_WIDTH * 3 + x * 3;
+
+            gradient[index..index+3].copy_from_slice(&color);
+        }
+    }
+
+    return gradient;
 }

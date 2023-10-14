@@ -29,7 +29,7 @@ pub struct ImageRead {
     pub min_temp: f32,
     pub max_temp: f32,
 
-    pub gradient: [u8; GRADIENT_COUNT * 3],
+    //pub gradient: [u8; GRADIENT_COUNT * 3],
 }
 
 pub fn init() {
