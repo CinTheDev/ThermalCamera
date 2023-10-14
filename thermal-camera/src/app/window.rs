@@ -111,7 +111,11 @@ impl ThermalApp {
             egui::Color32::WHITE
         );
         */
-        ui.image(texture, egui::Vec2 {x: mlx::PIXELS_WIDTH as f32, y: mlx::PIXELS_HEIGHT as f32});
+        let height = ui.available_height();
+        let width = height * (mlx::PIXELS_WIDTH as f32 / mlx::PIXELS_HEIGHT as f32);
+        let size = egui::Vec2 {x: width, y: height};
+
+        ui.image(texture, size);
     }
 
     fn show_scale(&mut self, ui: &mut egui::Ui) {
