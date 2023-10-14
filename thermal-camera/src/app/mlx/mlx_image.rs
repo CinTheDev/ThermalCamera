@@ -96,7 +96,7 @@ pub fn color_image(color_type: ColorTypes, temperatures: TemperatureRead, temp_m
 
     let mut gradient: [u8; GRADIENT_COUNT * 3] = [0x00; GRADIENT_COUNT * 3];
     for y in 0..GRADIENT_HEIGHT {
-        let t = y as f32 / GRADIENT_HEIGHT as f32;
+        let t = 1.0 - y as f32 / GRADIENT_HEIGHT as f32;
         let temp = temp_min + t * (temp_max - temp_min);
         let color = match color_type {
             ColorTypes::Gray => grayscale_function(temp, temp_min, temp_max),
