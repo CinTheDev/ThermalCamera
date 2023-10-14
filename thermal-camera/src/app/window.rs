@@ -107,7 +107,7 @@ impl ThermalApp {
             |ui| {
                 ui.label("Test");
 
-                let height = ui.available_height() - 50.0;
+                let height = ui.available_height() - 20.0;
                 let width = height * (20.0 / 127.0);
                 let size = egui::Vec2 {x: width, y: height};
                 ui.image(texture, size);
