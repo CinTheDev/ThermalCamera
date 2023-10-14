@@ -109,8 +109,8 @@ impl ThermalApp {
 
         ui.vertical(
             |ui| {
-                let string_min_temp = format!("{}", self.scale_bound.0);
-                let string_max_temp = format!("{}", self.scale_bound.1);
+                let string_min_temp = format!("{:.1}", self.scale_bound.0);
+                let string_max_temp = format!("{:.1}", self.scale_bound.1);
                 ui.label(string_max_temp);
 
                 let height = ui.available_height() - 20.0;
