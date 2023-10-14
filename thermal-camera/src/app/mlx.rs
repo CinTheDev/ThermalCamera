@@ -14,26 +14,41 @@ pub enum ColorTypes {
     Hue,
 }
 
+pub struct TemperatureRead {
+    pub
+    temperature_grid: [f32; PIXEL_COUNT],
+    min_temp: f32,
+    max_temp: f32,
+}
+
+pub struct ImageRead {
+    pub
+    pixels: [u8; PIXEL_COUNT * 3],
+    min_col: [u8; 3],
+    max_col: [u8; 3],
+}
+
 pub fn init() {
     bsp_mlx::init();
 }
 
-pub fn grayscale(temp_min: f32, temp_max: f32) -> [u8; PIXEL_COUNT * 3] {
+pub fn grayscale(temp_min: f32, temp_max: f32) -> ImageRead {
     let temperature_grid = read_temperatures();
+
     return mlx_image::grayscale(temperature_grid, temp_min, temp_max);
 }
 
-pub fn colored_cheap(temp_min: f32, temp_max: f32) -> [u8; PIXEL_COUNT * 3] {
+pub fn colored_cheap(temp_min: f32, temp_max: f32) -> ImageRead {
     let temperature_grid = read_temperatures();
     return mlx_image::rgb_cheap(temperature_grid, temp_min, temp_max);
 }
 
-pub fn colored_hue(temp_min: f32, temp_max: f32) -> [u8; PIXEL_COUNT * 3] {
+pub fn colored_hue(temp_min: f32, temp_max: f32) -> ImageRead {
     let temperature_grid = read_temperatures();
     return mlx_image::rgb_hue(temperature_grid, temp_min, temp_max);
 }
 
-pub fn take_image(args: &Opt) -> [u8; PIXEL_COUNT * 3] {
+pub fn take_image(args: &Opt) -> ImageRead {
     match args.color_type {
         ColorTypes::Gray => grayscale(args.min, args.max),
         ColorTypes::Cheap => colored_cheap(args.min, args.max),
@@ -41,11 +56,14 @@ pub fn take_image(args: &Opt) -> [u8; PIXEL_COUNT * 3] {
     }
 }
 
-fn read_temperatures() -> [f32; PIXEL_COUNT] {
+fn read_temperatures() -> TemperatureRead {
     let image_raw = read_raw_image();
     let image_eval = bsp_mlx::evaluate_image(image_raw);
 
     let mut image_flip: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
+
+    let mut min_temp: f32 =  99999.0;
+    let mut max_temp: f32 = -99999.0;
 
     for y in 0..PIXELS_HEIGHT {
         // Flip around vertical axis
@@ -56,10 +74,21 @@ fn read_temperatures() -> [f32; PIXEL_COUNT] {
             let new_index = y * PIXELS_WIDTH + x_flip;
 
             image_flip[new_index] = image_eval[old_index];
+
+            if min_temp > image_flip[new_index] {
+                min_temp = image_flip[new_index];
+            }
+            if max_temp < image_flip[new_index] {
+                max_temp = image_flip[new_index];
+            }
         }
     }
 
-    return image_flip;
+    return TemperatureRead {
+        temperature_grid: image_flip,
+        min_temp,
+        max_temp,
+    }
 }
 
 fn read_raw_image() -> [u16; PIXEL_COUNT] {

@@ -1,5 +1,7 @@
 use eframe::egui;
 use super::mlx;
+use mlx::ImageRead;
+
 use super::bsp;
 use std::thread;
 use std::sync::mpsc;
@@ -32,7 +34,7 @@ struct ThermalApp {
     scale: Option<egui::TextureHandle>,
     scale_bound: (f32, f32),
 
-    image_rx: Option<mpsc::Receiver<[u8; mlx::PIXEL_COUNT * 3]>>,
+    image_rx: Option<mpsc::Receiver<ImageRead>>,
     rx_active: bool,
 
     usb_detected: bool,
@@ -49,7 +51,7 @@ impl ThermalApp {
         }
     }
 
-    fn get_thread_receiver(&mut self, ctx: &egui::Context) -> &mut mpsc::Receiver<[u8; mlx::PIXEL_COUNT * 3]> {
+    fn get_thread_receiver(&mut self, ctx: &egui::Context) -> &mut mpsc::Receiver<ImageRead> {
         self.image_rx.get_or_insert_with(|| {
             let (tx, rx) = mpsc::channel();
             let ctx_clone = ctx.clone();
@@ -61,7 +63,7 @@ impl ThermalApp {
         })
     }
 
-    fn continuuos_read(args: Opt, ctx: egui::Context, tx: mpsc::Sender<[u8; mlx::PIXEL_COUNT * 3]>) -> ! {
+    fn continuuos_read(args: Opt, ctx: egui::Context, tx: mpsc::Sender<ImageRead>) -> ! {
         loop {
             let img = mlx::take_image(&args);
             tx.send(img).unwrap();
@@ -129,11 +131,11 @@ impl ThermalApp {
 
         if rx_img.is_ok() {
             let raw_img = rx_img.unwrap();
-            self.raw_picture.replace(raw_img);
+            self.raw_picture.replace(raw_img.pixels);
 
             let img = egui::ColorImage::from_rgb(
                 [mlx::PIXELS_WIDTH, mlx::PIXELS_HEIGHT],
-                &raw_img
+                &raw_img.pixels
             );
 
             self.picture.as_mut().unwrap().set(img, self.picture_options);
