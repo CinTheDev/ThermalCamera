@@ -184,8 +184,8 @@ impl eframe::App for ThermalApp {
                         egui::Layout::left_to_right(egui::Align::Min)
                             .with_main_justify(false),
                             |ui| {
-                                self.show_image(ui);
                                 self.show_scale(ui);
+                                self.show_image(ui);
                             }
                     );
             });
