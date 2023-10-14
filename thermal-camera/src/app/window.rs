@@ -23,11 +23,17 @@ pub fn open_window(args: Opt) {
 #[derive(Default)]
 struct ThermalApp {
     options: Opt,
+
     raw_picture: Option<[u8; mlx::PIXEL_COUNT * 3]>,
     picture: Option<egui::TextureHandle>,
     picture_options: egui::TextureOptions,
+
+    raw_scale: Option<[u8; 127]>,
+    scale: Option<egui::TextureHandle>,
+
     image_rx: Option<mpsc::Receiver<[u8; mlx::PIXEL_COUNT * 3]>>,
     rx_active: bool,
+
     usb_detected: bool,
 }
 
@@ -107,7 +113,18 @@ impl ThermalApp {
     }
 
     fn show_scale(&mut self, ui: &mut egui::Ui) {
+        let texture: &egui::TextureHandle = self.scale.get_or_insert_with(|| {
+            let raw_scale = self.raw_scale.get_or_insert_with(|| {
+                [0x00; 127]
+            });
 
+            let img = egui::ColorImage::from_rgb(
+                [20, 127],
+                raw_scale
+            );
+
+            ui.ctx().load_texture("Scale", img, self.picture_options)
+        });
     }
     
     fn update_image(&mut self, ctx: &egui::Context) {
