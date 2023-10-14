@@ -30,6 +30,7 @@ struct ThermalApp {
 
     raw_scale: Option<[u8; 127 * 20 * 3]>,
     scale: Option<egui::TextureHandle>,
+    scale_bound: (f32, f32),
 
     image_rx: Option<mpsc::Receiver<[u8; mlx::PIXEL_COUNT * 3]>>,
     rx_active: bool,
@@ -43,6 +44,7 @@ impl ThermalApp {
             options: args,
             rx_active: true,
             picture_options: egui::TextureOptions::NEAREST,
+            scale_bound: (20.0, 40.0),
             ..Default::default()
         }
     }
