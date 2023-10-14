@@ -1,20 +1,31 @@
 use super::{PIXEL_COUNT, TemperatureRead, ImageRead};
 
+fn grayscale_function(temp: f32, temp_min: f32, temp_max: f32) -> [u8; 3] {
+    let value: f32 = (temp - temp_min) * (255.0 / temp_max);
+    let value_byte: u8 = value.round().max(0.0).min(255.0) as u8;
+
+    return [value_byte; 3];
+}
+
 pub fn grayscale(temperatures: TemperatureRead, temp_min: f32, temp_max: f32) -> ImageRead {
-    let mut res: [u8; PIXEL_COUNT * 3] = [0x00; PIXEL_COUNT * 3];
+    let mut res_pixels: [u8; PIXEL_COUNT * 3] = [0x00; PIXEL_COUNT * 3];
 
     for i in 0..PIXEL_COUNT {
         let index = i * 3;
 
-        let value: f32 = (temperatures[i] - temp_min) * (255.0 / temp_max);
-        let value_byte: u8 = value.round().max(0.0).min(255.0) as u8;
-
-        res[index + 0] = value_byte;
-        res[index + 1] = value_byte;
-        res[index + 2] = value_byte;
+        let color = grayscale_function(temperatures.temperature_grid[i], temp_min, temp_max);
+        
+        res_pixels[index..index+2].clone_from_slice(&color);
     }
 
-    return res;
+    let color_min = grayscale_function(temperatures.min_temp, temp_min, temp_max);
+    let color_max = grayscale_function(temperatures.max_temp, temp_min, temp_max);
+
+    return ImageRead {
+        pixels: res_pixels,
+        min_col: color_min,
+        max_col: color_max,
+    }
 }
 
 pub fn rgb_cheap(temperatures: TemperatureRead, temp_min: f32, temp_max: f32) -> ImageRead {
