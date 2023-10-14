@@ -82,7 +82,7 @@ impl ThermalApp {
                 .load_texture("Picture", img, self.picture_options)
         });
 
-        let space = ui.available_rect_before_wrap();
+        /*let space = ui.available_rect_before_wrap();
         let aspect_ratio = space.width() / space.height();
         let desired_ratio = mlx::PIXELS_WIDTH as f32 / mlx::PIXELS_HEIGHT as f32;
         let new_rect;
@@ -110,6 +110,8 @@ impl ThermalApp {
             egui::Rect::from_min_max(egui::pos2(0.0, 0.0), egui::pos2(1.0, 1.0)),
             egui::Color32::WHITE
         );
+        */
+        ui.image(texture, egui::Vec2 {x: mlx::PIXELS_WIDTH as f32, y: mlx::PIXELS_HEIGHT as f32});
     }
 
     fn show_scale(&mut self, ui: &mut egui::Ui) {
@@ -231,7 +233,7 @@ impl eframe::App for ThermalApp {
                             .with_main_justify(false),
                             |ui| {
                                 self.show_image(ui);
-                                self.show_scale(ui);
+                                //self.show_scale(ui);
                             }
                     );
             });
