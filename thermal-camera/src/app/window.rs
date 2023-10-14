@@ -109,14 +109,16 @@ impl ThermalApp {
 
         ui.vertical(
             |ui| {
-                ui.label("Test");
+                let string_min_temp = format!("{}", self.scale_bound.0);
+                let string_max_temp = format!("{}", self.scale_bound.1);
+                ui.label(string_max_temp);
 
                 let height = ui.available_height() - 20.0;
                 let width = height * (20.0 / 127.0);
                 let size = egui::Vec2 {x: width, y: height};
                 ui.image(texture, size);
 
-                ui.label("Test 2");
+                ui.label(string_min_temp);
             }
         );
     }
