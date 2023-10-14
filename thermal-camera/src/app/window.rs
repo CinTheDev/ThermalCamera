@@ -132,34 +132,11 @@ impl ThermalApp {
             ui.ctx().load_texture("Scale", img, self.picture_options)
         });
 
-        let space = ui.available_rect_before_wrap();
-        let aspect_ratio = space.width() / space.height();
-        let desired_ratio = 20.0 / 127.0;
-        let new_rect;
+        let height = ui.available_height();
+        let width = height * (20.0 / 127.0);
+        let size = egui::Vec2 {x: width, y: height};
 
-        if aspect_ratio > desired_ratio {
-            // Width must be smaller
-            let factor = desired_ratio / aspect_ratio;
-            let new_width = space.width() * factor;
-            let diff = (space.width() - new_width) * 0.5;
-
-            new_rect = space.shrink2(egui::Vec2 {x: diff, y: 0.0});
-        }
-        else {
-            // Height must be smaller
-            let factor = aspect_ratio / desired_ratio;
-            let new_height = space.height() * factor;
-            let diff = (space.height() - new_height) * 0.5;
-
-            new_rect = space.shrink2(egui::Vec2 {x: 0.0, y: diff});
-        }
-
-        ui.painter().image(
-            texture.id(),
-            new_rect,
-            egui::Rect::from_min_max(egui::pos2(0.0, 0.0), egui::pos2(1.0, 1.0)),
-            egui::Color32::WHITE
-        );
+        ui.image(texture, size);
     }
     
     fn update_image(&mut self, ctx: &egui::Context) {
@@ -237,7 +214,7 @@ impl eframe::App for ThermalApp {
                             .with_main_justify(false),
                             |ui| {
                                 self.show_image(ui);
-                                //self.show_scale(ui);
+                                self.show_scale(ui);
                             }
                     );
             });
