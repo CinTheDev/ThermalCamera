@@ -28,7 +28,7 @@ struct ThermalApp {
     picture: Option<egui::TextureHandle>,
     picture_options: egui::TextureOptions,
 
-    raw_scale: Option<[u8; 127]>,
+    raw_scale: Option<[u8; 127 * 20 * 3]>,
     scale: Option<egui::TextureHandle>,
 
     image_rx: Option<mpsc::Receiver<[u8; mlx::PIXEL_COUNT * 3]>>,
@@ -115,7 +115,7 @@ impl ThermalApp {
     fn show_scale(&mut self, ui: &mut egui::Ui) {
         let texture: &egui::TextureHandle = self.scale.get_or_insert_with(|| {
             let raw_scale = self.raw_scale.get_or_insert_with(|| {
-                [0x00; 127]
+                [0x00; 127 * 20 * 3]
             });
 
             let img = egui::ColorImage::from_rgb(
@@ -125,6 +125,13 @@ impl ThermalApp {
 
             ui.ctx().load_texture("Scale", img, self.picture_options)
         });
+
+        ui.painter().image(
+            texture.id(),
+            egui::Rect::from_min_max(egui::pos2(0.0, 0.0), egui::pos2(300.0, 300.0)),
+            egui::Rect::from_min_max(egui::pos2(0.0, 0.0), egui::pos2(1.0, 1.0)),
+            egui::Color32::WHITE
+        );
     }
     
     fn update_image(&mut self, ctx: &egui::Context) {
