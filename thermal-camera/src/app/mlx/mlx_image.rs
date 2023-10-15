@@ -101,6 +101,7 @@ pub fn color_image(color_type: ColorTypes, temperatures: TemperatureRead) -> Ima
 
     return ImageRead {
         pixels: res_pixels,
+        temperature_grid: temperatures.temperature_grid,
         min_temp,
         max_temp,
     }
