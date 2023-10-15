@@ -72,8 +72,23 @@ impl ThermalApp {
         // Calculate position inside image
         let pos = pos_option.unwrap();
 
+        let rect_image = response.rect;
+
+        let uv = egui::Pos2::new(
+            (pos.x - rect_image.left()) / rect_image.right(),
+            (pos.y - rect_image.top()) / rect_image.bottom()
+        );
+
+        println!("UV: ( {}; {} )", uv.x, uv.y);
+
+        let img_coord: (usize, usize) = (
+            (uv.x * mlx::PIXELS_WIDTH as f32).floor().min(mlx::PIXELS_WIDTH as f32).max(0.0) as usize,
+            (uv.y * mlx::PIXELS_HEIGHT as f32).floor().min(mlx::PIXELS_HEIGHT as f32).max(0.0) as usize,
+        );
+
+        println!("Coord: ( {}; {} )", img_coord.0, img_coord.1);
+
         let bg_col = egui::Color32::BLACK;
-        
         let txt_col = egui::Color32::WHITE;
         
         // Draw
