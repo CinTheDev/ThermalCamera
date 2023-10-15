@@ -77,7 +77,9 @@ impl ThermalApp {
         // Draw
         let painter = ui.painter();
         let txt_galley = painter.layout_no_wrap(String::from("Test"), egui::FontId::default(), txt_col);
-        let bg_rect = txt_galley.rect.translate(pos.to_vec2());
+        let bg_rect = txt_galley.rect
+            .translate(pos.to_vec2())
+            .expand(5.0);
 
         painter.rect_filled(bg_rect, egui::Rounding::none(), bg_col);
         painter.galley(pos, txt_galley);
