@@ -55,6 +55,10 @@ impl ThermalApp {
         return s;
     }
 
+    fn check_clicked(&mut self, ui: &mut egui::Ui, response: egui::Response) {
+        
+    }
+
     fn get_thread_receiver(&mut self, ctx: &egui::Context) -> &mut mpsc::Receiver<ImageRead> {
         self.image_rx.get_or_insert_with(|| {
             let (tx, rx) = mpsc::channel();
@@ -94,7 +98,8 @@ impl ThermalApp {
         let width = height * (mlx::PIXELS_WIDTH as f32 / mlx::PIXELS_HEIGHT as f32);
         let size = egui::Vec2 {x: width, y: height};
 
-        ui.image(texture, size);
+        let response = ui.image(texture, size);
+        self.check_clicked(ui, response);
     }
 
     fn show_scale(&mut self, ui: &mut egui::Ui) {

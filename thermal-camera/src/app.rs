@@ -51,7 +51,7 @@ pub struct Opt {
     #[structopt(default_value = "out.png")]
     filename: String,
 
-    #[structopt(default_value = "gray")]
+    #[structopt(default_value = "hue")]
     color_type: ColorTypes,
 
     #[structopt(short, long)]
