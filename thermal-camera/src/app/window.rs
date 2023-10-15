@@ -56,6 +56,8 @@ impl ThermalApp {
     }
 
     fn check_clicked(&mut self, ui: &mut egui::Ui, response: egui::Response) {
+        // TODO: Only when dragging the mouse this is registered
+        // Could be the display, but should be investigated
         let mut left_mouse_down = false;
         ui.input(|i| left_mouse_down = i.pointer.button_down(egui::PointerButton::Primary));
         if ! left_mouse_down {
