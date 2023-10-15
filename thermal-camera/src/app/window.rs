@@ -61,27 +61,26 @@ impl ThermalApp {
         if ! left_mouse_down {
             return;
         }
-        println!("Mouse down");
 
         let pos_option = response.hover_pos();
         if pos_option.is_none() {
             return;
         }
 
-        println!("Is some");
-
         // Calculate position inside image
         let pos = pos_option.unwrap();
 
-        let bg_rect = egui::Rect::from_min_size(pos, egui::Vec2 { x: 1.0, y: 1.0} );
         let bg_col = egui::Color32::BLACK;
-
+        
         let txt_col = egui::Color32::WHITE;
-
+        
         // Draw
         let painter = ui.painter();
+        let txt_galley = painter.layout_no_wrap(String::from("Test"), egui::FontId::default(), txt_col);
+        let bg_rect = txt_galley.rect.translate(pos.to_vec2());
+
         painter.rect_filled(bg_rect, egui::Rounding::none(), bg_col);
-        painter.text(pos, egui::Align2::LEFT_TOP, "Test", egui::FontId::default(), txt_col);
+        painter.galley(pos, txt_galley);
     }
 
     fn get_thread_receiver(&mut self, ctx: &egui::Context) -> &mut mpsc::Receiver<ImageRead> {
