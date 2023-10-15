@@ -90,12 +90,16 @@ impl ThermalApp {
 
         //println!("Coord: ( {}; {} )", img_coord.0, img_coord.1);
 
+        let index = img_coord.0 + img_coord.1 * mlx::PIXELS_WIDTH;
+        let temperature = self.temperature_grid.unwrap_or([0.0; mlx::PIXEL_COUNT])[index];
+        let temp_string = format!("{:.1} °C", temperature);
+
         let bg_col = egui::Color32::BLACK;
         let txt_col = egui::Color32::WHITE;
         
         // Draw
         let painter = ui.painter();
-        let txt_galley = painter.layout_no_wrap(String::from("Test"), egui::FontId::default(), txt_col);
+        let txt_galley = painter.layout_no_wrap(temp_string, egui::FontId::default(), txt_col);
         let bg_rect = txt_galley.rect
             .translate(pos.to_vec2())
             .expand(5.0);
