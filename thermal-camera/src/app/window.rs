@@ -81,14 +81,10 @@ impl ThermalApp {
             (pos.y - rect_image.top()) / rect_image.bottom()
         );
 
-        //println!("UV: ( {}; {} )", uv.x, uv.y);
-
         let img_coord: (usize, usize) = (
             (uv.x * mlx::PIXELS_WIDTH as f32).floor().min(mlx::PIXELS_WIDTH as f32).max(0.0) as usize,
             (uv.y * mlx::PIXELS_HEIGHT as f32).floor().min(mlx::PIXELS_HEIGHT as f32).max(0.0) as usize,
         );
-
-        //println!("Coord: ( {}; {} )", img_coord.0, img_coord.1);
 
         let index = img_coord.0 + img_coord.1 * mlx::PIXELS_WIDTH;
         let temperature = self.temperature_grid.unwrap_or([0.0; mlx::PIXEL_COUNT])[index];
