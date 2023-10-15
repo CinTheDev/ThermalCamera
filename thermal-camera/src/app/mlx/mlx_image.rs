@@ -3,6 +3,9 @@ use super::{
     TemperatureRead, ImageRead, ColorTypes
 };
 
+// TODO: This function seems to be only half as bright as needed
+// But not when calculating the gradient.
+// Should be investigated
 fn grayscale_function(temp: f32, min_temp: f32, max_temp: f32) -> [u8; 3] {
     let value: f32 = (temp - min_temp) * (255.0 / max_temp);
     let value_byte: u8 = value.round().max(0.0).min(255.0) as u8;
