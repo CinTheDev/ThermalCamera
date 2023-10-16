@@ -25,7 +25,7 @@ pub fn open_window(args: Opt) {
 }
 
 #[derive(Default)]
-struct ThermalApp {
+pub struct ThermalApp {
     options: Opt,
 
     temperature_grid: Option<[f32; mlx::PIXEL_COUNT]>,
@@ -122,17 +122,7 @@ impl eframe::App for ThermalApp {
                     }
             });
 
-            self.update_image(ctx);
-
-            ui.vertical_centered(
-                |ui| {
-                    ui.horizontal_centered(
-                        |ui| {
-                            self.show_scale(ui);
-                            self.show_image(ui);
-                        }
-                    );
-            });
+            display::show(self, ui, ctx);    
         });
     }
 }
