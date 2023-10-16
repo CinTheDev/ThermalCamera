@@ -1,11 +1,11 @@
 use super::{egui, ThermalApp};
+use super::CONTROLS_X_SPACE;
 
 pub fn show(app: &mut ThermalApp, ui: &mut egui::Ui) {
-    let min_size = egui::Vec2::new(100.0, 200.0); // TODO: Adjust this
-    let allocated_space = ui.allocate_space(min_size);
+    let width_allocate = CONTROLS_X_SPACE * app.window_size.x;
 
-    ui.vertical(|ui| {
-        ui.expand_to_include_rect(allocated_space.1);
+    ui.vertical_centered_justified(|ui| {
+        ui.set_min_width(width_allocate);
 
         let button_freeze = ui.button("Freeze image");
         let button_save = ui.add_enabled(
