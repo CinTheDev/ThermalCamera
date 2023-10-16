@@ -106,25 +106,6 @@ impl eframe::App for ThermalApp {
         self.check_usb();
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            /*
-            ui.with_layout(
-                egui::Layout::top_down_justified(egui::Align::Center),
-                |ui| {
-                    if ui.button("Freeze image").clicked() {
-                        self.rx_active = !self.rx_active;
-                    }
-
-                    let save_button = ui.add_enabled(
-                        self.usb_detected,
-                        egui::Button::new("Save image")
-                    );
-                    if save_button.clicked() {
-                        self.save_image();
-                        println!("Image saved");
-                    }
-            });
-            */
-
             display::show(self, ui, ctx);    
 
             controls::show(self, ui);
