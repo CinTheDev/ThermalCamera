@@ -24,7 +24,6 @@ pub fn show_scale(app: &mut ThermalApp, ui: &mut egui::Ui) {
             ui.label(string_max_temp);
 
             let height = ui.available_height() - 20.0;
-            //let width = height * (mlx::GRADIENT_WIDTH as f32 / mlx::GRADIENT_HEIGHT as f32);
             let width = width_allocate;
             let size = egui::Vec2::new(width, height);
             ui.image(texture, size);
