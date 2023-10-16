@@ -9,6 +9,7 @@ use std::sync::mpsc;
 pub use super::Opt;
 
 mod display;
+mod controls;
 
 pub fn open_window(args: Opt) {
     let native_options = eframe::NativeOptions {
@@ -105,6 +106,7 @@ impl eframe::App for ThermalApp {
         self.check_usb();
 
         egui::CentralPanel::default().show(ctx, |ui| {
+            /*
             ui.with_layout(
                 egui::Layout::top_down_justified(egui::Align::Center),
                 |ui| {
@@ -121,8 +123,11 @@ impl eframe::App for ThermalApp {
                         println!("Image saved");
                     }
             });
+            */
 
             display::show(self, ui, ctx);    
+
+            controls::show(self, ui);
         });
     }
 }
