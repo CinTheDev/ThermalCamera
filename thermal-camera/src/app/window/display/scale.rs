@@ -1,6 +1,9 @@
 use super::{egui, ThermalApp, mlx};
+use super::SCALE_X_SPACE;
 
 pub fn show_scale(app: &mut ThermalApp, ui: &mut egui::Ui) {
+    let width_allocate = SCALE_X_SPACE * app.window_size.x;
+
     let texture: &egui::TextureHandle = app.scale.get_or_insert_with(|| {
         let raw_scale = app.raw_scale.get_or_insert_with(|| {
             [0x00; mlx::GRADIENT_COUNT * 3]
@@ -21,8 +24,9 @@ pub fn show_scale(app: &mut ThermalApp, ui: &mut egui::Ui) {
             ui.label(string_max_temp);
 
             let height = ui.available_height() - 20.0;
-            let width = height * (mlx::GRADIENT_WIDTH as f32 / mlx::GRADIENT_HEIGHT as f32);
-            let size = egui::Vec2 {x: width, y: height};
+            //let width = height * (mlx::GRADIENT_WIDTH as f32 / mlx::GRADIENT_HEIGHT as f32);
+            let width = width_allocate;
+            let size = egui::Vec2::new(width, height);
             ui.image(texture, size);
 
             ui.label(string_min_temp);

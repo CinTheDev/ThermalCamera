@@ -34,6 +34,8 @@ pub fn open_window(args: Opt) {
 
 #[derive(Default)]
 pub struct ThermalApp {
+    window_size: egui::Vec2,
+
     options: Opt,
 
     temperature_grid: Option<[f32; mlx::PIXEL_COUNT]>,
@@ -111,6 +113,8 @@ impl ThermalApp {
 impl eframe::App for ThermalApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         self.check_usb();
+
+        self.window_size = _frame.info().window_info.size;
 
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.horizontal_centered(|ui| {

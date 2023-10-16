@@ -1,4 +1,5 @@
 use super::{egui, ThermalApp, mlx};
+use super::{SCALE_X_SPACE, IMAGE_X_SPACE};
 
 mod image;
 mod scale;
