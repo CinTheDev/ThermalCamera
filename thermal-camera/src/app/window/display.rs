@@ -18,5 +18,5 @@ pub fn show(app: &mut ThermalApp, ui: &mut egui::Ui, ctx: &egui::Context) {
 }
 
 pub fn update_scale(app: &mut ThermalApp) {
-    scale::update_scale(app, app.options.color_type);
+    scale::update_scale(app);
 }

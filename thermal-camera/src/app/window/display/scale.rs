@@ -30,7 +30,8 @@ pub fn show_scale(app: &mut ThermalApp, ui: &mut egui::Ui) {
     );
 }
 
-pub fn update_scale(app: &mut ThermalApp, color_type: mlx::ColorTypes) {
+pub fn update_scale(app: &mut ThermalApp) {
+    let color_type = app.options.color_type;
     let gradient = mlx::get_scale(color_type);
 
     app.raw_scale.replace(gradient);
