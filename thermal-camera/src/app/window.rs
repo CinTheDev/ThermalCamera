@@ -8,6 +8,8 @@ use std::sync::mpsc;
 
 pub use super::Opt;
 
+mod scale;
+
 pub fn open_window(args: Opt) {
     let native_options = eframe::NativeOptions {
         fullscreen: true,
@@ -147,6 +149,7 @@ impl ThermalApp {
         self.check_clicked(ui, response);
     }
 
+    /*
     fn show_scale(&mut self, ui: &mut egui::Ui) {
         let texture: &egui::TextureHandle = self.scale.get_or_insert_with(|| {
             let raw_scale = self.raw_scale.get_or_insert_with(|| {
@@ -176,6 +179,7 @@ impl ThermalApp {
             }
         );
     }
+    */
     
     fn update_image(&mut self, ctx: &egui::Context) {
         // Don't update image if not supposed to
