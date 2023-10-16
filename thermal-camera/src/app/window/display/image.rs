@@ -1,4 +1,5 @@
 use super::{egui, ThermalApp, mlx};
+use super::IMAGE_X_SPACE;
 
 pub fn show_image(app: &mut ThermalApp, ui: &mut egui::Ui) {
     let texture: &egui::TextureHandle = app.picture.get_or_insert_with(|| {
@@ -15,9 +16,11 @@ pub fn show_image(app: &mut ThermalApp, ui: &mut egui::Ui) {
             .load_texture("Picture", img, app.picture_options)
     });
 
-    let height = ui.available_height();
-    let width = height * (mlx::PIXELS_WIDTH as f32 / mlx::PIXELS_HEIGHT as f32);
-    let size = egui::Vec2 {x: width, y: height};
+    //let height = ui.available_height();
+    //let width = height * (mlx::PIXELS_WIDTH as f32 / mlx::PIXELS_HEIGHT as f32);
+    let width = IMAGE_X_SPACE * app.window_size.x;
+    let height = width * (mlx::PIXELS_HEIGHT as f32 / mlx::PIXELS_WIDTH as f32);
+    let size = egui::Vec2::new(width, height);
 
     let response = ui.image(texture, size);
     check_clicked(app, ui, response);
