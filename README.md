@@ -99,5 +99,4 @@ Use the display guide mentioned above in Display Setup to connect the relevant p
 
 ## TODOs
 
-- Add Bad Pixel correction
 - Improve eframe UI (aspect ratio correction, nicer buttons, ...)
