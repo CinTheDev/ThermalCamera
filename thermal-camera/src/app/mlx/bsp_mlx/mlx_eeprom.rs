@@ -118,7 +118,12 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
     let T_o = calc_T_o(EMISSIVITY, T_a, V_IR_compensated, a_comp);
 
     let T_o_extra = calc_T_o_extra(T_o, EMISSIVITY, T_a, V_IR_compensated, a_comp);
-    return T_o_extra;
+
+    // Fix bad pixels
+    let bad_pixels = EEPROM_VARS.bad_pixels;
+    let fixed_t_o = fix_bad_pixels(T_o_extra, bad_pixels);
+    
+    return fixed_t_o;
 }
 
 
@@ -456,6 +461,49 @@ fn calc_T_o_extra(T_o: [f32; PIXEL_COUNT], emissivity: f32, T_a: f32, V_IR_compe
     }
 
     return T_o_extra;
+}
+
+fn fix_bad_pixels(temp_grid: [f32; PIXEL_COUNT], bad_pixels: [usize; 4]) -> [f32; PIXEL_COUNT] {
+    let mut initial_grid = temp_grid;
+
+    for y in 0..PIXELS_HEIGHT {
+        for x in 0..PIXELS_WIDTH {
+            let index = PIXELS_WIDTH * y + x;
+            if ! bad_pixels.contains(&index) {
+                continue;
+            }
+
+            let mut avg: f32 = 0.0;
+            let mut num_avg = 0;
+
+            // Upper neighbour
+            if y.checked_sub(1).is_some() {
+                avg += temp_grid[index - PIXELS_WIDTH];
+                num_avg += 1;
+            }
+            // Lower neighbour
+            if y + 1 < PIXELS_HEIGHT {
+                avg += temp_grid[index + PIXELS_WIDTH];
+                num_avg += 1;
+            }
+            // Left neighbour
+            if x.checked_sub(1).is_some() {
+                avg += temp_grid[index - 1];
+                num_avg += 1;
+            }
+            // Right neighbour
+            if x + 1 < PIXELS_WIDTH {
+                avg += temp_grid[index + 1];
+                num_avg += 1;
+            }
+
+            avg /= num_avg as f32;
+
+            initial_grid[index] = avg;
+        }
+    }
+
+    return initial_grid;
 }
 
 // ----------------------------
