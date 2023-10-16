@@ -30,4 +30,10 @@ impl ThermalApp {
             }
         );
     }
+
+    pub fn update_scale(&mut self, color_type: mlx::ColorTypes) {
+        let gradient = mlx::get_scale(color_type);
+
+        self.raw_scale.replace(gradient);
+    }
 }

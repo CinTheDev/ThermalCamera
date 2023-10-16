@@ -173,12 +173,6 @@ impl ThermalApp {
         }
     }
 
-    fn update_scale(&mut self, color_type: mlx::ColorTypes) {
-        let gradient = mlx::get_scale(color_type);
-
-        self.raw_scale.replace(gradient);
-    }
-
     fn save_image(&mut self) {
         if self.picture.is_none() { return }
         if !bsp::check_usb() { return }
