@@ -49,6 +49,8 @@ pub struct EepromVars {
     Resolution: u16,
 
     pattern: [u16; PIXEL_COUNT],
+
+    bad_pixels: [usize; 4],
 }
 
 lazy_static! {
@@ -184,6 +186,9 @@ pub fn restore() -> EepromVars {
 
     let pattern = restore_pattern();
 
+    // Bad pixels
+    let bad_pixels = restore_bad_pixels();
+
     return EepromVars {
         K_Vdd,
         VDD_25,
@@ -225,6 +230,8 @@ pub fn restore() -> EepromVars {
         Resolution,
 
         pattern,
+
+        bad_pixels,
     };
 }
 
@@ -885,4 +892,21 @@ fn restore_pattern() -> [u16; PIXEL_COUNT] {
     }
 
     return pattern;
+}
+
+fn restore_bad_pixels() -> [usize; 4] {
+    let mut bad_pixels: [usize; 4] = [usize::MAX; 4];
+    let mut index = 0;
+
+    for i in 0..PIXEL_COUNT {
+        let addr: u16 = 0x2440 + i as u16;
+        let is_outlier = (get_eeprom_val(addr) & 0x01) == 0x01;
+
+        if is_outlier {
+            bad_pixels[index] = i;
+            index += 1;
+        }
+    }
+
+    return bad_pixels;
 }
