@@ -54,7 +54,7 @@ impl ThermalApp {
             ..Default::default()
         };
 
-        s.update_scale(s.options.color_type);
+        display::update_scale(&mut s);
 
         return s;
     }

@@ -1,18 +1,22 @@
 use super::{egui, ThermalApp, mlx};
 
-pub mod image;
-pub mod scale;
+mod image;
+mod scale;
 
 pub fn show(app: &mut ThermalApp, ui: &mut egui::Ui, ctx: &egui::Context) {
-    app.update_image(ctx);
+    image::update_image(app, ctx);
 
     ui.vertical_centered(
         |ui| {
             ui.horizontal_centered(
                 |ui| {
-                    app.show_scale(ui);
-                    app.show_image(ui);
+                    scale::show_scale(app, ui);
+                    image::show_image(app, ui);
                 }
             );
     });
+}
+
+pub fn update_scale(app: &mut ThermalApp) {
+    scale::update_scale(app, app.options.color_type);
 }
