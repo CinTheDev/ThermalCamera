@@ -106,9 +106,11 @@ impl eframe::App for ThermalApp {
         self.check_usb();
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            display::show(self, ui, ctx);    
+            ui.horizontal_centered(|ui| {
+                display::show(self, ui, ctx);    
 
-            controls::show(self, ui);
+                controls::show(self, ui);
+            });
         });
     }
 }
