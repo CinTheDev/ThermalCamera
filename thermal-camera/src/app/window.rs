@@ -11,6 +11,13 @@ pub use super::Opt;
 mod display;
 mod controls;
 
+// How much of the screen is covered by these widgets
+const SCALE_X_SPACE: f32 = 0.1;
+const CONTROLS_X_SPACE: f32 = 0.2;
+
+// Fill rest of space
+const IMAGE_X_SPACE: f32 = 1.0 - SCALE_X_SPACE - CONTROLS_X_SPACE;
+
 pub fn open_window(args: Opt) {
     let native_options = eframe::NativeOptions {
         fullscreen: true,
