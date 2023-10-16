@@ -8,8 +8,7 @@ use std::sync::mpsc;
 
 pub use super::Opt;
 
-mod image;
-mod scale;
+mod display;
 
 pub fn open_window(args: Opt) {
     let native_options = eframe::NativeOptions {
