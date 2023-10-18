@@ -4,7 +4,7 @@ use super::CONTROLS_X_SPACE;
 pub fn show(app: &mut ThermalApp, ui: &mut egui::Ui) {
     let width_allocate = CONTROLS_X_SPACE * app.window_size.x;
 
-    ui.vertical_centered_justified(|ui| {
+    ui.vertical_centered(|ui| {
         ui.set_min_width(width_allocate);
 
         let button_freeze = ui.button("Freeze image");
