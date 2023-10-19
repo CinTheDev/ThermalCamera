@@ -12,9 +12,9 @@ mod display;
 mod controls;
 
 // How much of the screen is covered by these widgets
-const SPACE_INBETWEEN: f32 = 0.05;
+const SPACE_INBETWEEN: f32 = 0.0;
 const SCALE_X_SPACE: f32 = 0.1 - SPACE_INBETWEEN;
-const CONTROLS_X_SPACE: f32 = 0.2 - SPACE_INBETWEEN;
+const CONTROLS_X_SPACE: f32 = 0.15 - SPACE_INBETWEEN;
 
 // Fill rest of space
 const IMAGE_X_SPACE: f32 = 1.0 - SCALE_X_SPACE - CONTROLS_X_SPACE - SPACE_INBETWEEN;
@@ -115,9 +115,9 @@ impl eframe::App for ThermalApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         self.check_usb();
 
-        self.window_size = _frame.info().window_info.size;
-
         egui::CentralPanel::default().show(ctx, |ui| {
+            self.window_size = ui.available_size();
+
             ui.horizontal_centered(|ui| {
                 display::show(self, ui, ctx);    
 

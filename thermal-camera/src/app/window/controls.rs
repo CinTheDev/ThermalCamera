@@ -1,8 +1,9 @@
 use super::{egui, ThermalApp};
+use super::CONTROLS_X_SPACE;
 
 pub fn show(app: &mut ThermalApp, ui: &mut egui::Ui) {
     let height_buttons = ui.available_height() / 2.0;
-    let size_buttons = egui::Vec2::new(0.0, height_buttons);
+    let size_buttons = egui::Vec2::new(CONTROLS_X_SPACE, height_buttons);
 
     ui.with_layout(egui::Layout::top_down_justified(egui::Align::Center), |ui| {
         let button_freeze = ui.add(
