@@ -9,7 +9,7 @@ pub fn show(app: &mut ThermalApp, ui: &mut egui::Ui) {
     let size = app.window_size * WINDOW_RELATIVE_SIZE;
     let bounds = egui::Rect::from_center_size(center, size);
 
-    ui.put(bounds, egui::Button::new("Test"));
+    ui.put(bounds, options_window::new());
 }
 
 struct options_window {
@@ -17,7 +17,16 @@ struct options_window {
 }
 
 impl options_window {
-    fn ui(self, ui: &mut egui::Ui) -> Response {
-        
+    fn new() -> Self {
+        return options_window {};
+    }
+}
+
+impl egui::widgets::Widget for options_window {
+    fn ui(self, ui: &mut egui::Ui) -> egui::Response {
+        return ui.vertical(|ui| {
+            ui.button("Test 1");
+            ui.button("Test 2");
+        }).response;
     }
 }
