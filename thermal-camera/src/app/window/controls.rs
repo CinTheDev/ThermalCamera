@@ -6,13 +6,13 @@ pub fn show(app: &mut ThermalApp, ui: &mut egui::Ui) {
     let height_buttons = ui.available_height() / 2.0;
     let size_buttons = egui::Vec2::new(width_allocate, height_buttons);
 
-    ui.vertical(|ui| {
+    ui.with_layout(egui::Layout::top_down_justified(egui::Align::Center), |ui| {
         let button_freeze = ui.add(
-            egui::Button::new("Freeze image").min_size(size_buttons)
+            egui::Button::new("Freeze image")//.min_size(size_buttons)
         );
         let button_save = ui.add_enabled(
             app.usb_detected,
-            egui::Button::new("Save image").min_size(size_buttons)
+            egui::Button::new("Save image")//.min_size(size_buttons)
         );
 
         if button_freeze.clicked() {
