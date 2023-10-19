@@ -9,24 +9,18 @@ pub fn show(app: &mut ThermalApp, ui: &mut egui::Ui) {
     let size = app.window_size * WINDOW_RELATIVE_SIZE;
     let bounds = egui::Rect::from_center_size(center, size);
 
-    ui.put(bounds, options_window::new());
+    let mut option_ui = ui.child_ui(bounds, egui::Layout::top_down_justified(egui::Align::Min));
+    draw_options(app, &mut option_ui);
 }
 
-struct options_window {
+fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
+    let elements_height = ui.available_height() / 2.0;
+    let elements_size = egui::vec2(0.0, elements_height);
 
-}
-
-impl options_window {
-    fn new() -> Self {
-        return options_window {};
-    }
-}
-
-impl egui::widgets::Widget for options_window {
-    fn ui(self, ui: &mut egui::Ui) -> egui::Response {
-        return ui.vertical(|ui| {
-            ui.button("Test 1");
-            ui.button("Test 2");
-        }).response;
-    }
+    ui.add(
+        egui::Button::new("Test 1").min_size(elements_size)
+    );
+    ui.add(
+        egui::Button::new("Test 2").min_size(elements_size)
+    );
 }
