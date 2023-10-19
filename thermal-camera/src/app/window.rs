@@ -10,6 +10,7 @@ pub use super::Opt;
 
 mod display;
 mod controls;
+mod options;
 
 // How much of the screen is covered by these widgets
 const SCALE_X_SPACE: f32 = 0.1;
@@ -124,6 +125,8 @@ impl eframe::App for ThermalApp {
 
                 controls::show(self, ui);
             });
+
+            options::show(self, ui);
         });
     }
 }

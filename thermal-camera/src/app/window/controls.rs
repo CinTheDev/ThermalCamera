@@ -1,6 +1,4 @@
-use super::{egui, ThermalApp, mlx};
-
-mod options;
+use super::{egui, ThermalApp};
 
 pub fn show(app: &mut ThermalApp, ui: &mut egui::Ui) {
     let height_buttons = app.window_size.y / 3.0;
@@ -28,10 +26,6 @@ pub fn show(app: &mut ThermalApp, ui: &mut egui::Ui) {
             on_button_options(app);
         }
     });
-
-    if app.show_options {
-        options::show(app, ui);
-    }
 }
 
 fn on_button_freeze(app: &mut ThermalApp) {
