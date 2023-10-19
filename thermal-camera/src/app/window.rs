@@ -48,6 +48,8 @@ pub struct ThermalApp {
     scale: Option<egui::TextureHandle>,
     scale_bound: (f32, f32),
 
+    show_options: bool,
+
     image_rx: Option<mpsc::Receiver<ImageRead>>,
     rx_active: bool,
 
