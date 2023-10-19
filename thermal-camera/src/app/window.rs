@@ -12,12 +12,11 @@ mod display;
 mod controls;
 
 // How much of the screen is covered by these widgets
-const SPACE_INBETWEEN: f32 = 0.0;
-const SCALE_X_SPACE: f32 = 0.1 - SPACE_INBETWEEN;
-const CONTROLS_X_SPACE: f32 = 0.15 - SPACE_INBETWEEN;
+const SCALE_X_SPACE: f32 = 0.1;
+const CONTROLS_X_SPACE: f32 = 0.1;
 
 // Fill rest of space
-const IMAGE_X_SPACE: f32 = 1.0 - SCALE_X_SPACE - CONTROLS_X_SPACE - SPACE_INBETWEEN;
+const IMAGE_X_SPACE: f32 = 1.0 - SCALE_X_SPACE - CONTROLS_X_SPACE;
 
 pub fn open_window(args: Opt) {
     let native_options = eframe::NativeOptions {
