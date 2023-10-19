@@ -9,11 +9,15 @@ pub fn show(app: &mut ThermalApp, ui: &mut egui::Ui) {
     let size = app.window_size * WINDOW_RELATIVE_SIZE;
     let bounds = egui::Rect::from_center_size(center, size);
 
-    let mut option_ui = ui.child_ui(bounds, egui::Layout::top_down_justified(egui::Align::Min));
+    let mut option_ui = ui.child_ui(bounds, egui::Layout::top_down(egui::Align::Min));
     draw_options(app, &mut option_ui);
 }
 
 fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
+    let bg_color = egui::Color32::BLACK;
+    let bg_painter = ui.painter();
+    bg_painter.rect_filled(ui.max_rect(), 0.0, bg_color);
+
     let elements_height = ui.available_height() / 2.0;
     let elements_size = egui::vec2(0.0, elements_height);
 
