@@ -31,5 +31,6 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
     if btn_1.clicked() {
         app.options.color_type = mlx::ColorTypes::Gray;
         app.show_options = false;
+        app.update_options();
     }
 }

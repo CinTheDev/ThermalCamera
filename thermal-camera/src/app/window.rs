@@ -73,7 +73,7 @@ impl ThermalApp {
         return s;
     }
 
-    fn get_thread_receiver(&mut self, ctx: &egui::Context) -> &mut mpsc::Receiver<ImageRead> {
+    fn get_thread_receiver(&mut self, ctx: &egui::Context) -> &mut Receiver<ImageRead> {
         let options_clone = self.options.clone();
 
         self.image_rx.get_or_insert_with(|| {
@@ -90,14 +90,13 @@ impl ThermalApp {
         })
     }
 
-    fn continuuos_read(args_rx: mpsc::Receiver<Opt>, ctx: egui::Context, tx: mpsc::Sender<ImageRead>) -> ! {
-        let mut args: Option<Opt> = Option::None;
+    fn continuuos_read(args_rx: Receiver<Opt>, ctx: egui::Context, tx: Sender<ImageRead>) -> ! {
+        let mut args: Option<Opt> = Some(Opt::default());
         loop {
-            let r = args_rx.recv();
+            let r = args_rx.try_recv();
             if r.is_ok() {
-                args = Some(r.unwrap());
+                args.replace(r.unwrap());
             }
-            if args.is_none() { continue; }
 
             let img = mlx::take_image(args.as_ref().unwrap());
             tx.send(img).unwrap();
