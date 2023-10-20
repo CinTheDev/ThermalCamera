@@ -53,6 +53,7 @@ pub struct ThermalApp {
 
     image_rx: Option<mpsc::Receiver<ImageRead>>,
     rx_active: bool,
+    args_tx: Option<mpsc::Sender<Opt>>,
 
     usb_detected: bool,
 }
@@ -77,15 +78,25 @@ impl ThermalApp {
             let (tx, rx) = mpsc::channel();
             let ctx_clone = ctx.clone();
 
-            thread::spawn(|| ThermalApp::continuuos_read(&self.options, ctx_clone, tx));
+            let (args_tx, args_rx) = mpsc::channel();
+            self.args_tx = Some(args_tx);
+
+            thread::spawn(|| ThermalApp::continuuos_read(args_rx, ctx_clone, tx));
 
             return rx;
         })
     }
 
-    fn continuuos_read(args: &Opt, ctx: egui::Context, tx: mpsc::Sender<ImageRead>) -> ! {
+    fn continuuos_read(args_rx: mpsc::Receiver<Opt>, ctx: egui::Context, tx: mpsc::Sender<ImageRead>) -> ! {
+        let mut args: Option<Opt> = Option::None;
         loop {
-            let img = mlx::take_image(&args);
+            let r = args_rx.recv();
+            if r.is_ok() {
+                args = Some(r.unwrap());
+            }
+            if args.is_none() { continue; }
+
+            let img = mlx::take_image(args.as_ref().unwrap());
             tx.send(img).unwrap();
             ctx.request_repaint();
         }
