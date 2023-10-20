@@ -4,7 +4,7 @@ use mlx::ImageRead;
 
 use super::bsp;
 use std::thread;
-use std::sync::mpsc;
+use std::sync::mpsc::{self, Receiver, Sender};
 
 pub use super::Opt;
 
@@ -74,11 +74,14 @@ impl ThermalApp {
     }
 
     fn get_thread_receiver(&mut self, ctx: &egui::Context) -> &mut mpsc::Receiver<ImageRead> {
+        let options_clone = self.options.clone();
+
         self.image_rx.get_or_insert_with(|| {
             let (tx, rx) = mpsc::channel();
             let ctx_clone = ctx.clone();
 
             let (args_tx, args_rx) = mpsc::channel();
+            args_tx.send(options_clone).unwrap();
             self.args_tx = Some(args_tx);
 
             thread::spawn(|| ThermalApp::continuuos_read(args_rx, ctx_clone, tx));
@@ -100,6 +103,12 @@ impl ThermalApp {
             tx.send(img).unwrap();
             ctx.request_repaint();
         }
+    }
+
+    fn update_options(&self) {
+        if self.args_tx.is_none() { return; }
+        let tx: &Sender<Opt> = self.args_tx.as_ref().unwrap();
+        tx.send(self.options.clone()).unwrap();
     }
 
     fn save_image(&mut self) {
