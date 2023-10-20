@@ -76,15 +76,14 @@ impl ThermalApp {
         self.image_rx.get_or_insert_with(|| {
             let (tx, rx) = mpsc::channel();
             let ctx_clone = ctx.clone();
-            let args_clone = self.options.clone();
 
-            thread::spawn(move || ThermalApp::continuuos_read(args_clone, ctx_clone, tx));
+            thread::spawn(|| ThermalApp::continuuos_read(&self.options, ctx_clone, tx));
 
             return rx;
         })
     }
 
-    fn continuuos_read(args: Opt, ctx: egui::Context, tx: mpsc::Sender<ImageRead>) -> ! {
+    fn continuuos_read(args: &Opt, ctx: egui::Context, tx: mpsc::Sender<ImageRead>) -> ! {
         loop {
             let img = mlx::take_image(&args);
             tx.send(img).unwrap();

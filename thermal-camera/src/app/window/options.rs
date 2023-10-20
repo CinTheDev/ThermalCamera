@@ -21,10 +21,15 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
     let elements_height = ui.available_height() / 2.0;
     let elements_size = egui::vec2(0.0, elements_height);
 
-    ui.add(
-        egui::Button::new("Test 1").min_size(elements_size)
+    let btn_1 = ui.add(
+        egui::Button::new("Make grayscale").min_size(elements_size)
     );
-    ui.add(
+    let btn_2 = ui.add(
         egui::Button::new("Test 2").min_size(elements_size)
     );
+
+    if btn_1.clicked() {
+        app.options.color_type = mlx::ColorTypes::Gray;
+        app.show_options = false;
+    }
 }
