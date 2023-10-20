@@ -38,4 +38,11 @@ pub fn update_scale(app: &mut ThermalApp) {
     let gradient = mlx::get_scale(color_type);
 
     app.raw_scale.replace(gradient);
+
+    let scale = egui::ColorImage::from_rgb(
+        [mlx::PIXELS_WIDTH, mlx::PIXELS_HEIGHT],
+        &gradient
+    );
+
+    app.scale.as_mut().unwrap().set(scale, app.picture_options);
 }

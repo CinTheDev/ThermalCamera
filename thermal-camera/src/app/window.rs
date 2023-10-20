@@ -104,10 +104,12 @@ impl ThermalApp {
         }
     }
 
-    fn update_options(&self) {
+    fn update_options(&mut self) {
         if self.args_tx.is_none() { return; }
         let tx: &Sender<Opt> = self.args_tx.as_ref().unwrap();
         tx.send(self.options.clone()).unwrap();
+
+        display::update_scale(self);
     }
 
     fn save_image(&mut self) {
