@@ -105,12 +105,23 @@ impl ThermalApp {
         }
     }
 
-    fn recolor_image(&mut self) {
+    fn recolor_image(&mut self, ctx: &egui::Context) {
         if self.last_read.is_none() { return; }
 
         let last_read = self.last_read.as_ref().unwrap();
 
         let color_grid = mlx::mlx_image::color_image(&self.options.color_type, &last_read.temperature_read);
+        
+        let img = egui::ColorImage::from_rgb(
+            [mlx::PIXELS_WIDTH, mlx::PIXELS_HEIGHT],
+            &color_grid.pixels
+        );
+
+        self.picture.as_mut().unwrap().set(img, self.picture_options);
+
+        self.last_read.replace(color_grid);
+
+        ctx.request_repaint();
     }
 
     fn update_options(&mut self) {
