@@ -39,7 +39,8 @@ pub struct ThermalApp {
 
     options: Opt,
 
-    temperature_grid: Option<[f32; mlx::PIXEL_COUNT]>,
+    //temperature_grid: Option<[f32; mlx::PIXEL_COUNT]>,
+    last_read: Option<mlx::ImageRead>,
 
     raw_picture: Option<[u8; mlx::PIXEL_COUNT * 3]>,
     picture: Option<egui::TextureHandle>,
@@ -107,11 +108,11 @@ impl ThermalApp {
     }
 
     fn recolor_image(&mut self) {
-        if self.temperature_grid.is_none() { return; }
+        if self.last_read.is_none() { return; }
 
-        let temperature_grid = self.temperature_grid.as_ref().unwrap();
+        let last_read = self.last_read.as_ref().unwrap();
 
-        let color_grid = mlx::mlx_image::color_image(self.options.color_type, temperature_grid);
+        let color_grid = mlx::mlx_image::color_image(self.options.color_type, last_read.temperature_read);
     }
 
     fn update_options(&mut self) {

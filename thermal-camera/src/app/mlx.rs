@@ -26,9 +26,10 @@ pub struct TemperatureRead {
 
 pub struct ImageRead {
     pub pixels: [u8; PIXEL_COUNT * 3],
-    pub temperature_grid: [f32; PIXEL_COUNT],
-    pub min_temp: f32,
-    pub max_temp: f32,
+    pub temperature_read: TemperatureRead,
+    //pub temperature_grid: [f32; PIXEL_COUNT],
+    //pub min_temp: f32,
+    //pub max_temp: f32,
 }
 
 pub fn init() {
