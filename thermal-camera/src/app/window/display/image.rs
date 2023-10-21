@@ -2,19 +2,7 @@ use super::{egui, ThermalApp, mlx};
 use super::IMAGE_X_SPACE;
 
 pub fn show_image(app: &mut ThermalApp, ui: &mut egui::Ui) {
-    let texture: &egui::TextureHandle = app.picture.get_or_insert_with(|| {
-        let raw_img = app.raw_picture.get_or_insert_with(|| {
-            [0x00; mlx::PIXEL_COUNT * 3]
-        });
-
-        let img = egui::ColorImage::from_rgb(
-            [mlx::PIXELS_WIDTH, mlx::PIXELS_HEIGHT],
-            raw_img
-        );
-
-        ui.ctx()
-            .load_texture("Picture", img, app.picture_options)
-    });
+    let texture = app.picture.as_ref().unwrap();
 
     let width = IMAGE_X_SPACE * app.window_size.x;
     let height = width * (mlx::PIXELS_HEIGHT as f32 / mlx::PIXELS_WIDTH as f32);
@@ -46,6 +34,20 @@ pub fn update_image(app: &mut ThermalApp, ctx: &egui::Context) {
 
         app.scale_bound = (raw_img.min_temp, raw_img.max_temp);
     }
+}
+
+pub fn init_image_texture(app: &mut ThermalApp, ctx: &egui::Context) {
+    let raw_img = app.raw_picture.get_or_insert_with(|| {
+        [0x00; mlx::PIXEL_COUNT * 3]
+    });
+
+    let img = egui::ColorImage::from_rgb(
+        [mlx::PIXELS_WIDTH, mlx::PIXELS_HEIGHT],
+        raw_img
+    );
+
+    let texture = ctx.load_texture("Picture", img, app.picture_options);
+    app.picture.replace(texture);
 }
 
 pub fn check_clicked(app: &mut ThermalApp, ui: &mut egui::Ui, response: egui::Response) {

@@ -68,6 +68,7 @@ impl ThermalApp {
             ..Default::default()
         };
 
+        display::image::init_image_texture(&mut s, &_cc.egui_ctx);
         display::scale::init_scale(&mut s, &_cc.egui_ctx);
         display::scale::update_scale(&mut s);
 
