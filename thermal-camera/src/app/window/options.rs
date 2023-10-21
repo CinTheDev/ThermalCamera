@@ -18,13 +18,16 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
     let bg_painter = ui.painter();
     bg_painter.rect_filled(ui.max_rect(), 0.0, bg_color);
 
-    let elements_height = ui.available_height() / 2.0;
+    let elements_height = ui.available_height() / 3.0;
     let elements_size = egui::vec2(0.0, elements_height);
 
     let btn_1 = ui.add(
         egui::Button::new("Make grayscale").min_size(elements_size)
     );
     let btn_2 = ui.add(
+        egui::Button::new("Make hue").min_size(elements_size)
+    );
+    let btn_3 = ui.add(
         egui::Button::new("Test 2").min_size(elements_size)
     );
 
@@ -35,6 +38,12 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
         app.recolor_image(ui.ctx());
     }
     if btn_2.clicked() {
+        app.options.color_type = mlx::ColorTypes::Hue;
+        app.show_options = false;
+        app.update_options();
+        app.recolor_image(ui.ctx());
+    }
+    if btn_3.clicked() {
         app.show_options = false;
         app.update_options();
     }
