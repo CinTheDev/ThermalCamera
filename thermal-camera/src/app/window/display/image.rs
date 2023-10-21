@@ -22,8 +22,6 @@ pub fn update_image(app: &mut ThermalApp, ctx: &egui::Context) {
 
     if rx_img.is_ok() {
         let img_read = rx_img.unwrap();
-        app.raw_picture.replace(img_read.pixels);
-        //app.temperature_grid.replace(raw_img.temperature_grid);
         
         let img = egui::ColorImage::from_rgb(
             [mlx::PIXELS_WIDTH, mlx::PIXELS_HEIGHT],
@@ -39,13 +37,11 @@ pub fn update_image(app: &mut ThermalApp, ctx: &egui::Context) {
 }
 
 pub fn init_image_texture(app: &mut ThermalApp, ctx: &egui::Context) {
-    let raw_img = app.raw_picture.get_or_insert_with(|| {
-        [0x00; mlx::PIXEL_COUNT * 3]
-    });
+    let raw_img = [0x00; mlx::PIXEL_COUNT * 3];
 
     let img = egui::ColorImage::from_rgb(
         [mlx::PIXELS_WIDTH, mlx::PIXELS_HEIGHT],
-        raw_img
+        &raw_img
     );
 
     let texture = ctx.load_texture("Picture", img, app.picture_options);
@@ -89,7 +85,6 @@ pub fn check_clicked(app: &mut ThermalApp, ui: &mut egui::Ui, response: egui::Re
         temperature = app.last_read.as_ref().unwrap().temperature_read.temperature_grid[index];
     }
 
-    //let temperature = app.last_read.unwrap_or([0.0; mlx::PIXEL_COUNT])[index];
     let temp_string = format!("{:.1} °C", temperature);
 
     let bg_col = egui::Color32::BLACK;

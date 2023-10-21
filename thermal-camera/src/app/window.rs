@@ -39,10 +39,8 @@ pub struct ThermalApp {
 
     options: Opt,
 
-    //temperature_grid: Option<[f32; mlx::PIXEL_COUNT]>,
     last_read: Option<mlx::ImageRead>,
 
-    raw_picture: Option<[u8; mlx::PIXEL_COUNT * 3]>,
     picture: Option<egui::TextureHandle>,
     picture_options: egui::TextureOptions,
 
@@ -127,13 +125,13 @@ impl ThermalApp {
         if self.picture.is_none() { return }
         if !bsp::check_usb() { return }
 
-        let raw_img = self.raw_picture.as_ref().unwrap();
+        let raw_img = self.last_read.as_ref().unwrap().pixels;
 
         let path = bsp::get_usb_path("png".to_string());
 
         bsp::write_rgb(
             &path,
-            raw_img,
+            &raw_img,
             mlx::PIXELS_WIDTH,
             mlx::PIXELS_HEIGHT,
         );
