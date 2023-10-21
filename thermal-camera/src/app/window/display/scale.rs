@@ -4,18 +4,7 @@ use super::SCALE_X_SPACE;
 pub fn show_scale(app: &mut ThermalApp, ui: &mut egui::Ui) {
     let width_allocate = SCALE_X_SPACE * app.window_size.x;
 
-    let texture: &egui::TextureHandle = app.scale.get_or_insert_with(|| {
-        let raw_scale = app.raw_scale.get_or_insert_with(|| {
-            [0x00; mlx::GRADIENT_COUNT * 3]
-        });
-
-        let img = egui::ColorImage::from_rgb(
-            [mlx::GRADIENT_WIDTH, mlx::GRADIENT_HEIGHT],
-            raw_scale
-        );
-
-        ui.ctx().load_texture("Scale", img, app.picture_options)
-    });
+    let texture = app.scale.as_ref().unwrap();
 
     ui.vertical(
         |ui| {
