@@ -46,3 +46,17 @@ pub fn update_scale(app: &mut ThermalApp) {
 
     app.scale.as_mut().unwrap().set(scale, app.picture_options);
 }
+
+pub fn init_scale(app: &mut ThermalApp, ctx: &egui::Context) {
+    let raw_scale = app.raw_scale.get_or_insert_with(|| {
+        [0x00; mlx::GRADIENT_COUNT * 3]
+    });
+
+    let img = egui::ColorImage::from_rgb(
+        [mlx::GRADIENT_WIDTH, mlx::GRADIENT_HEIGHT],
+        raw_scale
+    );
+
+    let texture = ctx.load_texture("Scale", img, app.picture_options);
+    app.scale.replace(texture);
+}

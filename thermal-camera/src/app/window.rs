@@ -68,7 +68,8 @@ impl ThermalApp {
             ..Default::default()
         };
 
-        display::update_scale(&mut s);
+        display::scale::init_scale(&mut s, &_cc.egui_ctx);
+        display::scale::update_scale(&mut s);
 
         return s;
     }
@@ -109,7 +110,7 @@ impl ThermalApp {
         let tx: &Sender<Opt> = self.args_tx.as_ref().unwrap();
         tx.send(self.options.clone()).unwrap();
 
-        display::update_scale(self);
+        display::scale::update_scale(self);
     }
 
     fn save_image(&mut self) {
