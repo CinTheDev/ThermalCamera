@@ -29,10 +29,13 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
 
     // Color options
     const OPTIONS_COLORING_COLUMNS: u32 = 3;
-    let options_coloring_width = ui.available_width() / OPTIONS_COLORING_COLUMNS as f32;
-    let options_coloring_size = egui::vec2(options_coloring_width, elements_height);
-
+    
     ui.horizontal(|ui| {
+        ui.label("Coloring Algorithm");
+
+        let options_coloring_width = ui.available_width() / OPTIONS_COLORING_COLUMNS as f32;
+        let options_coloring_size = egui::vec2(options_coloring_width, elements_height);
+
         let btn_coloring_gray = ui.add(
             egui::Button::new("Grayscale").min_size(options_coloring_size)
         );
