@@ -18,6 +18,47 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
     let bg_painter = ui.painter();
     bg_painter.rect_filled(ui.max_rect().expand(10.0), 5.0, bg_color);
 
+    const ROWS: u32 = 2;
+    let elements_height = ui.available_height() / ROWS as f32;
+    let element_standard_size = egui::vec2(ui.available_width(), elements_height);
+
+    // Close menu button
+    let btn_close = ui.add(
+        egui::Button::new("Close").min_size(element_standard_size)
+    );
+
+    // Color options
+    const OPTIONS_COLORING_COLUMNS: u32 = 3;
+    let options_coloring_width = ui.available_width() / OPTIONS_COLORING_COLUMNS as f32;
+    let options_coloring_size = egui::vec2(options_coloring_width, elements_height);
+
+    ui.horizontal(|ui| {
+        let btn_coloring_gray = ui.add(
+            egui::Button::new("Grayscale").min_size(options_coloring_size)
+        );
+        let btn_coloring_cheap = ui.add(
+            egui::Button::new("Cheap").min_size(options_coloring_size)
+        );
+        let btn_coloring_hue = ui.add(
+            egui::Button::new("Hue").min_size(options_coloring_size)
+        );
+
+        if btn_coloring_gray.clicked() {
+
+        }
+        if btn_coloring_cheap.clicked() {
+
+        }
+        if btn_coloring_hue.clicked() {
+
+        }
+    });
+
+    if btn_close.clicked() {
+        
+    }
+
+    /*
     let elements_height = ui.available_height() / 3.0;
     let elements_size = egui::vec2(0.0, elements_height);
 
@@ -47,4 +88,5 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
         app.show_options = false;
         app.update_options();
     }
+    */
 }
