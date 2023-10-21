@@ -1,7 +1,7 @@
 pub use super::Opt;
 
 mod bsp_mlx;
-mod mlx_image;
+pub mod mlx_image;
 
 pub const PIXELS_WIDTH: usize = 32;
 pub const PIXELS_HEIGHT: usize = 24;

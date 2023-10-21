@@ -106,6 +106,14 @@ impl ThermalApp {
         }
     }
 
+    fn recolor_image(&mut self) {
+        if self.temperature_grid.is_none() { return; }
+
+        let temperature_grid = self.temperature_grid.as_ref().unwrap();
+
+        let color_grid = mlx::mlx_image::color_image(self.options.color_type, temperature_grid);
+    }
+
     fn update_options(&mut self) {
         if self.args_tx.is_none() { return; }
         let tx: &Sender<Opt> = self.args_tx.as_ref().unwrap();
