@@ -44,49 +44,29 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
         );
 
         if btn_coloring_gray.clicked() {
-
+            on_btn_coloring(app, ui.ctx(), mlx::ColorTypes::Gray);
         }
         if btn_coloring_cheap.clicked() {
-
+            on_btn_coloring(app, ui.ctx(), mlx::ColorTypes::Cheap);
         }
         if btn_coloring_hue.clicked() {
-
+            on_btn_coloring(app, ui.ctx(), mlx::ColorTypes::Hue);
         }
     });
 
     if btn_close.clicked() {
-        
+        on_btn_close(app);
     }
+}
 
-    /*
-    let elements_height = ui.available_height() / 3.0;
-    let elements_size = egui::vec2(0.0, elements_height);
+fn on_btn_close(app: &mut ThermalApp) {
+    app.show_options = false;
+    app.update_options();
+}
 
-    let btn_1 = ui.add(
-        egui::Button::new("Make grayscale").min_size(elements_size)
-    );
-    let btn_2 = ui.add(
-        egui::Button::new("Make hue").min_size(elements_size)
-    );
-    let btn_3 = ui.add(
-        egui::Button::new("Test 2").min_size(elements_size)
-    );
-
-    if btn_1.clicked() {
-        app.options.color_type = mlx::ColorTypes::Gray;
-        app.show_options = false;
-        app.update_options();
-        app.recolor_image(ui.ctx());
-    }
-    if btn_2.clicked() {
-        app.options.color_type = mlx::ColorTypes::Hue;
-        app.show_options = false;
-        app.update_options();
-        app.recolor_image(ui.ctx());
-    }
-    if btn_3.clicked() {
-        app.show_options = false;
-        app.update_options();
-    }
-    */
+fn on_btn_coloring(app: &mut ThermalApp, ctx: &egui::Context, color_type: mlx::ColorTypes) {
+    app.options.color_type = color_type;
+    app.show_options = false;
+    app.update_options();
+    app.recolor_image(ctx);
 }
