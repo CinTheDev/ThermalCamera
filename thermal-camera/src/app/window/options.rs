@@ -33,4 +33,8 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
         app.show_options = false;
         app.update_options();
     }
+    if btn_2.clicked() {
+        app.show_options = false;
+        app.update_options();
+    }
 }
