@@ -5,8 +5,8 @@ pub const PIXELS_WIDTH: usize = 32;
 pub const PIXELS_HEIGHT: usize = 24;
 pub const PIXEL_COUNT: usize = PIXELS_WIDTH * PIXELS_HEIGHT;
 
-pub const GRADIENT_WIDTH: usize = 20;
-pub const GRADIENT_HEIGHT: usize = 127;
+pub const GRADIENT_WIDTH: usize = 1;
+pub const GRADIENT_HEIGHT: usize = 256;
 pub const GRADIENT_COUNT: usize = GRADIENT_WIDTH * GRADIENT_HEIGHT;
 
 #[derive(Debug, Clone, Copy)]
