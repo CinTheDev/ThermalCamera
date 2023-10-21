@@ -1,6 +1,6 @@
 use super::{egui, ThermalApp, mlx};
 
-const WINDOW_RELATIVE_SIZE: f32 = 0.9;
+const WINDOW_RELATIVE_SIZE: f32 = 0.8;
 
 pub fn show(app: &mut ThermalApp, ui: &mut egui::Ui) {
     if ! app.show_options { return }
@@ -16,7 +16,7 @@ pub fn show(app: &mut ThermalApp, ui: &mut egui::Ui) {
 fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
     let bg_color = egui::Color32::BLACK;
     let bg_painter = ui.painter();
-    bg_painter.rect_filled(ui.max_rect(), 0.0, bg_color);
+    bg_painter.rect_filled(ui.max_rect().expand(10.0), 5.0, bg_color);
 
     let elements_height = ui.available_height() / 3.0;
     let elements_size = egui::vec2(0.0, elements_height);
