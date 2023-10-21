@@ -94,13 +94,15 @@ impl ThermalApp {
     fn continuuos_read(args_rx: Receiver<Opt>, ctx: egui::Context, tx: Sender<ImageRead>) -> ! {
         let mut args: Option<Opt> = Some(Opt::default());
         loop {
+            let temp_grid = mlx::read_temperatures();
+
             let r = args_rx.try_recv();
             if r.is_ok() {
                 args.replace(r.unwrap());
             }
 
-            let img = mlx::take_image(args.as_ref().unwrap());
-            tx.send(img).unwrap();
+            let color_grid = mlx::mlx_image::color_image(&args.as_ref().unwrap().color_type, &temp_grid);
+            tx.send(color_grid).unwrap();
             ctx.request_repaint();
         }
     }

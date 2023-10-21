@@ -43,7 +43,7 @@ pub fn get_scale(color_type: ColorTypes) -> [u8; GRADIENT_COUNT * 3] {
     return mlx_image::color_gradient(color_type);
 }
 
-fn read_temperatures() -> TemperatureRead {
+pub fn read_temperatures() -> TemperatureRead {
     let image_raw = read_raw_image();
     let image_eval = bsp_mlx::evaluate_image(image_raw);
 
