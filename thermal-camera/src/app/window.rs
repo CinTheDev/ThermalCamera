@@ -112,7 +112,7 @@ impl ThermalApp {
 
         let last_read = self.last_read.as_ref().unwrap();
 
-        let color_grid = mlx::mlx_image::color_image(self.options.color_type, last_read.temperature_read);
+        let color_grid = mlx::mlx_image::color_image(&self.options.color_type, &last_read.temperature_read);
     }
 
     fn update_options(&mut self) {

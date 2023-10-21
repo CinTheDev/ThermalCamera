@@ -81,7 +81,7 @@ fn rgb_hue_function(temp: f32, min_temp: f32, max_temp :f32) -> [u8; 3] {
     return [r_byte, g_byte, b_byte];
 }
 
-pub fn color_image(color_type: ColorTypes, temperatures: TemperatureRead) -> ImageRead {
+pub fn color_image(color_type: &ColorTypes, temperatures: &TemperatureRead) -> ImageRead {
     let mut res_pixels: [u8; PIXEL_COUNT * 3] = [0x00; PIXEL_COUNT * 3];
     let min_temp = temperatures.min_temp;
     let max_temp = temperatures.max_temp;
@@ -101,9 +101,11 @@ pub fn color_image(color_type: ColorTypes, temperatures: TemperatureRead) -> Ima
 
     return ImageRead {
         pixels: res_pixels,
-        temperature_grid: temperatures.temperature_grid,
-        min_temp,
-        max_temp,
+        temperature_read: TemperatureRead {
+            temperature_grid: temperatures.temperature_grid,
+            min_temp,
+            max_temp,
+        },
     }
 }
 
