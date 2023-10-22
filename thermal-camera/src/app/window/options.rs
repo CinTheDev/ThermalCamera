@@ -117,4 +117,7 @@ fn on_btn_coloring(app: &mut ThermalApp, ctx: &egui::Context, color_type: mlx::C
 fn on_btn_speed(app: &mut ThermalApp, framerate: u8) {
     app.options.framerate = framerate;
     mlx::set_framerate(framerate);
+    
+    app.show_options = false;
+    app.update_options();
 }
