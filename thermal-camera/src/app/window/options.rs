@@ -30,10 +30,6 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
         );
 
         // Color options
-        const OPTIONS_COLORING_COLUMNS: u32 = 4;
-        let options_coloring_width = ui.available_size_before_wrap().x / OPTIONS_COLORING_COLUMNS as f32;
-        let options_coloring_size = egui::vec2(options_coloring_width, elements_height);
-        
         ui.horizontal(|ui| {
             ui.add_sized(
                 element_standard_size,
