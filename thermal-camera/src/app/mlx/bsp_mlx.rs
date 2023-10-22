@@ -1,4 +1,6 @@
 use rppal::i2c::I2c;
+use std::sync::Mutex;
+use lazy_static::lazy_static;
 
 mod mlx_eeprom;
 
@@ -6,11 +8,17 @@ use super::PIXEL_COUNT;
 
 const CAM_ADDR: u8 = 0x33;
 
+lazy_static! {
+    static ref I2C_MUTEX: Mutex<u32> = Mutex::new(0);
+}
+
 pub fn init() {
     mlx_eeprom::restore();
 }
 
 pub fn write(address: u16, data: u16) {
+    let _i2c_lock = I2C_MUTEX.lock().unwrap();
+
     let mut i2c = I2c::new().unwrap();
     i2c.set_slave_address(CAM_ADDR as u16).unwrap();
 
@@ -22,6 +30,8 @@ pub fn write(address: u16, data: u16) {
 }
 
 pub fn read(address: u16, read_buffer: &mut [u8]) {
+    let _i2c_lock = I2C_MUTEX.lock().unwrap();
+
     let mut i2c = I2c::new().unwrap();
     i2c.set_slave_address(CAM_ADDR as u16).unwrap();
 
