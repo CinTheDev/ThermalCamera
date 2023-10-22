@@ -12,12 +12,15 @@ pub fn show(app: &mut ThermalApp, ui: &mut egui::Ui) {
             egui::Button::new("Freeze image")
         );
 
-        ui.set_enabled(app.usb_detected);
-        let button_save = ui.add_sized(
-            size_buttons,
-            egui::Button::new("Save image")
-        );
-        ui.set_enabled(true);
+        let button_save = ui.add_enabled_ui(
+            app.usb_detected,
+            |ui| {
+                ui.add_sized(
+                    size_buttons,
+                    egui::Button::new("Save image")
+                );
+            }
+        ).response;
 
         let button_options = ui.add_sized(
             size_buttons,
