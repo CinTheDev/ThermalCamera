@@ -26,7 +26,7 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
         // Close menu button
         let btn_close = ui.add_sized(
             element_standard_size,
-            egui::Button::new("Close")//.min_size(element_standard_size)
+            egui::Button::new("Close")
         );
 
         if btn_close.clicked() {
@@ -43,15 +43,15 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
             ui.columns(3, |col| {
                 let btn_coloring_gray = col[0].add_sized(
                     element_standard_size,
-                    egui::Button::new("Grayscale")//.min_size(options_coloring_size)
+                    egui::Button::new("Grayscale")
                 );
                 let btn_coloring_cheap = col[1].add_sized(
                     element_standard_size,
-                    egui::Button::new("Cheap")//.min_size(options_coloring_size)
+                    egui::Button::new("Cheap")
                 );
                 let btn_coloring_hue = col[2].add_sized(
                     element_standard_size,
-                    egui::Button::new("Hue")//.min_size(options_coloring_size)
+                    egui::Button::new("Hue")
                 );
     
                 if btn_coloring_gray.clicked() {
