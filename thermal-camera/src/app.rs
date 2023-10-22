@@ -54,6 +54,9 @@ pub struct Opt {
     #[structopt(default_value = "hue")]
     color_type: ColorTypes,
 
+    #[structopt(default_value = "2")]
+    framerate: u8,
+
     #[structopt(short, long)]
     windowed: bool,
 }
@@ -63,6 +66,7 @@ impl Default for Opt {
         Self {
             filename: "out.png".to_string(),
             color_type: ColorTypes::Cheap,
+            framerate: 2,
             windowed: false,
         }
     }
