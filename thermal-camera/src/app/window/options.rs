@@ -18,7 +18,7 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
     let bg_painter = ui.painter();
     bg_painter.rect_filled(ui.max_rect().expand(10.0), 5.0, bg_color);
 
-    const ROWS: u32 = 2;
+    const ROWS: u32 = 3;
     let elements_height = ui.available_height() / ROWS as f32;
     let element_standard_size = egui::vec2(0.0, elements_height);
 
@@ -65,6 +65,39 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
                 }
             });
         });
+
+        // Speed options
+        ui.horizontal(|ui| {
+            ui.add_sized(
+                element_standard_size,
+                egui::Label::new("Framerate")
+            );
+
+            ui.columns(3, |col| {
+                let btn_speed_low = col[0].add_sized(
+                    element_standard_size,
+                    egui::Button::new("Low")
+                );
+                let btn_speed_medium = col[1].add_sized(
+                    element_standard_size,
+                    egui::Button::new("Medium")
+                );
+                let btn_speed_high = col[2].add_sized(
+                    element_standard_size,
+                    egui::Button::new("High")
+                );
+
+                if btn_speed_low.clicked() {
+                    on_btn_speed(app);
+                }
+                if btn_speed_medium.clicked() {
+                    on_btn_speed(app);
+                }
+                if btn_speed_high.clicked() {
+                    on_btn_speed(app);
+                }
+            });
+        });
     });
 }
 
@@ -78,4 +111,8 @@ fn on_btn_coloring(app: &mut ThermalApp, ctx: &egui::Context, color_type: mlx::C
     app.show_options = false;
     app.update_options();
     app.recolor_image(ctx);
+}
+
+fn on_btn_speed(app: &mut ThermalApp) {
+    // TODO: Implement this
 }
