@@ -22,44 +22,49 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
     let elements_height = ui.available_height() / ROWS as f32;
     let element_standard_size = egui::vec2(ui.available_width(), elements_height);
 
-    // Close menu button
-    let btn_close = ui.add(
-        egui::Button::new("Close").min_size(element_standard_size)
-    );
+    ui.vertical_centered_justified(|ui| {
+        // Close menu button
+        let btn_close = ui.add(
+            egui::Button::new("Close")//.min_size(element_standard_size)
+        );
 
-    // Color options
-    const OPTIONS_COLORING_COLUMNS: u32 = 3;
-    
-    ui.horizontal(|ui| {
-        ui.label("Coloring Algorithm");
-
-        let options_coloring_width = ui.available_width() / OPTIONS_COLORING_COLUMNS as f32;
+        // Color options
+        const OPTIONS_COLORING_COLUMNS: u32 = 4;
+        let options_coloring_width = ui.available_size_before_wrap().x / OPTIONS_COLORING_COLUMNS as f32;
         let options_coloring_size = egui::vec2(options_coloring_width, elements_height);
+        
+        ui.horizontal(|ui| {
+            ui.add(
+                egui::Label::new("Coloring Algorithm")
+            );
 
-        let btn_coloring_gray = ui.add(
-            egui::Button::new("Grayscale").min_size(options_coloring_size)
-        );
-        let btn_coloring_cheap = ui.add(
-            egui::Button::new("Cheap").min_size(options_coloring_size)
-        );
-        let btn_coloring_hue = ui.add(
-            egui::Button::new("Hue").min_size(options_coloring_size)
-        );
+            ui.columns(3, |col| {
+                let btn_coloring_gray = col[0].add(
+                    egui::Button::new("Grayscale")//.min_size(options_coloring_size)
+                );
+                let btn_coloring_cheap = col[1].add(
+                    egui::Button::new("Cheap")//.min_size(options_coloring_size)
+                );
+                let btn_coloring_hue = col[2].add(
+                    egui::Button::new("Hue")//.min_size(options_coloring_size)
+                );
+    
+                if btn_coloring_gray.clicked() {
+                    on_btn_coloring(app, col[0].ctx(), mlx::ColorTypes::Gray);
+                }
+                if btn_coloring_cheap.clicked() {
+                    on_btn_coloring(app, col[1].ctx(), mlx::ColorTypes::Cheap);
+                }
+                if btn_coloring_hue.clicked() {
+                    on_btn_coloring(app, col[2].ctx(), mlx::ColorTypes::Hue);
+                }
+            });
+        });
 
-        if btn_coloring_gray.clicked() {
-            on_btn_coloring(app, ui.ctx(), mlx::ColorTypes::Gray);
-        }
-        if btn_coloring_cheap.clicked() {
-            on_btn_coloring(app, ui.ctx(), mlx::ColorTypes::Cheap);
-        }
-        if btn_coloring_hue.clicked() {
-            on_btn_coloring(app, ui.ctx(), mlx::ColorTypes::Hue);
+        if btn_close.clicked() {
+            on_btn_close(app);
         }
     });
-
-    if btn_close.clicked() {
-        on_btn_close(app);
-    }
 }
 
 fn on_btn_close(app: &mut ThermalApp) {
