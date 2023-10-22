@@ -1,19 +1,27 @@
 use super::{egui, ThermalApp};
 
 pub fn show(app: &mut ThermalApp, ui: &mut egui::Ui) {
-    let height_buttons = app.window_size.y / 3.0;
+    const BUTTONS_COUNT: u32 = 3;
+    let spacing_y = ui.spacing().item_spacing.y;
+    let height_buttons = ui.available_height() / BUTTONS_COUNT as f32 - spacing_y;
     let size_buttons = egui::Vec2::new(0.0, height_buttons);
 
-    ui.with_layout(egui::Layout::top_down_justified(egui::Align::Center), |ui| {
-        let button_freeze = ui.add(
-            egui::Button::new("Freeze image").min_size(size_buttons)
+    ui.vertical_centered_justified(|ui| {
+        let button_freeze = ui.add_sized(
+            size_buttons,
+            egui::Button::new("Freeze image")
         );
-        let button_save = ui.add_enabled(
-            app.usb_detected,
-            egui::Button::new("Save image").min_size(size_buttons)
+
+        ui.set_enabled(app.usb_detected);
+        let button_save = ui.add_sized(
+            size_buttons,
+            egui::Button::new("Save image")
         );
-        let button_options = ui.add(
-            egui::Button::new("Options").min_size(size_buttons)
+        ui.set_enabled(true);
+
+        let button_options = ui.add_sized(
+            size_buttons,
+            egui::Button::new("Options")
         );
 
         if button_freeze.clicked() {
