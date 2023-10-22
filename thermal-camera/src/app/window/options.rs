@@ -19,7 +19,8 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
     bg_painter.rect_filled(ui.max_rect().expand(10.0), 5.0, bg_color);
 
     const ROWS: u32 = 3;
-    let elements_height = ui.available_height() / ROWS as f32;
+    let spacing_y = ui.spacing().item_spacing.y;
+    let elements_height = ui.available_height() / ROWS as f32 - spacing_y;
     let element_standard_size = egui::vec2(0.0, elements_height);
 
     ui.vertical_centered_justified(|ui| {
