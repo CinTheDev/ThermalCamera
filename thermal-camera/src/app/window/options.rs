@@ -89,13 +89,13 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
                 );
 
                 if btn_speed_low.clicked() {
-                    on_btn_speed(app);
+                    on_btn_speed(app, 2);
                 }
                 if btn_speed_medium.clicked() {
-                    on_btn_speed(app);
+                    on_btn_speed(app, 4);
                 }
                 if btn_speed_high.clicked() {
-                    on_btn_speed(app);
+                    on_btn_speed(app, 6);
                 }
             });
         });
@@ -114,6 +114,6 @@ fn on_btn_coloring(app: &mut ThermalApp, ctx: &egui::Context, color_type: mlx::C
     app.recolor_image(ctx);
 }
 
-fn on_btn_speed(app: &mut ThermalApp) {
-    // TODO: Implement this
+fn on_btn_speed(app: &mut ThermalApp, framerate: u8) {
+    mlx::set_framerate(framerate);
 }
