@@ -59,6 +59,14 @@ If the touchscreen axes are "inverted" in some way after reboot, you must edit `
 
 Now the touchscreen should behave properly.
 
+#### Increase Display framerate
+
+If the default framerate is too slow:
+
+- `sudo nano /boot/config.txt`
+- Look for `dtoverlay=waveshare35a` and append `:speed=41000000,fps=20` or other desired values
+- Save and restart
+
 ## Development setup
 
 On our working machine, we have to make sure we can cross compile the program and upload it to the raspi.
