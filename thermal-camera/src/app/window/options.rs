@@ -20,11 +20,12 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
 
     const ROWS: u32 = 2;
     let elements_height = ui.available_height() / ROWS as f32;
-    let element_standard_size = egui::vec2(ui.available_width(), elements_height);
+    let element_standard_size = egui::vec2(0.0, elements_height);
 
     ui.vertical_centered_justified(|ui| {
         // Close menu button
-        let btn_close = ui.add(
+        let btn_close = ui.add_sized(
+            element_standard_size,
             egui::Button::new("Close")//.min_size(element_standard_size)
         );
 
@@ -34,18 +35,22 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
         let options_coloring_size = egui::vec2(options_coloring_width, elements_height);
         
         ui.horizontal(|ui| {
-            ui.add(
+            ui.add_sized(
+                element_standard_size,
                 egui::Label::new("Coloring Algorithm")
             );
 
             ui.columns(3, |col| {
-                let btn_coloring_gray = col[0].add(
+                let btn_coloring_gray = col[0].add_sized(
+                    element_standard_size,
                     egui::Button::new("Grayscale")//.min_size(options_coloring_size)
                 );
-                let btn_coloring_cheap = col[1].add(
+                let btn_coloring_cheap = col[1].add_sized(
+                    element_standard_size,
                     egui::Button::new("Cheap")//.min_size(options_coloring_size)
                 );
-                let btn_coloring_hue = col[2].add(
+                let btn_coloring_hue = col[2].add_sized(
+                    element_standard_size,
                     egui::Button::new("Hue")//.min_size(options_coloring_size)
                 );
     
