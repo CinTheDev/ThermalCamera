@@ -29,6 +29,10 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
             egui::Button::new("Close")//.min_size(element_standard_size)
         );
 
+        if btn_close.clicked() {
+            on_btn_close(app);
+        }
+
         // Color options
         ui.horizontal(|ui| {
             ui.add_sized(
@@ -61,10 +65,6 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
                 }
             });
         });
-
-        if btn_close.clicked() {
-            on_btn_close(app);
-        }
     });
 }
 
