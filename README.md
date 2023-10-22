@@ -64,7 +64,7 @@ Now the touchscreen should behave properly.
 If the default framerate is too slow:
 
 - `sudo nano /boot/config.txt`
-- Look for `dtoverlay=waveshare35a` and append `:speed=41000000,fps=20` or other desired values
+- Look for `dtoverlay=waveshare35a` and append `:speed=20000000,fps=30` or other desired values
 - Save and restart
 
 ## Development setup
