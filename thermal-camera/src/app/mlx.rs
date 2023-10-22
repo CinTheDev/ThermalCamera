@@ -41,6 +41,16 @@ pub fn get_scale(color_type: ColorTypes) -> [u8; GRADIENT_COUNT * 3] {
     return mlx_image::color_gradient(color_type);
 }
 
+pub fn set_framerate(val: u8) {
+    let speed_val: u16 = val.min(7) as u16;
+
+    let mut ctrl_register_1 = bsp_mlx::read_value(0x800D);
+    ctrl_register_1 &= 0b111_1_11_000_111_1111;
+    ctrl_register_1 |= speed_val << 7;
+
+    bsp_mlx::write(0x800D, ctrl_register_1);
+}
+
 pub fn read_temperatures() -> TemperatureRead {
     let image_raw = read_raw_image();
     let image_eval = bsp_mlx::evaluate_image(image_raw);
