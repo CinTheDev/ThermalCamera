@@ -9,7 +9,7 @@ fi
 
 # Create user
 
-if ! "user" >/dev/null 2>&1; then
+if ! id "user" >/dev/null 2>&1; then
     echo "Creating user \"user\""
     sudo useradd user
     sudo passwd user
@@ -18,9 +18,7 @@ else
     echo "User \"user\" already exists"
 fi
 
-(
-    sudo su -l user
-
-    whoami
-    sudo whoami
-)
+# Sync files with new user
+sudo cp -r . /home/user/thermal-camera
+sudo chmod -R +x /home/user/
+sudo su -l user -c "cd thermal-camera && ./config.sh"
