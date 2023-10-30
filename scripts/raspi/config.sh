@@ -15,4 +15,4 @@ sudo apt full-upgrade
 
 echo "Installing X"
 
-sudo apt install xauth xorg openbox eog
+sudo apt install xauth xorg eog
