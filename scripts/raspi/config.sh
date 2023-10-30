@@ -6,3 +6,4 @@
 # TODO
 
 echo "Configuration yeah"
+source ~/.bashrc
