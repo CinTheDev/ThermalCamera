@@ -4,7 +4,9 @@
 
 DRIVERS_PATH='/opt/display-drivers'
 
-git clone https://github.com/waveshare/LCD-show.git "$DRIVERS_PATH"
+sudo git clone https://github.com/waveshare/LCD-show.git "$DRIVERS_PATH"
 
-chmod +x "$DRIVERS_PATH/LCD35-show"
-$DRIVERS_PATH/LCD35-show lite
+cd $DRIVERS_PATH
+
+sudo chmod +x ./LCD35-show
+sudo ./LCD35-show lite
