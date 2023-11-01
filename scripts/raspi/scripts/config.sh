@@ -7,4 +7,4 @@ sudo apt full-upgrade
 
 echo "Installing X"
 
-sudo apt install git xauth xorg eog
+sudo apt install git xorg eog

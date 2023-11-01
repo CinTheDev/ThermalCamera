@@ -10,3 +10,6 @@ cd $DRIVERS_PATH
 
 sudo chmod +x ./LCD35-show
 sudo ./LCD35-show lite
+
+# TODO: Somehow make the drivers not restart
+#       and configure display further
