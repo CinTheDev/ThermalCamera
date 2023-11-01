@@ -2,4 +2,4 @@
 
 # Run all scripts inside scripts/ in order
 
-./scripts/create_user.sh
+#./scripts/create_user.sh
