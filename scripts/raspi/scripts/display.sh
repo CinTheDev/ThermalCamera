@@ -9,12 +9,9 @@ sudo git clone https://github.com/waveshare/LCD-show.git "$DRIVERS_PATH"
 cd $DRIVERS_PATH
 
 # To prevent the display drivers from restarting the whole system
-sudo systemd-inhibit --why="The installation script is still running" sleep 1000 &
+sudo chmod 0 /sbin/reboot
 
 sudo chmod +x ./LCD35-show
 ./LCD35-show lite
 
-kill $!
-
-# TODO: Somehow make the drivers not restart
-#       and configure display further
+sudo chmod 0755 /sbin/reboot
