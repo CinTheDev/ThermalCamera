@@ -10,6 +10,9 @@ fi
 
 # TODO: Implement all scripts
 
+# Make all scripts executable
+chmod -R +x ./scripts
+
 ./scripts/create_user.sh
 ./scripts/config.sh
 ./scripts/display.sh
