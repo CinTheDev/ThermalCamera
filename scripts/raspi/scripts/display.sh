@@ -16,4 +16,4 @@ sudo chmod +x ./LCD35-show
 
 sudo chmod 0755 /sbin/reboot
 
-# TODO: Configure display further
+sudo cp ./files/99-calibration.conf /usr/share/X11/xorg.conf.d/99-calibration.conf
