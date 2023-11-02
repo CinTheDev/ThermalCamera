@@ -1,12 +1,14 @@
 #!/bin/bash
 
+USER_NAME="thermal-camera"
+
 # Create user
-if ! id "user" >/dev/null 2>&1; then
-    echo "Creating user \"user\""
-    sudo useradd user
-    sudo passwd user
-    sudo usermod -aG sudo user
-    sudo mkdir /home/user
+if ! id "$USER_NAME" >/dev/null 2>&1; then
+    echo "Creating user \"$USER_NAME\""
+    sudo useradd $USER_NAME
+    sudo passwd $USER_NAME
+    #sudo usermod -aG sudo user
+    #sudo mkdir /home/user
 else
-    echo "User \"user\" already exists"
+    echo "User \"$USER_NAME\" already exists"
 fi
