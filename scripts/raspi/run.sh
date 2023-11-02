@@ -19,3 +19,5 @@ chmod -R +x ./scripts
 # [Copy important files to where they belong]
 # [Enable and config I2C]
 # [Systemctl]
+
+sudo reboot
