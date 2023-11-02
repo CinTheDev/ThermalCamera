@@ -17,7 +17,7 @@ chmod -R +x ./scripts
 ./scripts/config.sh
 ./scripts/display.sh
 # [Copy important files to where they belong]
-# [Enable and config I2C]
+./scripts/enable_i2c.sh
 # [Systemctl]
 
 sudo reboot
