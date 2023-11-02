@@ -19,8 +19,8 @@ pub fn init() {
 pub fn write(address: u16, data: u16) {
     let _i2c_lock = I2C_MUTEX.lock().unwrap();
 
-    let mut i2c = I2c::new().unwrap();
-    i2c.set_slave_address(CAM_ADDR as u16).unwrap();
+    //let mut i2c = I2c::new().unwrap();
+    //i2c.set_slave_address(CAM_ADDR as u16).unwrap();
 
     let mut buffer: [u8; 4] = [0x00; 4];
     buffer[0..2].copy_from_slice(&address.to_be_bytes());
@@ -32,8 +32,8 @@ pub fn write(address: u16, data: u16) {
 pub fn read(address: u16, read_buffer: &mut [u8]) {
     let _i2c_lock = I2C_MUTEX.lock().unwrap();
 
-    let mut i2c = I2c::new().unwrap();
-    i2c.set_slave_address(CAM_ADDR as u16).unwrap();
+    //let mut i2c = I2c::new().unwrap();
+    //i2c.set_slave_address(CAM_ADDR as u16).unwrap();
 
     let mut write_buffer: [u8; 2] = [0x00; 2];
     write_buffer.copy_from_slice(&address.to_be_bytes());

@@ -4,7 +4,8 @@ After=multi-user.target
 
 [Service]
 Type=simple
-ExecStart=/opt/thermal-camera/thermal-camera
+User=thermal-camera
+ExecStart=/opt/thermal-camera/thermal-camera -w
 
 [Install]
 WantedBy=multi-user.target
