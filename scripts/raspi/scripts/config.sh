@@ -7,7 +7,8 @@ sudo apt full-upgrade
 
 echo "Installing X"
 
-sudo apt install git xorg lightdm eog
+sudo apt install git xorg xserver-xorg-video-fbturbo lightdm eog
 
-# NOTE: In order to user startx, I had to:
-# sudo mv /usr/share/X11/xorg.conf.d/99-fbturbo.conf ~
+sudo raspi-config nonint do_boot_behaviour B4
+
+# Configure fbturbo driver to use fb1
