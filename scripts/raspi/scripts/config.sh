@@ -10,3 +10,7 @@ echo "Installing X"
 sudo apt -y install git xorg xserver-xorg-video-fbturbo lightdm ratpoison
 
 sudo raspi-config nonint do_boot_behaviour B4
+
+# Move thermal-camera binary
+sudo mkdir /opt/thermal-camera
+sudo mv ./files/thermal-camera /opt/thermal-camera/thermal-camera
