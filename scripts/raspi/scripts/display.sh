@@ -20,4 +20,4 @@ sudo chmod 0755 /sbin/reboot
 sudo cp ./files/99-calibration.conf /usr/share/X11/xorg.conf.d/99-calibration.conf
 
 # Increase framerate
-sed -i "s/dtoverlay=waveshare35a/dtoverlay=waveshare35a:speed=20000000,fps=30/g" /boot/config.txt
+sudo sed -i "s/dtoverlay=waveshare35a/dtoverlay=waveshare35a:speed=20000000,fps=30/g" /boot/config.txt
