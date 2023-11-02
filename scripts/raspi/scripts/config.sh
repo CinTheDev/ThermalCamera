@@ -16,3 +16,5 @@ sudo mkdir /opt/thermal-camera
 sudo mv ./files/thermal-camera /opt/thermal-camera/thermal-camera
 
 # Configure systemctl service
+sudo cp ./files/thermal-camera.service /etc/systemd/system/thermal-camera.service
+sudo systemctl enable thermal-camera
