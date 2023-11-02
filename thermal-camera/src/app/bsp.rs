@@ -3,8 +3,9 @@ use std::fs;
 use chrono;
 
 pub fn check_usb() -> bool {
-    let mut paths = fs::read_dir("/media/thermal-camera").unwrap().peekable();
-    return paths.peek().is_some();
+    //let mut paths = fs::read_dir("/media/thermal-camera").unwrap().peekable();
+    //return paths.peek().is_some();
+    return false;
 }
 
 pub fn get_usb_path(filetype: String) -> String {
