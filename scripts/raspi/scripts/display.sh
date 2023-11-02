@@ -15,3 +15,5 @@ sudo chmod +x ./LCD35-show
 ./LCD35-show lite
 
 sudo chmod 0755 /sbin/reboot
+
+# TODO: Configure display further

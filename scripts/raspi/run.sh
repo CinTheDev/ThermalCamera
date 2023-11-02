@@ -10,9 +10,9 @@ fi
 
 # TODO: Implement all scripts
 
-# [Create user]
-# [Install dependencies via apt]
-# [Display]
+./scripts/create_user.sh
+./scripts/config.sh
+./scripts/display.sh
 # [Copy important files to where they belong]
 # [Enable and config I2C]
 # [Systemctl]
