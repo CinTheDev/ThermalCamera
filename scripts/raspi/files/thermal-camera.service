@@ -1,0 +1,10 @@
+[Unit]
+Description=Executes the thermal-camera binary
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/opt/thermal-camera/thermal-camera
+
+[Install]
+WantedBy=multi-user.target
