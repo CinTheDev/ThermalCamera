@@ -8,6 +8,7 @@ if ! id "$USER_NAME" >/dev/null 2>&1; then
     sudo useradd $USER_NAME
     sudo passwd $USER_NAME
     sudo mkdir "/home/$USER_NAME"
+    sudo chmod a+rw "/home/$USER_NAME"
 else
     echo "User \"$USER_NAME\" already exists"
 fi
