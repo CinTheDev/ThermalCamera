@@ -18,7 +18,6 @@ sudo git clone https://github.com/waveshare/LCD-show.git "$DRIVERS_PATH"
 )
 
 # Calibration
-#sudo cp ./files/99-calibration.conf /usr/share/X11/xorg.conf.d/99-calibration.conf
 sudo cp ./files/40-libinput.conf /usr/share/X11/xorg.conf.d/40-libinput.conf
 
 # Increase framerate
