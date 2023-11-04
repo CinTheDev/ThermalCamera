@@ -1,4 +1,4 @@
 #!/bin/bash
 
 export DISPLAY=:0
-/opt/thermal-camera/thermal-camera -w
+/opt/thermal-camera/bin/thermal-camera -w
