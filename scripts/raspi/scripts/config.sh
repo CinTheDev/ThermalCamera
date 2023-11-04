@@ -11,10 +11,13 @@ sudo apt -y install git xorg xserver-xorg-video-fbturbo lightdm ratpoison
 
 sudo raspi-config nonint do_boot_behaviour B4
 
-# Move thermal-camera binary
+# Move thermal-camera binary and run script
 sudo mkdir /opt/thermal-camera
-sudo cp ./files/thermal-camera /opt/thermal-camera/thermal-camera
+sudo mv ./files/thermal-camera /opt/thermal-camera/thermal-camera
+sudo cp ./files/run_thermal_camera.sh /opt/thermal-camera/run_thermal_camera.sh
+
 sudo chmod a+x /opt/thermal-camera/thermal-camera
+sudo chmod a+x /opt/thermal-camera/run_thermal_camera.sh
 
 # Configure systemctl service
 sudo cp ./files/thermal-camera.service /etc/systemd/system/thermal-camera.service

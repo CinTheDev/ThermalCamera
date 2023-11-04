@@ -5,7 +5,7 @@ After=multi-user.target
 [Service]
 Type=simple
 User=thermal-camera
-ExecStart=/opt/thermal-camera/thermal-camera -w
+ExecStart=/bin/bash /opt/thermal-camera/run_thermal_camera.sh
 
 [Install]
 WantedBy=multi-user.target
