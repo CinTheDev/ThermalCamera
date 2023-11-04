@@ -9,7 +9,10 @@ echo "Installing X"
 
 sudo apt -y install git xorg xserver-xorg-video-fbturbo lightdm ratpoison
 
+# Login automatically as thermal-camera user
 sudo raspi-config nonint do_boot_behaviour B4
+
+sudo sed -i "s/autologin-user=pi/autologin-user=thermal-camera/g" /etc/lightdm/lightdm.conf
 
 # Move thermal-camera binary and run script
 sudo mkdir /opt/thermal-camera
