@@ -18,7 +18,8 @@ sudo git clone https://github.com/waveshare/LCD-show.git "$DRIVERS_PATH"
 )
 
 # Calibration
-sudo cp ./files/99-calibration.conf /usr/share/X11/xorg.conf.d/99-calibration.conf
+#sudo cp ./files/99-calibration.conf /usr/share/X11/xorg.conf.d/99-calibration.conf
+sudo cp ./files/40-libinput.conf /usr/share/X11/xorg.conf.d/40-libinput.conf
 
 # Increase framerate
 sudo sed -i "s/dtoverlay=waveshare35a/dtoverlay=waveshare35a:speed=20000000,fps=30/g" /boot/config.txt
