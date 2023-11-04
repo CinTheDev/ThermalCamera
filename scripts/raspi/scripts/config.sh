@@ -14,6 +14,7 @@ sudo raspi-config nonint do_boot_behaviour B4
 # Move thermal-camera binary
 sudo mkdir /opt/thermal-camera
 sudo cp ./files/thermal-camera /opt/thermal-camera/thermal-camera
+sudo chmod a+x /opt/thermal-camera/thermal-camera
 
 # Configure systemctl service
 sudo cp ./files/thermal-camera.service /etc/systemd/system/thermal-camera.service
