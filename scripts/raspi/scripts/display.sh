@@ -12,7 +12,7 @@ sudo git clone https://github.com/waveshare/LCD-show.git "$DRIVERS_PATH"
     sudo chmod 0 /sbin/reboot
 
     sudo chmod +x ./LCD35-show
-    ./LCD35-show lite
+    sudo ./LCD35-show lite
 
     sudo chmod 0755 /sbin/reboot
 )
