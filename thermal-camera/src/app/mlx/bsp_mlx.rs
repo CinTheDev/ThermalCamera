@@ -19,26 +19,40 @@ pub fn init() {
 pub fn write(address: u16, data: u16) {
     let _i2c_lock = I2C_MUTEX.lock().unwrap();
 
-    //let mut i2c = I2c::new().unwrap();
-    //i2c.set_slave_address(CAM_ADDR as u16).unwrap();
+    let i2c_response = I2c::new();
+
+    if i2c_response.is_err() {
+        // TODO: Add error message
+        return;
+    }
+
+    let mut i2c = i2c_response.unwrap();
+    i2c.set_slave_address(CAM_ADDR as u16).unwrap();
 
     let mut buffer: [u8; 4] = [0x00; 4];
     buffer[0..2].copy_from_slice(&address.to_be_bytes());
     buffer[2..4].copy_from_slice(&data.to_be_bytes());
     
-    //i2c.write(&buffer).expect("I2C write failed.");
+    i2c.write(&buffer).expect("I2C write failed.");
 }
 
 pub fn read(address: u16, read_buffer: &mut [u8]) {
     let _i2c_lock = I2C_MUTEX.lock().unwrap();
 
-    //let mut i2c = I2c::new().unwrap();
-    //i2c.set_slave_address(CAM_ADDR as u16).unwrap();
+    let i2c_response = I2c::new();
+
+    if i2c_response.is_err() {
+        // TODO: Add error message
+        return;
+    }
+
+    let mut i2c = i2c_response.unwrap();
+    i2c.set_slave_address(CAM_ADDR as u16).unwrap();
 
     let mut write_buffer: [u8; 2] = [0x00; 2];
     write_buffer.copy_from_slice(&address.to_be_bytes());
 
-    //i2c.write_read(&write_buffer, read_buffer).expect("I2C read failed.");
+    i2c.write_read(&write_buffer, read_buffer).expect("I2C read failed.");
 }
 
 pub fn read_value(address: u16) -> u16 {
