@@ -12,6 +12,8 @@ sudo git clone https://github.com/waveshare/LCD-show.git "$DRIVERS_PATH"
     sudo chmod 0 /sbin/reboot
 
     sudo chmod +x ./LCD35-show
+    # For some reason, directly installing the lite variant leads to
+    # touch drivers not being installed, so this has to be called twice.
     sudo ./LCD35-show
     sudo ./LCD35-show lite
 
