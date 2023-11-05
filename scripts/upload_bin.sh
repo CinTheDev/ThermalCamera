@@ -12,10 +12,11 @@ if ! command -v rsync > /dev/null
 then
     echo -e "${PURPLE}It is recommended to use rsync for uploading files"
     echo -e "Run ${RED}sudo apt install rsync${PURPLE} for faster upload speeds.${NOCOL}"
-    scp target/armv7-unknown-linux-gnueabihf/debug/thermal-camera thermal-camera@raspberrypi:~/thermal-camera/thermal-camera
+    scp target/armv7-unknown-linux-gnueabihf/debug/thermal-camera pi@thermal-camera:~/thermal-camera
     exit
 fi
 
-ssh thermal-camera@raspberrypi "mkdir thermal-camera"
+#ssh thermal-camera@raspberrypi "mkdir thermal-camera"
 
-rsync -P target/armv7-unknown-linux-gnueabihf/debug/thermal-camera thermal-camera@raspberrypi:~/thermal-camera/thermal-camera
+rsync -P target/armv7-unknown-linux-gnueabihf/debug/thermal-camera pi@raspberrypi:~/thermal-camera
+ssh pi@thermal-camera 'sudo mv thermal-camera /opt/thermal-camera/bin/thermal-camera'
