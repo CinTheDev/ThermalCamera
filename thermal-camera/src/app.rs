@@ -17,13 +17,13 @@ pub fn run() {
         window::open_window(opt);
     }
     else {
-        let filename = opt.filename.as_str();
-        let width = mlx::PIXELS_WIDTH;
-        let height = mlx::PIXELS_HEIGHT;
+        let path = opt.filename.as_str();
+        let width = mlx::PIXELS_WIDTH as u32;
+        let height = mlx::PIXELS_HEIGHT as u32;
 
         let output = get_mlx_output(&opt);
 
-        bsp::write_rgb(filename, &output.pixels, width, height);
+        bsp::write_png(path, &output.pixels, width, height);
     }
 }
 

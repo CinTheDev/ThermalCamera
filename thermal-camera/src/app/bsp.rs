@@ -10,8 +10,8 @@ pub fn check_usb() -> bool {
     });
 }
 
-pub fn get_usb_path(filetype: String) -> String {
-    return format!("{}/capture/{}.{}", get_usb_dir(), get_time(), filetype);
+pub fn get_usb_path() -> String {
+    return format!("/mnt/usb/thermal-camera/{}.png", get_time());
 }
 
 fn get_time() -> String {
@@ -23,24 +23,7 @@ fn get_time() -> String {
     return res;
 }
 
-fn get_usb_dir() -> String {
-    // Simply return last directory
-    //let paths = fs::read_dir("/media/thermal-camera").unwrap();
-    //return paths.last().unwrap().unwrap().path().to_str().unwrap().to_string();
-    return "/mnt/usb".to_string();
-}
-
-pub fn write_rgb(path: &str, image: &[u8], width: usize, height: usize) {
-    let file_suffix = path.split('.').last().expect("Unrecognised file suffix");
-
-    match file_suffix.to_ascii_lowercase().as_str() {
-        "png" => write_png(path, image, width as u32, height as u32),
-
-        _ => panic!()
-    }
-}
-
-fn write_png(path: &str, image: &[u8], width: u32, height: u32) {
+pub fn write_png(file_path: &str, image: &[u8], width: u32, height: u32) {
     let mut img_png = RgbImage::new(width, height);
 
     for y in 0..height {
@@ -63,9 +46,19 @@ fn write_png(path: &str, image: &[u8], width: u32, height: u32) {
         return;
     }
 
-    let filename = path.split("/").last().unwrap();
-    let without_file = path.replace(filename, "");
+    fs::create_dir_all(get_path(&file_path.to_string())).unwrap();
+    img_png.save(file_path).unwrap();
+}
 
-    fs::create_dir_all(without_file).unwrap();
-    img_png.save(path).unwrap();
+fn get_path(file_path: &String) -> String {
+    let mut parts = file_path.split('/').rev();
+    parts.next();
+    
+    let mut res = "".to_string();
+
+    for p in parts {
+        res += p;
+    }
+
+    return res;
 }

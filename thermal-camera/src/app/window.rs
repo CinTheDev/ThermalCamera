@@ -140,13 +140,13 @@ impl ThermalApp {
 
         let raw_img = self.last_read.as_ref().unwrap().pixels;
 
-        let path = bsp::get_usb_path("png".to_string());
+        let path = bsp::get_usb_path();
 
-        bsp::write_rgb(
+        bsp::write_png(
             &path,
             &raw_img,
-            mlx::PIXELS_WIDTH,
-            mlx::PIXELS_HEIGHT,
+            mlx::PIXELS_WIDTH as u32,
+            mlx::PIXELS_HEIGHT as u32,
         );
     }
 
