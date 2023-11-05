@@ -1,5 +1,6 @@
 use image::{RgbImage, Rgb};
 use std::fs;
+use sys_mount;
 use chrono;
 
 pub fn check_usb() -> bool {
@@ -52,6 +53,14 @@ fn write_png(path: &str, image: &[u8], width: u32, height: u32) {
 
             img_png.put_pixel(x, y, Rgb([r, g, b]));
         }
+    }
+
+    let mount_result = sys_mount::Mount::builder()
+        .mount_autodrop("/dev/sda1", "/mnt/usb", sys_mount::UnmountFlags::DETACH);
+
+    if mount_result.is_err() {
+        println!("ERROR: Mount /dev/sda1 on /mnt/usb failed.\n");
+        return;
     }
 
     let filename = path.split("/").last().unwrap();
