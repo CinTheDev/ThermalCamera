@@ -4,4 +4,4 @@
 
 ./scripts/upload_bin.sh
 
-ssh thermal-camera@raspberrypi 'sudo systemctl restart thermal-camera'
+ssh pi@thermal-camera 'sudo systemctl restart thermal-camera'

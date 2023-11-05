@@ -4,4 +4,4 @@
 
 ./scripts/upload_bin.sh
 
-ssh -Y thermal-camera@raspberrypi 'sudo systemctl stop thermal-camera opt/thermal-camera/bin/thermal-camera -w'
+ssh -Y pi@thermal-camera 'sudo systemctl stop thermal-camera && sudo su thermal-camera -c "opt/thermal-camera/bin/thermal-camera -w"'

@@ -18,5 +18,5 @@ fi
 
 #ssh thermal-camera@raspberrypi "mkdir thermal-camera"
 
-rsync -P target/armv7-unknown-linux-gnueabihf/debug/thermal-camera pi@raspberrypi:~/thermal-camera
-ssh pi@thermal-camera 'sudo mv thermal-camera /opt/thermal-camera/bin/thermal-camera'
+rsync -P target/armv7-unknown-linux-gnueabihf/debug/thermal-camera pi@thermal-camera:~/thermal-camera
+ssh pi@thermal-camera 'sudo cp thermal-camera /opt/thermal-camera/bin/thermal-camera'
