@@ -38,11 +38,12 @@ pub fn write_png(file_path: &str, image: &[u8], width: u32, height: u32) {
         }
     }
 
+    // TODO: Fix mount
     let mount_result = sys_mount::Mount::builder()
         .mount_autodrop("/dev/sda1", "/mnt/usb", sys_mount::UnmountFlags::DETACH);
 
     if mount_result.is_err() {
-        println!("ERROR: Mount /dev/sda1 on /mnt/usb failed.\n");
+        println!("ERROR: Mount /dev/sda1 on /mnt/usb failed.\n{}", mount_result.err().unwrap());
         return;
     }
 
