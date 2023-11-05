@@ -3,9 +3,10 @@ use std::fs;
 use chrono;
 
 pub fn check_usb() -> bool {
-    //let mut paths = fs::read_dir("/media/thermal-camera").unwrap().peekable();
-    //return paths.peek().is_some();
-    return false;
+    let mut paths = fs::read_dir("/dev").unwrap();
+    return paths.any(|val| {
+        return val.as_ref().unwrap().file_name() == "sda1";
+    });
 }
 
 pub fn get_usb_path(filetype: String) -> String {
@@ -23,8 +24,9 @@ fn get_time() -> String {
 
 fn get_usb_dir() -> String {
     // Simply return last directory
-    let paths = fs::read_dir("/media/thermal-camera").unwrap();
-    return paths.last().unwrap().unwrap().path().to_str().unwrap().to_string();
+    //let paths = fs::read_dir("/media/thermal-camera").unwrap();
+    //return paths.last().unwrap().unwrap().path().to_str().unwrap().to_string();
+    return "/mnt/usb".to_string();
 }
 
 pub fn write_rgb(path: &str, image: &[u8], width: usize, height: usize) {
