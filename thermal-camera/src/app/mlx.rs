@@ -129,3 +129,22 @@ fn wait_for_data() {
     
     bsp_mlx::write(0x8000, status_reg);
 }
+
+impl Default for TemperatureRead {
+    fn default() -> Self {
+        TemperatureRead {
+            temperature_grid: [0.0; PIXEL_COUNT],
+            min_temp: 0.0,
+            max_temp: 0.0
+        }
+    }
+}
+
+impl Default for ImageRead {
+    fn default() -> Self {
+        ImageRead {
+            pixels: [0x00; PIXEL_COUNT * 3],
+            temperature_read: TemperatureRead::default()
+        }
+    }
+}

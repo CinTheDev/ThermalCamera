@@ -17,6 +17,7 @@ pub fn run() {
         window::open_window(opt);
     }
     else {
+        // TODO: Update this
         let path = opt.filename.as_str();
         let width = mlx::PIXELS_WIDTH as u32;
         let height = mlx::PIXELS_HEIGHT as u32;

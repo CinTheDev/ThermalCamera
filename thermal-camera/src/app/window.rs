@@ -138,7 +138,7 @@ impl ThermalApp {
         if self.picture.is_none() { return }
         if !bsp::check_usb() { return }
 
-        let raw_img = self.last_read.as_ref().unwrap().pixels;
+        let raw_img = self.last_read.as_ref().unwrap_or(&ImageRead::default()).pixels;
 
         let path = bsp::get_usb_path();
 
@@ -163,7 +163,7 @@ impl eframe::App for ThermalApp {
             self.window_size = ui.available_size();
 
             ui.horizontal_centered(|ui| {
-                display::show(self, ui, ctx);    
+                display::show(self, ui, ctx);
 
                 controls::show(self, ui);
             });

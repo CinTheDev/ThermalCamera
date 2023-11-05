@@ -15,7 +15,6 @@ then
     echo -e "${PURPLE}It is recommended to use rsync for uploading files"
     echo -e "Run ${RED}sudo apt install rsync${PURPLE} for faster upload speeds.${NOCOL}"
     scp target/armv7-unknown-linux-gnueabihf/debug/thermal-camera pi@thermal-camera:~/thermal-camera
-    exit
 else
     rsync -P target/armv7-unknown-linux-gnueabihf/debug/thermal-camera pi@thermal-camera:~/thermal-camera
 fi
