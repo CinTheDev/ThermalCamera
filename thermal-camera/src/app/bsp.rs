@@ -37,22 +37,16 @@ pub fn write_png(file_path: &str, image: &[u8], width: u32, height: u32) {
         }
     }
 
-    // TODO: Fix mount
-    //let mount_result = sys_mount::Mount::builder()
-    //    .mount_autodrop("/dev/sda1", "/mnt/usb", sys_mount::UnmountFlags::DETACH);
-
-    //if mount_result.is_err() {
-    //    println!("ERROR: Mount /dev/sda1 on /mnt/usb failed.\n{}", mount_result.err().unwrap());
-    //    return;
-    //}
-
+    println!("Path: {}\nFull string: {}", get_path(&file_path.to_string()), &file_path);
     fs::create_dir_all(get_path(&file_path.to_string())).unwrap();
     img_png.save(file_path).unwrap();
 }
 
 fn get_path(file_path: &String) -> String {
-    let mut parts = file_path.split('/').rev();
+    let mut parts = file_path.split_inclusive('/');
+
     parts.next();
+    parts.next_back();
     
     let mut res = "".to_string();
 
