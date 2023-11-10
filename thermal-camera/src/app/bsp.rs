@@ -37,7 +37,6 @@ pub fn write_png(file_path: &str, image: &[u8], width: u32, height: u32) {
         }
     }
 
-    println!("Path: {}\nFull string: {}", get_path(&file_path.to_string()), &file_path);
     fs::create_dir_all(get_path(&file_path.to_string())).unwrap();
     img_png.save(file_path).unwrap();
 }
