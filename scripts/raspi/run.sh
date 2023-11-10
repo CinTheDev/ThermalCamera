@@ -13,6 +13,7 @@ chmod -R +x ./scripts
 
 ./scripts/create_user.sh
 ./scripts/config.sh
+./scripts/automount.sh
 ./scripts/display.sh
 ./scripts/enable_i2c.sh
 
