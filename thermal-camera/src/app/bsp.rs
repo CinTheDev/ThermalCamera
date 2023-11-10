@@ -10,7 +10,7 @@ pub fn check_usb() -> bool {
 }
 
 pub fn get_usb_path() -> String {
-    return format!("/mnt/usb/thermal-camera/{}.png", get_time());
+    return format!("/media/usb0/thermal-camera/{}.png", get_time());
 }
 
 fn get_time() -> String {
@@ -46,8 +46,8 @@ pub fn write_png(file_path: &str, image: &[u8], width: u32, height: u32) {
     //    return;
     //}
 
-    //fs::create_dir_all(get_path(&file_path.to_string())).unwrap();
-    //img_png.save(file_path).unwrap();
+    fs::create_dir_all(get_path(&file_path.to_string())).unwrap();
+    img_png.save(file_path).unwrap();
 }
 
 fn get_path(file_path: &String) -> String {
