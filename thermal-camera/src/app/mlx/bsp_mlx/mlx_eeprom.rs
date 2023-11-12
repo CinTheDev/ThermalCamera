@@ -94,7 +94,7 @@ fn get_eeprom_val(address: u16) -> u16 {
 // ----------------------------
 
 pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> Result<[f32; PIXEL_COUNT], String> {
-    if EEPROM_VARS.is_none() { return Err("Eeprom Variables not restored.".to_string()); }
+    if EEPROM_VARS.is_err() { return Err("Eeprom Variables not restored.".to_string()); }
     let eeprom_vars = EEPROM_VARS.as_ref().unwrap();
 
     const EMISSIVITY: f32 = 1.0;
@@ -142,7 +142,13 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> Result<[f32; PIXEL_COUNT], Stri
 
 pub fn restore() -> Result<EepromVars, String> {
     // Read eeprom data
-    read_eeprom()?;
+    read_eeprom();
+
+    unsafe {
+        if EEPROM_RAW.is_err() {
+            return Err(EEPROM_RAW.as_ref().unwrap_err().to_owned());
+        }
+    }
 
     // VDD
     let K_Vdd = restore_K_Vdd();
@@ -206,51 +212,6 @@ pub fn restore() -> Result<EepromVars, String> {
 
     // Bad pixels
     let bad_pixels = restore_bad_pixels();
-
-    EEPROM_VARS = Some(EepromVars {
-        K_Vdd,
-        VDD_25,
-
-        K_V_PTAT,
-        K_T_PTAT,
-        V_PTAT_25,
-        Alpha_PTAT,
-
-        pix_os_ref,
-
-        a,
-
-        K_V,
-
-        K_Ta,
-
-        GAIN,
-
-        Ks_Ta,
-
-        CT3,
-        CT4,
-
-        Ks_To,
-
-        Alpha_corr,
-
-        a_CP,
-
-        Off_CP,
-
-        K_V_CP,
-
-        K_Ta_CP,
-
-        TGC,
-
-        Resolution,
-
-        pattern,
-
-        bad_pixels,
-    });
 
     return Ok(EepromVars {
         K_Vdd,
