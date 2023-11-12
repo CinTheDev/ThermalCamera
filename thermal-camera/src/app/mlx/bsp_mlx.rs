@@ -18,7 +18,7 @@ pub fn write(address: u16, data: u16) -> Result<(), String> {
     let i2c_p_response = I2c::new();
 
     if i2c_p_response.is_err() {
-        return Err("I2C Peripheral failure".to_string());
+        return Err(format!("I2C Peripheral failure\n{}", i2c_p_response.unwrap_err()));
     }
 
     let mut i2c = i2c_p_response.unwrap();
@@ -30,7 +30,7 @@ pub fn write(address: u16, data: u16) -> Result<(), String> {
     
     let i2c_write_response = i2c.write(&buffer);
     if i2c_write_response.is_err() {
-        return Err("I2C Write failure".to_string());
+        return Err(format!("I2C Write failure\n{}", i2c_write_response.unwrap_err()));
     }
 
     return Ok(());
@@ -42,7 +42,7 @@ pub fn read(address: u16, read_buffer: &mut [u8]) -> Result<(), String> {
     let i2c_p_response = I2c::new();
 
     if i2c_p_response.is_err() {
-        return Err("I2C Peripheral failure".to_string());
+        return Err(format!("I2C Peripheral failure\n{}", i2c_p_response.unwrap_err()));
     }
 
     let mut i2c = i2c_p_response.unwrap();
@@ -53,7 +53,7 @@ pub fn read(address: u16, read_buffer: &mut [u8]) -> Result<(), String> {
 
     let i2c_read_response = i2c.write_read(&write_buffer, read_buffer);
     if i2c_read_response.is_err() {
-        return Err("I2C Read failure".to_string());
+        return Err(format!("I2C Read failure\n{}", i2c_read_response.unwrap_err()));
     }
 
     return Ok(());
