@@ -29,7 +29,7 @@ pub fn run() {
 }
 
 fn get_mlx_output(args: &Opt) -> ImageRead {
-    return mlx::take_image(&args.color_type);
+    return mlx::take_image(&args.color_type).unwrap();
 }
 
 impl FromStr for ColorTypes {
