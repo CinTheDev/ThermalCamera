@@ -23,6 +23,7 @@ pub struct TemperatureRead {
     pub max_temp: f32,
 }
 
+#[derive(Debug)]
 pub struct ImageRead {
     pub pixels: [u8; PIXEL_COUNT * 3],
     pub temperature_read: TemperatureRead,

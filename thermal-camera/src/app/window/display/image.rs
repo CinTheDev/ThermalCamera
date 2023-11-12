@@ -9,6 +9,26 @@ pub fn show_image(app: &mut ThermalApp, ui: &mut egui::Ui) {
     let size = egui::Vec2::new(width, height);
 
     let response = ui.image(texture, size);
+
+    if app.last_read.is_err() {
+        // Draw error message
+        let txt_col = egui::Color32::RED;
+        let bg_col = egui::Color32::BLACK;
+        let error_msg = format!("Error while reading picture: {}", app.last_read.as_ref().unwrap_err());
+        let pos = app.window_size / 2.0;
+
+        let painter = ui.painter();
+        let txt_galley = painter.layout_no_wrap(error_msg, egui::FontId::default(), txt_col);
+        let bg_rect = txt_galley.rect
+            .translate(pos)
+            .expand(5.0);
+
+        painter.rect_filled(bg_rect, egui::Rounding::none(), bg_col);
+        painter.galley(pos.to_pos2(), txt_galley);
+
+        return;
+    }
+
     check_clicked(app, ui, response);
 }
 
