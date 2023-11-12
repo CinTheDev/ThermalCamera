@@ -102,8 +102,7 @@ impl ThermalApp {
             }
 
             if temp_grid.is_err() {
-                tx.send(Err(temp_grid.unwrap_err()));
-                ctx.request_repaint();
+                tx.send(Err(temp_grid.unwrap_err())).unwrap();
                 continue;
             }
 

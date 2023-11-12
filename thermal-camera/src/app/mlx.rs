@@ -45,7 +45,7 @@ pub fn get_scale(color_type: ColorTypes) -> [u8; GRADIENT_COUNT * 3] {
 pub fn set_framerate(val: u8) {
     let speed_val: u16 = val.min(7) as u16;
 
-    let mut mlx_response = bsp_mlx::read_value(0x800D);
+    let mlx_response = bsp_mlx::read_value(0x800D);
 
     if mlx_response.is_err() { return; }
     let mut ctrl_register_1 = mlx_response.unwrap();
@@ -53,7 +53,9 @@ pub fn set_framerate(val: u8) {
     ctrl_register_1 &= 0b111_1_11_000_111_1111;
     ctrl_register_1 |= speed_val << 7;
 
-    bsp_mlx::write(0x800D, ctrl_register_1);
+    bsp_mlx::write(0x800D, ctrl_register_1).unwrap_or_else(|err| {
+        println!("Framerate update failed: {}", err);
+    });
 }
 
 pub fn read_temperatures() -> Result<TemperatureRead, String> {
@@ -118,7 +120,7 @@ fn read_raw_image() -> Result<[u16; PIXEL_COUNT], String> {
 }
 
 fn wait_for_data() {
-    let mut status_reg: u16 = 0x00;
+    let mut status_reg: u16;
     loop {
         let mlx_response = bsp_mlx::read_value(0x8000);
 
@@ -134,7 +136,9 @@ fn wait_for_data() {
     //let mut status_reg = bsp_mlx::read_value(0x8000);
     status_reg &= !0x8; // Clear that bit
     
-    bsp_mlx::write(0x8000, status_reg);
+    bsp_mlx::write(0x8000, status_reg).unwrap_or_else(|err| {
+        println!("Couldn't wait for data: {}", err);
+    });
 }
 
 impl Default for TemperatureRead {
