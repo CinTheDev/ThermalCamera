@@ -63,11 +63,15 @@ pub fn read(address: u16, read_buffer: &mut [u8]) -> Result<(), String> {
     return Ok(());
 }
 
-pub fn read_value(address: u16) -> u16 {
+pub fn read_value(address: u16) -> Result<u16, String> {
     let mut read_buffer: [u8; 2] = [0x00; 2];
-    read(address, &mut read_buffer);
+    let read_response = read(address, &mut read_buffer);
 
-    return u16::from_be_bytes(read_buffer);
+    if read_response.is_err() {
+        return Err(read_response.unwrap_err());
+    }
+
+    return Ok(u16::from_be_bytes(read_buffer));
 }
 
 pub fn evaluate_image(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
