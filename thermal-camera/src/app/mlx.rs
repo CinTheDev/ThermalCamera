@@ -115,8 +115,12 @@ fn read_raw_image() -> [u16; PIXEL_COUNT] {
 }
 
 fn wait_for_data() {
+    let mut status_reg: u16 = 0x00;
     loop {
-        let status_reg = bsp_mlx::read_value(0x8000);
+        let mlx_response = bsp_mlx::read_value(0x8000);
+
+        if mlx_response.is_err() { return; }
+        status_reg = mlx_response.unwrap();
 
         // If that bit is a 1, it's bigger than 0
         let new_data = status_reg & 0x8 > 0;
@@ -124,7 +128,7 @@ fn wait_for_data() {
         if new_data { break }
     }
 
-    let mut status_reg = bsp_mlx::read_value(0x8000);
+    //let mut status_reg = bsp_mlx::read_value(0x8000);
     status_reg &= !0x8; // Clear that bit
     
     bsp_mlx::write(0x8000, status_reg);
