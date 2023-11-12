@@ -59,6 +59,7 @@ lazy_static! {
 
 static mut EEPROM_RAW: [u16; EEPROM_SIZE] = [0x00; EEPROM_SIZE];
 
+// TODO: Do Error checking here
 fn read_eeprom() {
     let mut d: [u8; EEPROM_SIZE * 2] = [0x00; EEPROM_SIZE * 2];
     super::read(0x2410, &mut d);

@@ -31,10 +31,10 @@ pub fn init() {
     bsp_mlx::init();
 }
 
-pub fn take_image(color_type: &ColorTypes) -> ImageRead {
-    let temperature_grid = read_temperatures();
+pub fn take_image(color_type: &ColorTypes) -> Result<ImageRead, String> {
+    let temperature_grid = read_temperatures()?;
 
-    return mlx_image::color_image(&color_type, &temperature_grid);
+    return Ok(mlx_image::color_image(&color_type, &temperature_grid));
 }
 
 pub fn get_scale(color_type: ColorTypes) -> [u8; GRADIENT_COUNT * 3] {
