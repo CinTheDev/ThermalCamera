@@ -104,6 +104,7 @@ impl ThermalApp {
             if temp_grid.is_err() {
                 tx.send(Err(temp_grid.unwrap_err()));
                 ctx.request_repaint();
+                continue;
             }
 
             let color_grid = mlx::mlx_image::color_image(&args.as_ref().unwrap().color_type, &temp_grid.unwrap());
