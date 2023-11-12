@@ -74,6 +74,6 @@ pub fn read_value(address: u16) -> Result<u16, String> {
     return Ok(u16::from_be_bytes(read_buffer));
 }
 
-pub fn evaluate_image(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
+pub fn evaluate_image(pix_data: [u16; PIXEL_COUNT]) -> Result<[f32; PIXEL_COUNT], String> {
     return mlx_eeprom::evaluate(pix_data);
 }
