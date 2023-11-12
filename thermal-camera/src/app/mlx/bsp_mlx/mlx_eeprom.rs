@@ -57,8 +57,6 @@ lazy_static!(
     static ref EEPROM_VARS: Result<EepromVars, String> = restore();
 );
 
-//static mut EEPROM_RAW: Result<[u16; EEPROM_SIZE], String> = Err("EEPROM values haven't been read".to_string());
-
 fn read_eeprom() -> Result<[u16; EEPROM_SIZE], String> {
     let mut d: [u8; EEPROM_SIZE * 2] = [0x00; EEPROM_SIZE * 2];
     super::read(0x2410, &mut d)?;
@@ -132,76 +130,70 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> Result<[f32; PIXEL_COUNT], Stri
 
 pub fn restore() -> Result<EepromVars, String> {
     // Read eeprom data
-    read_eeprom();
-
-    unsafe {
-        if EEPROM_RAW.is_err() {
-            return Err(EEPROM_RAW.as_ref().unwrap_err().to_owned());
-        }
-    }
+    let eeprom_vars = read_eeprom()?;
 
     // VDD
-    let K_Vdd = restore_K_Vdd();
-    let VDD_25 = restore_VDD_25();
+    let K_Vdd = restore_K_Vdd(eeprom_vars);
+    let VDD_25 = restore_VDD_25(eeprom_vars);
 
     // Ta
     let mut K_V_PTAT: f32 = 0.0;
     let mut K_T_PTAT: f32 = 0.0;
     let mut V_PTAT_25: i32 = 0;
     let mut Alpha_PTAT: f32 = 0.0;
-    restore_T_a(&mut K_V_PTAT, &mut K_T_PTAT, &mut V_PTAT_25, &mut Alpha_PTAT);
+    restore_T_a(&mut K_V_PTAT, &mut K_T_PTAT, &mut V_PTAT_25, &mut Alpha_PTAT, eeprom_vars);
 
     // Offset
-    let pix_os_ref = restore_offset();
+    let pix_os_ref = restore_offset(eeprom_vars);
 
     // Sensitivity a (i, j)
-    let a = restore_a();
+    let a = restore_a(eeprom_vars);
 
     // K_V (i, j)
-    let K_V = restore_K_V();
+    let K_V = restore_K_V(eeprom_vars);
 
     // K_Ta (i, j)
-    let K_Ta = restore_K_Ta();
+    let K_Ta = restore_K_Ta(eeprom_vars);
 
     // GAIN
-    let GAIN = restore_gain();
+    let GAIN = restore_gain(eeprom_vars);
 
     // Ks_Ta
-    let Ks_Ta = restore_Ks_Ta();
+    let Ks_Ta = restore_Ks_Ta(eeprom_vars);
 
     // Corner temperatures
-    let Step = restore_Step();
-    let CT3 = restore_CT3(Step);
-    let CT4 = restore_CT4(Step, CT3);
+    let Step = restore_Step(eeprom_vars);
+    let CT3 = restore_CT3(Step, eeprom_vars);
+    let CT4 = restore_CT4(Step, CT3, eeprom_vars);
 
     // Ks_To
-    let Ks_To = restore_Ks_To();
+    let Ks_To = restore_Ks_To(eeprom_vars);
 
     // Ranged sensitivity correction
     let Alpha_corr = restore_Alpha_corr(Ks_To, CT3, CT4);
 
     // Sensitivity a_CP
-    let a_CP = restore_a_CP();
+    let a_CP = restore_a_CP(eeprom_vars);
 
     // Offset of CP
-    let Off_CP = restore_Off_CP();
+    let Off_CP = restore_Off_CP(eeprom_vars);
 
     // Kv CP
-    let K_V_CP = restore_K_V_CP();
+    let K_V_CP = restore_K_V_CP(eeprom_vars);
 
     // Kta CP
-    let K_Ta_CP = restore_K_Ta_CP();
+    let K_Ta_CP = restore_K_Ta_CP(eeprom_vars);
 
     // TGC
-    let TGC = restore_TGC();
+    let TGC = restore_TGC(eeprom_vars);
 
     // Resolution control
-    let Resolution = restore_Resolution();
+    let Resolution = restore_Resolution(eeprom_vars);
 
     let pattern = restore_pattern();
 
     // Bad pixels
-    let bad_pixels = restore_bad_pixels();
+    let bad_pixels = restore_bad_pixels(eeprom_vars);
 
     return Ok(EepromVars {
         K_Vdd,
@@ -537,8 +529,8 @@ fn fix_bad_pixels(temp_grid: [f32; PIXEL_COUNT], bad_pixels: [usize; 4]) -> [f32
 // | EEPROM restore functions |
 // ----------------------------
 
-fn restore_K_Vdd() -> i32 {
-    let mut K_Vdd: i32 = ((get_eeprom_val(0x2433) & 0xFF00) >> 8) as i32;
+fn restore_K_Vdd(eeprom_raw: [u16; EEPROM_SIZE]) -> i32 {
+    let mut K_Vdd: i32 = ((get_eeprom_val(0x2433, eeprom_raw) & 0xFF00) >> 8) as i32;
     if K_Vdd > 127 {
         K_Vdd -= 256;
     }
@@ -546,36 +538,36 @@ fn restore_K_Vdd() -> i32 {
     return K_Vdd;
 }
 
-fn restore_VDD_25() -> i32 {
-    let mut VDD_25: i32 = (get_eeprom_val(0x2433) & 0x00FF) as i32;
+fn restore_VDD_25(eeprom_raw: [u16; EEPROM_SIZE]) -> i32 {
+    let mut VDD_25: i32 = (get_eeprom_val(0x2433, eeprom_raw) & 0x00FF) as i32;
     VDD_25 = ((VDD_25 - 256) * 2_i32.pow(5)) - 2_i32.pow(13);
     return VDD_25;
 }
 
-fn restore_T_a(K_V_PTAT: &mut f32, K_T_PTAT: &mut f32, V_PTAT_25: &mut i32, Alpha_PTAT: &mut f32) {
-    *K_V_PTAT = ((get_eeprom_val(0x2432) & 0xFC00) >> 10) as f32;
+fn restore_T_a(K_V_PTAT: &mut f32, K_T_PTAT: &mut f32, V_PTAT_25: &mut i32, Alpha_PTAT: &mut f32, eeprom_raw: [u16; EEPROM_SIZE]) {
+    *K_V_PTAT = ((get_eeprom_val(0x2432, eeprom_raw) & 0xFC00) >> 10) as f32;
     if *K_V_PTAT > 31.0 {
         *K_V_PTAT -= 64.0;
     }
     *K_V_PTAT /= 2_f32.powi(12);
 
-    *K_T_PTAT = (get_eeprom_val(0x2432) & 0x03FF) as f32;
+    *K_T_PTAT = (get_eeprom_val(0x2432, eeprom_raw) & 0x03FF) as f32;
     if *K_T_PTAT > 511.0 {
         *K_T_PTAT -= 1024.0;
     }
     *K_T_PTAT /= 2_f32.powi(3);
 
-    *V_PTAT_25 = get_eeprom_val(0x2431) as i32;
+    *V_PTAT_25 = get_eeprom_val(0x2431, eeprom_raw) as i32;
     if *V_PTAT_25 > 32767 {
         *V_PTAT_25 -= 65536;
     }
 
-    let Alpha_PTAT_EE: f32 = ((get_eeprom_val(0x2410) & 0xF000) >> 12) as f32;
+    let Alpha_PTAT_EE: f32 = ((get_eeprom_val(0x2410, eeprom_raw) & 0xF000) >> 12) as f32;
     *Alpha_PTAT = Alpha_PTAT_EE / 2_f32.powi(2) + 8.0;
 }
 
-fn restore_offset() -> [i32; PIXEL_COUNT] {
-    let mut offset_avg: i32 = get_eeprom_val(0x2411) as i32;
+fn restore_offset(eeprom_raw: [u16; EEPROM_SIZE]) -> [i32; PIXEL_COUNT] {
+    let mut offset_avg: i32 = get_eeprom_val(0x2411, eeprom_raw) as i32;
     if offset_avg > 32767 {
         offset_avg -= 65536;
     }
@@ -585,10 +577,10 @@ fn restore_offset() -> [i32; PIXEL_COUNT] {
     for row in 0..PIXELS_HEIGHT/4 {
         let address: u16 = (0x2412 + row) as u16;
 
-        OCC_row[row * 4 + 0] = ((get_eeprom_val(address) & 0x000F) >> 0) as i32;
-        OCC_row[row * 4 + 1] = ((get_eeprom_val(address) & 0x00F0) >> 4) as i32;
-        OCC_row[row * 4 + 2] = ((get_eeprom_val(address) & 0x0F00) >> 8) as i32;
-        OCC_row[row * 4 + 3] = ((get_eeprom_val(address) & 0xF000) >> 12) as i32;
+        OCC_row[row * 4 + 0] = ((get_eeprom_val(address, eeprom_raw) & 0x000F) >> 0) as i32;
+        OCC_row[row * 4 + 1] = ((get_eeprom_val(address, eeprom_raw) & 0x00F0) >> 4) as i32;
+        OCC_row[row * 4 + 2] = ((get_eeprom_val(address, eeprom_raw) & 0x0F00) >> 8) as i32;
+        OCC_row[row * 4 + 3] = ((get_eeprom_val(address, eeprom_raw) & 0xF000) >> 12) as i32;
 
         if OCC_row[row * 4 + 0] > 7 { OCC_row[row * 4 + 0] -= 16 }
         if OCC_row[row * 4 + 1] > 7 { OCC_row[row * 4 + 1] -= 16 }
@@ -597,17 +589,17 @@ fn restore_offset() -> [i32; PIXEL_COUNT] {
     }
 
     // OCC scale row
-    let OCC_scale_row: u16 = (get_eeprom_val(0x2410) & 0x0F00) as u16 >> 8;
+    let OCC_scale_row: u16 = (get_eeprom_val(0x2410, eeprom_raw) & 0x0F00) as u16 >> 8;
 
     // OCC column
     let mut OCC_column: [i32; PIXELS_WIDTH] = [0x00; PIXELS_WIDTH];
     for column in 0..PIXELS_WIDTH/4 {
         let address: u16 = (0x2418 + column) as u16;
 
-        OCC_column[column * 4 + 0] = ((get_eeprom_val(address) & 0x000F) >> 0) as i32;
-        OCC_column[column * 4 + 1] = ((get_eeprom_val(address) & 0x00F0) >> 4) as i32;
-        OCC_column[column * 4 + 2] = ((get_eeprom_val(address) & 0x0F00) >> 8) as i32;
-        OCC_column[column * 4 + 3] = ((get_eeprom_val(address) & 0xF000) >> 12) as i32;
+        OCC_column[column * 4 + 0] = ((get_eeprom_val(address, eeprom_raw) & 0x000F) >> 0) as i32;
+        OCC_column[column * 4 + 1] = ((get_eeprom_val(address, eeprom_raw) & 0x00F0) >> 4) as i32;
+        OCC_column[column * 4 + 2] = ((get_eeprom_val(address, eeprom_raw) & 0x0F00) >> 8) as i32;
+        OCC_column[column * 4 + 3] = ((get_eeprom_val(address, eeprom_raw) & 0xF000) >> 12) as i32;
 
         if OCC_column[column * 4 + 0] > 7 { OCC_column[column * 4 + 0] -= 16 }
         if OCC_column[column * 4 + 1] > 7 { OCC_column[column * 4 + 1] -= 16 }
@@ -616,21 +608,21 @@ fn restore_offset() -> [i32; PIXEL_COUNT] {
     }
 
     // OCC scale column
-    let OCC_scale_column: u16 = (get_eeprom_val(0x2410) & 0x00F0) as u16 >> 4;
+    let OCC_scale_column: u16 = (get_eeprom_val(0x2410, eeprom_raw) & 0x00F0) as u16 >> 4;
 
     // offset
     let mut offset: [i32; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
     for i in 0..PIXEL_COUNT {
         let address: u16 = (0x2440 + i) as u16;
 
-        offset[i] = ((get_eeprom_val(address) & 0xFC00) >> 10) as i32;
+        offset[i] = ((get_eeprom_val(address, eeprom_raw) & 0xFC00) >> 10) as i32;
         if offset[i] > 31 {
             offset[i] -= 64;
         }
     }
 
     // OCC scale remnant
-    let OCC_scale_remnant: u16 = get_eeprom_val(0x2410) as u16 & 0x000F;
+    let OCC_scale_remnant: u16 = get_eeprom_val(0x2410, eeprom_raw) as u16 & 0x000F;
 
     let mut pix_os_ref: [i32; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
     for i in 0..PIXELS_HEIGHT {
@@ -645,19 +637,19 @@ fn restore_offset() -> [i32; PIXEL_COUNT] {
     return pix_os_ref;
 }
 
-fn restore_a() -> [f32; PIXEL_COUNT] {
-    let a_reference: i32 = get_eeprom_val(0x2421) as i32;
+fn restore_a(eeprom_raw: [u16; EEPROM_SIZE]) -> [f32; PIXEL_COUNT] {
+    let a_reference: i32 = get_eeprom_val(0x2421, eeprom_raw) as i32;
 
-    let a_scale: i32 = ((get_eeprom_val(0x2420) & 0xF000) >> 12) as i32 + 30;
+    let a_scale: i32 = ((get_eeprom_val(0x2420, eeprom_raw) & 0xF000) >> 12) as i32 + 30;
 
     let mut ACC_row: [i32; PIXELS_HEIGHT] = [0x00; PIXELS_HEIGHT];
     for row in 0..PIXELS_HEIGHT/4 {
         let address: u16 = 0x2422 + row as u16;
 
-        ACC_row[row * 4 + 0] = ((get_eeprom_val(address) & 0x000F) >> 0) as i32;
-        ACC_row[row * 4 + 1] = ((get_eeprom_val(address) & 0x00F0) >> 4) as i32;
-        ACC_row[row * 4 + 2] = ((get_eeprom_val(address) & 0x0F00) >> 8) as i32;
-        ACC_row[row * 4 + 3] = ((get_eeprom_val(address) & 0xF000) >> 12) as i32;
+        ACC_row[row * 4 + 0] = ((get_eeprom_val(address, eeprom_raw) & 0x000F) >> 0) as i32;
+        ACC_row[row * 4 + 1] = ((get_eeprom_val(address, eeprom_raw) & 0x00F0) >> 4) as i32;
+        ACC_row[row * 4 + 2] = ((get_eeprom_val(address, eeprom_raw) & 0x0F00) >> 8) as i32;
+        ACC_row[row * 4 + 3] = ((get_eeprom_val(address, eeprom_raw) & 0xF000) >> 12) as i32;
 
         if ACC_row[row * 4 + 0] > 7 { ACC_row[row * 4 + 0] -= 16 }
         if ACC_row[row * 4 + 1] > 7 { ACC_row[row * 4 + 1] -= 16 }
@@ -665,16 +657,16 @@ fn restore_a() -> [f32; PIXEL_COUNT] {
         if ACC_row[row * 4 + 3] > 7 { ACC_row[row * 4 + 3] -= 16 }
     }
 
-    let ACC_scale_row: u16 = (get_eeprom_val(0x2420) & 0x0F00) as u16 >> 8;
+    let ACC_scale_row: u16 = (get_eeprom_val(0x2420, eeprom_raw) & 0x0F00) as u16 >> 8;
 
     let mut ACC_column: [i32; PIXELS_WIDTH] = [0x00; PIXELS_WIDTH];
     for column in 0..PIXELS_WIDTH/4 {
         let address: u16 = 0x2428 + column as u16;
 
-        ACC_column[column * 4 + 0] = ((get_eeprom_val(address) & 0x000F) >> 0) as i32;
-        ACC_column[column * 4 + 1] = ((get_eeprom_val(address) & 0x00F0) >> 4) as i32;
-        ACC_column[column * 4 + 2] = ((get_eeprom_val(address) & 0x0F00) >> 8) as i32;
-        ACC_column[column * 4 + 3] = ((get_eeprom_val(address) & 0xF000) >> 12) as i32;
+        ACC_column[column * 4 + 0] = ((get_eeprom_val(address, eeprom_raw) & 0x000F) >> 0) as i32;
+        ACC_column[column * 4 + 1] = ((get_eeprom_val(address, eeprom_raw) & 0x00F0) >> 4) as i32;
+        ACC_column[column * 4 + 2] = ((get_eeprom_val(address, eeprom_raw) & 0x0F00) >> 8) as i32;
+        ACC_column[column * 4 + 3] = ((get_eeprom_val(address, eeprom_raw) & 0xF000) >> 12) as i32;
 
         if ACC_column[column * 4 + 0] > 7 { ACC_column[column * 4 + 0] -= 16 }
         if ACC_column[column * 4 + 1] > 7 { ACC_column[column * 4 + 1] -= 16 }
@@ -682,19 +674,19 @@ fn restore_a() -> [f32; PIXEL_COUNT] {
         if ACC_column[column * 4 + 3] > 7 { ACC_column[column * 4 + 3] -= 16 }
     }
 
-    let ACC_scale_column: u16 = (get_eeprom_val(0x2420) & 0x00F0) as u16 >> 4;
+    let ACC_scale_column: u16 = (get_eeprom_val(0x2420, eeprom_raw) & 0x00F0) as u16 >> 4;
 
     let mut a_pixel: [i32; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
     for i in 0..PIXEL_COUNT {
         let address: u16 = 0x2440 + i as u16;
 
-        a_pixel[i] = ((get_eeprom_val(address) & 0x03F0) >> 4) as i32;
+        a_pixel[i] = ((get_eeprom_val(address, eeprom_raw) & 0x03F0) >> 4) as i32;
         if a_pixel[i] > 31 {
             a_pixel[i] -= 64;
         }
     }
 
-    let ACC_scale_remnant: u16 = get_eeprom_val(0x2420) as u16 & 0x000F;
+    let ACC_scale_remnant: u16 = get_eeprom_val(0x2420, eeprom_raw) as u16 & 0x000F;
 
     let mut a: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
     for i in 0..PIXELS_HEIGHT {
@@ -711,15 +703,15 @@ fn restore_a() -> [f32; PIXEL_COUNT] {
     return a;
 }
 
-fn restore_K_V() -> [f32; PIXEL_COUNT] {
-    let K_V_scale: u16 = (get_eeprom_val(0x2438) & 0x0F00) as u16 >> 8;
+fn restore_K_V(eeprom_raw: [u16; EEPROM_SIZE]) -> [f32; PIXEL_COUNT] {
+    let K_V_scale: u16 = (get_eeprom_val(0x2438, eeprom_raw) & 0x0F00) as u16 >> 8;
 
     let mut K_V: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
     // EVEN EVEN
     for i in (0..PIXELS_HEIGHT).step_by(2) {
         for j in (0..PIXELS_WIDTH).step_by(2) {
             let index = i * PIXELS_WIDTH + j;
-            K_V[index] = ((get_eeprom_val(0x2434) & 0xF000) >> 12) as i32 as f32;
+            K_V[index] = ((get_eeprom_val(0x2434, eeprom_raw) & 0xF000) >> 12) as i32 as f32;
         }
     }
 
@@ -727,7 +719,7 @@ fn restore_K_V() -> [f32; PIXEL_COUNT] {
     for i in (1..PIXELS_HEIGHT).step_by(2) {
         for j in (0..PIXELS_WIDTH).step_by(2) {
             let index = i * PIXELS_WIDTH + j;
-            K_V[index] = ((get_eeprom_val(0x2434) & 0x0F00) >> 8) as i32 as f32;
+            K_V[index] = ((get_eeprom_val(0x2434, eeprom_raw) & 0x0F00) >> 8) as i32 as f32;
         }
     }
 
@@ -735,7 +727,7 @@ fn restore_K_V() -> [f32; PIXEL_COUNT] {
     for i in (0..PIXELS_HEIGHT).step_by(2) {
         for j in (1..PIXELS_WIDTH).step_by(2) {
             let index = i * PIXELS_WIDTH + j;
-            K_V[index] = ((get_eeprom_val(0x2434) & 0x00F0) >> 4) as i32 as f32;
+            K_V[index] = ((get_eeprom_val(0x2434, eeprom_raw) & 0x00F0) >> 4) as i32 as f32;
         }
     }
 
@@ -743,7 +735,7 @@ fn restore_K_V() -> [f32; PIXEL_COUNT] {
     for i in (1..PIXELS_HEIGHT).step_by(2) {
         for j in (1..PIXELS_WIDTH).step_by(2) {
             let index = i * PIXELS_WIDTH + j;
-            K_V[index] = ((get_eeprom_val(0x2434) & 0x000F) >> 0) as i32 as f32;
+            K_V[index] = ((get_eeprom_val(0x2434, eeprom_raw) & 0x000F) >> 0) as i32 as f32;
         }
     }
 
@@ -758,13 +750,13 @@ fn restore_K_V() -> [f32; PIXEL_COUNT] {
     return K_V;
 }
 
-fn restore_K_Ta() -> [f32; PIXEL_COUNT] {
+fn restore_K_Ta(eeprom_raw: [u16; EEPROM_SIZE]) -> [f32; PIXEL_COUNT] {
     let mut K_Ta_EE: [i32; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
 
     for i in 0..PIXEL_COUNT {
         let address: u16 = 0x2440 + i as u16;
 
-        K_Ta_EE[i] = ((get_eeprom_val(address) & 0x000E) >> 1) as i32;
+        K_Ta_EE[i] = ((get_eeprom_val(address, eeprom_raw) & 0x000E) >> 1) as i32;
         if K_Ta_EE[i] > 3 {
             K_Ta_EE[i] -= 8;
         }
@@ -776,7 +768,7 @@ fn restore_K_Ta() -> [f32; PIXEL_COUNT] {
     for i in (0..PIXELS_HEIGHT).step_by(2) {
         for j in (0..PIXELS_WIDTH).step_by(2) {
             let index = i * PIXELS_WIDTH + j;
-            K_Ta_RC_EE[index] = ((get_eeprom_val(0x2436) & 0xFF00) >> 8) as i32;
+            K_Ta_RC_EE[index] = ((get_eeprom_val(0x2436, eeprom_raw) & 0xFF00) >> 8) as i32;
         }
     }
 
@@ -784,7 +776,7 @@ fn restore_K_Ta() -> [f32; PIXEL_COUNT] {
     for i in (1..PIXELS_HEIGHT).step_by(2) {
         for j in (0..PIXELS_WIDTH).step_by(2) {
             let index = i * PIXELS_WIDTH + j;
-            K_Ta_RC_EE[index] = ((get_eeprom_val(0x2436) & 0x00FF) >> 0) as i32;
+            K_Ta_RC_EE[index] = ((get_eeprom_val(0x2436, eeprom_raw) & 0x00FF) >> 0) as i32;
         }
     }
 
@@ -792,7 +784,7 @@ fn restore_K_Ta() -> [f32; PIXEL_COUNT] {
     for i in (0..PIXELS_HEIGHT).step_by(2) {
         for j in (1..PIXELS_WIDTH).step_by(2) {
             let index = i * PIXELS_WIDTH + j;
-            K_Ta_RC_EE[index] = ((get_eeprom_val(0x2437) & 0xFF00) >> 8) as i32;
+            K_Ta_RC_EE[index] = ((get_eeprom_val(0x2437, eeprom_raw) & 0xFF00) >> 8) as i32;
         }
     }
 
@@ -800,7 +792,7 @@ fn restore_K_Ta() -> [f32; PIXEL_COUNT] {
     for i in (1..PIXELS_HEIGHT).step_by(2) {
         for j in (1..PIXELS_WIDTH).step_by(2) {
             let index = i * PIXELS_WIDTH + j;
-            K_Ta_RC_EE[index] = ((get_eeprom_val(0x2437) & 0x00FF) >> 0) as i32;
+            K_Ta_RC_EE[index] = ((get_eeprom_val(0x2437, eeprom_raw) & 0x00FF) >> 0) as i32;
         }
     }
 
@@ -810,9 +802,9 @@ fn restore_K_Ta() -> [f32; PIXEL_COUNT] {
         }
     }
 
-    let K_Ta_scale1: u16 = ((get_eeprom_val(0x2438) & 0x00F0) as u16 >> 4) + 8;
+    let K_Ta_scale1: u16 = ((get_eeprom_val(0x2438, eeprom_raw) & 0x00F0) as u16 >> 4) + 8;
 
-    let K_Ta_scale2: u16 = (get_eeprom_val(0x2438) & 0x000F) as u16;
+    let K_Ta_scale2: u16 = (get_eeprom_val(0x2438, eeprom_raw) & 0x000F) as u16;
 
     let mut K_Ta: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
 
@@ -825,16 +817,16 @@ fn restore_K_Ta() -> [f32; PIXEL_COUNT] {
     return K_Ta;
 }
 
-fn restore_gain() -> i32 {
-    let mut gain: i32 = get_eeprom_val(0x2430) as i32;
+fn restore_gain(eeprom_raw: [u16; EEPROM_SIZE]) -> i32 {
+    let mut gain: i32 = get_eeprom_val(0x2430, eeprom_raw) as i32;
     if gain > 32767 {
         gain -= 65536;
     }
     return gain;
 }
 
-fn restore_Ks_Ta() -> f32 {
-    let mut Ks_Ta_EE: i32 = ((get_eeprom_val(0x243C) & 0xFF00) >> 8) as i32;
+fn restore_Ks_Ta(eeprom_raw: [u16; EEPROM_SIZE]) -> f32 {
+    let mut Ks_Ta_EE: i32 = ((get_eeprom_val(0x243C, eeprom_raw) & 0xFF00) >> 8) as i32;
     if Ks_Ta_EE > 127 {
         Ks_Ta_EE -= 256;
     }
@@ -843,34 +835,34 @@ fn restore_Ks_Ta() -> f32 {
     return Ks_Ta;
 }
 
-fn restore_Step() -> i32 {
-    return ((get_eeprom_val(0x243F) & 0x3000) >> 12) as i32 * 10;
+fn restore_Step(eeprom_raw: [u16; EEPROM_SIZE]) -> i32 {
+    return ((get_eeprom_val(0x243F, eeprom_raw) & 0x3000) >> 12) as i32 * 10;
 }
 
-fn restore_CT3(Step: i32) -> i32 {
-    return ((get_eeprom_val(0x243F) & 0x00F0) >> 4) as i32 * Step;
+fn restore_CT3(Step: i32, eeprom_raw: [u16; EEPROM_SIZE]) -> i32 {
+    return ((get_eeprom_val(0x243F, eeprom_raw) & 0x00F0) >> 4) as i32 * Step;
 }
 
-fn restore_CT4(Step: i32, CT3: i32) -> i32 {
-    return ((get_eeprom_val(0x243F) & 0x0F00) >> 8) as i32 * Step + CT3;
+fn restore_CT4(Step: i32, CT3: i32, eeprom_raw: [u16; EEPROM_SIZE]) -> i32 {
+    return ((get_eeprom_val(0x243F, eeprom_raw) & 0x0F00) >> 8) as i32 * Step + CT3;
 }
 
-fn restore_Ks_To() -> (f32, f32, f32, f32) {
-    let Ks_To_scale: u16 = (get_eeprom_val(0x243F) & 0x000F) + 8;
+fn restore_Ks_To(eeprom_raw: [u16; EEPROM_SIZE]) -> (f32, f32, f32, f32) {
+    let Ks_To_scale: u16 = (get_eeprom_val(0x243F, eeprom_raw) & 0x000F) + 8;
 
-    let mut Ks_To1_EE: i32 = (get_eeprom_val(0x243D) & 0x00FF) as i32;
+    let mut Ks_To1_EE: i32 = (get_eeprom_val(0x243D, eeprom_raw) & 0x00FF) as i32;
     if Ks_To1_EE > 127 { Ks_To1_EE -= 256 }
     let Ks_To1 = Ks_To1_EE as f32 / 2_f32.powi(Ks_To_scale as i32);
 
-    let mut Ks_To2_EE: i32 = ((get_eeprom_val(0x243D) & 0xFF00) >> 8) as i32;
+    let mut Ks_To2_EE: i32 = ((get_eeprom_val(0x243D, eeprom_raw) & 0xFF00) >> 8) as i32;
     if Ks_To2_EE > 127 { Ks_To2_EE -= 256 }
     let Ks_To2 = Ks_To2_EE as f32 / 2_f32.powi(Ks_To_scale as i32);
 
-    let mut Ks_To3_EE: i32 = (get_eeprom_val(0x243E) & 0x00FF) as i32;
+    let mut Ks_To3_EE: i32 = (get_eeprom_val(0x243E, eeprom_raw) & 0x00FF) as i32;
     if Ks_To3_EE > 127 { Ks_To3_EE -= 256 }
     let Ks_To3 = Ks_To3_EE as f32 / 2_f32.powi(Ks_To_scale as i32);
 
-    let mut Ks_To4_EE: i32 = ((get_eeprom_val(0x243E) & 0xFF00) >> 8) as i32;
+    let mut Ks_To4_EE: i32 = ((get_eeprom_val(0x243E, eeprom_raw) & 0xFF00) >> 8) as i32;
     if Ks_To4_EE > 127 { Ks_To4_EE -= 256 }
     let Ks_To4 = Ks_To4_EE as f32 / 2_f32.powi(Ks_To_scale as i32);
 
@@ -886,26 +878,26 @@ fn restore_Alpha_corr(Ks_To: (f32, f32, f32, f32), CT3: i32, CT4: i32) -> (f32, 
     return (Alpha_corr_range1, Alpha_corr_range2, Alpha_corr_range3, Alpha_corr_range4);
 }
 
-fn restore_a_CP() -> (f32, f32) {
-    let a_scale_CP = ((get_eeprom_val(0x2420) & 0xF000) >> 12) as i32 + 27;
-    let mut CP_P1_P0_ratio = ((get_eeprom_val(0x2439) & 0xFC00) >> 10) as i32;
+fn restore_a_CP(eeprom_raw: [u16; EEPROM_SIZE]) -> (f32, f32) {
+    let a_scale_CP = ((get_eeprom_val(0x2420, eeprom_raw) & 0xF000) >> 12) as i32 + 27;
+    let mut CP_P1_P0_ratio = ((get_eeprom_val(0x2439, eeprom_raw) & 0xFC00) >> 10) as i32;
     if CP_P1_P0_ratio > 31 {
         CP_P1_P0_ratio -= 64;
     }
 
-    let a_CP_0 = ((get_eeprom_val(0x2439) & 0x03FF)) as i32 as f32 / 2_f32.powi(a_scale_CP as i32);
+    let a_CP_0 = ((get_eeprom_val(0x2439, eeprom_raw) & 0x03FF)) as i32 as f32 / 2_f32.powi(a_scale_CP as i32);
     let a_CP_1 = a_CP_0 * (1.0 + (CP_P1_P0_ratio as f32 / 2_f32.powi(7)));
 
     return (a_CP_0, a_CP_1);
 }
 
-fn restore_Off_CP() -> (i32, i32) {
-    let mut Off_CP_0 = (get_eeprom_val(0x243A) & 0x03FF) as i32;
+fn restore_Off_CP(eeprom_raw: [u16; EEPROM_SIZE]) -> (i32, i32) {
+    let mut Off_CP_0 = (get_eeprom_val(0x243A, eeprom_raw) & 0x03FF) as i32;
     if Off_CP_0 > 511 {
         Off_CP_0 -= 1024;
     }
 
-    let mut Off_CP_1_delta: i32 = ((get_eeprom_val(0x243A) & 0xFC00) >> 10) as i32;
+    let mut Off_CP_1_delta: i32 = ((get_eeprom_val(0x243A, eeprom_raw) & 0xFC00) >> 10) as i32;
     if Off_CP_1_delta > 31 {
         Off_CP_1_delta -= 64;
     }
@@ -915,10 +907,10 @@ fn restore_Off_CP() -> (i32, i32) {
     return (Off_CP_0, Off_CP_1);
 }
 
-fn restore_K_V_CP() -> f32 {
-    let K_V_Scale: u16 = (get_eeprom_val(0x2438) & 0x0F00) as u16 >> 8;
+fn restore_K_V_CP(eeprom_raw: [u16; EEPROM_SIZE]) -> f32 {
+    let K_V_Scale: u16 = (get_eeprom_val(0x2438, eeprom_raw) & 0x0F00) as u16 >> 8;
 
-    let mut K_V_CP_EE: i32 = ((get_eeprom_val(0x243B) & 0xFF00) >> 8) as i32;
+    let mut K_V_CP_EE: i32 = ((get_eeprom_val(0x243B, eeprom_raw) & 0xFF00) >> 8) as i32;
     if K_V_CP_EE > 127 {
         K_V_CP_EE -= 256;
     }
@@ -927,10 +919,10 @@ fn restore_K_V_CP() -> f32 {
     return K_V_CP;
 }
 
-fn restore_K_Ta_CP() -> f32 {
-    let K_Ta_scale_1: u16 = ((get_eeprom_val(0x2438) & 0x00F0) as u16 >> 4) + 8;
+fn restore_K_Ta_CP(eeprom_raw: [u16; EEPROM_SIZE]) -> f32 {
+    let K_Ta_scale_1: u16 = ((get_eeprom_val(0x2438, eeprom_raw) & 0x00F0) as u16 >> 4) + 8;
 
-    let mut K_Ta_CP_EE: i32 = (get_eeprom_val(0x243B) & 0x00FF) as i32;
+    let mut K_Ta_CP_EE: i32 = (get_eeprom_val(0x243B, eeprom_raw) & 0x00FF) as i32;
     if K_Ta_CP_EE > 127 {
         K_Ta_CP_EE -= 256;
     }
@@ -939,8 +931,8 @@ fn restore_K_Ta_CP() -> f32 {
     return K_Ta_CP;
 }
 
-fn restore_TGC() -> f32 {
-    let mut TGC_EE: i32 = (get_eeprom_val(0x243C) & 0x00FF) as i32;
+fn restore_TGC(eeprom_raw: [u16; EEPROM_SIZE]) -> f32 {
+    let mut TGC_EE: i32 = (get_eeprom_val(0x243C, eeprom_raw) & 0x00FF) as i32;
     if TGC_EE > 127 {
         TGC_EE -= 256;
     }
@@ -949,8 +941,8 @@ fn restore_TGC() -> f32 {
     return TGC;
 }
 
-fn restore_Resolution() -> u16 {
-    return (get_eeprom_val(0x2438) & 0x3000) as u16 >> 12;
+fn restore_Resolution(eeprom_raw: [u16; EEPROM_SIZE]) -> u16 {
+    return (get_eeprom_val(0x2438, eeprom_raw) & 0x3000) as u16 >> 12;
 }
 
 fn restore_pattern() -> [u16; PIXEL_COUNT] {
@@ -969,13 +961,13 @@ fn restore_pattern() -> [u16; PIXEL_COUNT] {
     return pattern;
 }
 
-fn restore_bad_pixels() -> [usize; 4] {
+fn restore_bad_pixels(eeprom_raw: [u16; EEPROM_SIZE]) -> [usize; 4] {
     let mut bad_pixels: [usize; 4] = [usize::MAX; 4];
     let mut index = 0;
 
     for i in 0..PIXEL_COUNT {
         let addr: u16 = 0x2440 + i as u16;
-        let is_outlier = (get_eeprom_val(addr) & 0x01) == 0x01;
+        let is_outlier = (get_eeprom_val(addr, eeprom_raw) & 0x01) == 0x01;
 
         if is_outlier {
             bad_pixels[index] = i;
