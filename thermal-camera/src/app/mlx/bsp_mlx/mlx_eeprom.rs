@@ -53,16 +53,20 @@ pub struct EepromVars {
     bad_pixels: [usize; 4],
 }
 
-lazy_static! {
-    static ref EEPROM_VARS: EepromVars = restore();
-}
+lazy_static!(
+    static ref EEPROM_VARS: Result<EepromVars, String> = restore();
+);
 
-static mut EEPROM_RAW: [u16; EEPROM_SIZE] = [0x00; EEPROM_SIZE];
+static mut EEPROM_RAW: Result<[u16; EEPROM_SIZE], String> = Err("EEPROM values haven't been read".to_string());
 
 // TODO: Do Error checking here
 fn read_eeprom() {
     let mut d: [u8; EEPROM_SIZE * 2] = [0x00; EEPROM_SIZE * 2];
-    super::read(0x2410, &mut d);
+    let mlx_response = super::read(0x2410, &mut d);
+
+    if mlx_response.is_err() {
+        unsafe { EEPROM_RAW = Err(mlx_response.unwrap_err()); }
+    }
 
     let mut converted: [u16; EEPROM_SIZE] = [0x00; EEPROM_SIZE];
 
@@ -72,12 +76,17 @@ fn read_eeprom() {
         converted[i] = (msb << 8) | lsb;
     }
 
-    unsafe { EEPROM_RAW = converted };
+    unsafe { EEPROM_RAW = Ok(converted) };
 }
 
 fn get_eeprom_val(address: u16) -> u16 {
     let index:usize = (address - 0x2410) as usize;
-    return unsafe { EEPROM_RAW[index] };
+    unsafe {
+        if EEPROM_RAW.is_err() {
+            return 0;
+        }
+        return EEPROM_RAW.as_ref().unwrap()[index];
+    }
 }
 
 // ----------------------------
@@ -85,9 +94,12 @@ fn get_eeprom_val(address: u16) -> u16 {
 // ----------------------------
 
 pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> Result<[f32; PIXEL_COUNT], String> {
+    if EEPROM_VARS.is_none() { return Err("Eeprom Variables not restored.".to_string()); }
+    let eeprom_vars = EEPROM_VARS.as_ref().unwrap();
+
     const EMISSIVITY: f32 = 1.0;
 
-    let Resolution_corr: f32 = 2_f32.powi(EEPROM_VARS.Resolution as i32) / 2_f32.powi((super::read_value(0x800D)? as i32 & 0x0C00) >> 10);
+    let Resolution_corr: f32 = 2_f32.powi(eeprom_vars.Resolution as i32) / 2_f32.powi((super::read_value(0x800D)? as i32 & 0x0C00) >> 10);
 
     // Calculate Voltage
     let V_dd = calc_V_dd(Resolution_corr)?;
@@ -121,16 +133,16 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> Result<[f32; PIXEL_COUNT], Stri
     let T_o_extra = calc_T_o_extra(T_o, EMISSIVITY, T_a, V_IR_compensated, a_comp);
 
     // Fix bad pixels
-    let bad_pixels = EEPROM_VARS.bad_pixels;
+    let bad_pixels = eeprom_vars.bad_pixels;
     let fixed_t_o = fix_bad_pixels(T_o_extra, bad_pixels);
     
     return Ok(fixed_t_o);
 }
 
 
-pub fn restore() -> EepromVars {
+pub fn restore() -> Result<EepromVars, String> {
     // Read eeprom data
-    read_eeprom();
+    read_eeprom()?;
 
     // VDD
     let K_Vdd = restore_K_Vdd();
@@ -195,7 +207,7 @@ pub fn restore() -> EepromVars {
     // Bad pixels
     let bad_pixels = restore_bad_pixels();
 
-    return EepromVars {
+    EEPROM_VARS = Some(EepromVars {
         K_Vdd,
         VDD_25,
 
@@ -238,7 +250,52 @@ pub fn restore() -> EepromVars {
         pattern,
 
         bad_pixels,
-    };
+    });
+
+    return Ok(EepromVars {
+        K_Vdd,
+        VDD_25,
+
+        K_V_PTAT,
+        K_T_PTAT,
+        V_PTAT_25,
+        Alpha_PTAT,
+
+        pix_os_ref,
+
+        a,
+
+        K_V,
+
+        K_Ta,
+
+        GAIN,
+
+        Ks_Ta,
+
+        CT3,
+        CT4,
+
+        Ks_To,
+
+        Alpha_corr,
+
+        a_CP,
+
+        Off_CP,
+
+        K_V_CP,
+
+        K_Ta_CP,
+
+        TGC,
+
+        Resolution,
+
+        pattern,
+
+        bad_pixels,
+    });
 }
 
 // -------------------------------------
@@ -246,8 +303,10 @@ pub fn restore() -> EepromVars {
 // -------------------------------------
 
 fn calc_V_dd(Resolution_corr: f32) -> Result<f32, String> {
-    let VDD_25: f32 = EEPROM_VARS.VDD_25 as f32;
-    let K_Vdd: f32 = EEPROM_VARS.K_Vdd as f32;
+    let eeprom_vars = EEPROM_VARS.as_ref().unwrap();
+
+    let VDD_25: f32 = eeprom_vars.VDD_25 as f32;
+    let K_Vdd: f32 = eeprom_vars.K_Vdd as f32;
 
     let mut V_ram: f32 = super::read_value(0x072A)? as f32;
     if V_ram > 32767.0 { V_ram -= 65536.0 }
@@ -256,12 +315,14 @@ fn calc_V_dd(Resolution_corr: f32) -> Result<f32, String> {
 }
 
 fn calc_T_a() -> Result<f32, String> {
-    let VDD_25 = EEPROM_VARS.VDD_25;
-    let K_Vdd = EEPROM_VARS.K_Vdd;
-    let K_V_PTAT = EEPROM_VARS.K_V_PTAT;
-    let K_T_PTAT = EEPROM_VARS.K_T_PTAT;
-    let V_PTAT_25 = EEPROM_VARS.V_PTAT_25;
-    let Alpha_PTAT = EEPROM_VARS.Alpha_PTAT;
+    let eeprom_vars = EEPROM_VARS.as_ref().unwrap();
+
+    let VDD_25 = eeprom_vars.VDD_25;
+    let K_Vdd = eeprom_vars.K_Vdd;
+    let K_V_PTAT = eeprom_vars.K_V_PTAT;
+    let K_T_PTAT = eeprom_vars.K_T_PTAT;
+    let V_PTAT_25 = eeprom_vars.V_PTAT_25;
+    let Alpha_PTAT = eeprom_vars.Alpha_PTAT;
 
     let mut dV: f32 = super::read_value(0x072A)? as f32;
     if dV > 32767.0 {
@@ -291,7 +352,9 @@ fn calc_T_a() -> Result<f32, String> {
 }
 
 fn calc_K_gain() -> Result<f32, String> {
-    let GAIN: f32 = EEPROM_VARS.GAIN as f32;
+    let eeprom_vars = EEPROM_VARS.as_ref().unwrap();
+
+    let GAIN: f32 = eeprom_vars.GAIN as f32;
 
     let mut gain_ram: f32 = super::read_value(0x070A)? as f32;
     if gain_ram > 32767.0 { gain_ram -= 65536.0 }
@@ -310,9 +373,11 @@ fn calc_pix_gain(K_gain: f32, pixel_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COU
 }
 
 fn calc_pix_os(V_dd: f32, T_a: f32, pix_gain: [f32; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
-    let K_Ta = EEPROM_VARS.K_Ta;
-    let K_V = EEPROM_VARS.K_V;
-    let pix_os_ref = EEPROM_VARS.pix_os_ref;
+    let eeprom_vars = EEPROM_VARS.as_ref().unwrap();
+
+    let K_Ta = eeprom_vars.K_Ta;
+    let K_V = eeprom_vars.K_V;
+    let pix_os_ref = eeprom_vars.pix_os_ref;
 
     let mut pix_os: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
     for i in 0..PIXEL_COUNT {
@@ -335,9 +400,11 @@ fn calc_V_IR_Em_compensated(emissivity: f32, pix_os: [f32; PIXEL_COUNT]) -> [f32
 }
 
 fn calc_pix_OS_CP_SPX(V_dd: f32, T_a: f32, K_gain: f32) -> Result<(f32, f32), String> {
-    let K_Ta_CP = EEPROM_VARS.K_Ta_CP;
-    let K_V_CP = EEPROM_VARS.K_V_CP;
-    let Off_CP = EEPROM_VARS.Off_CP;
+    let eeprom_vars = EEPROM_VARS.as_ref().unwrap();
+
+    let K_Ta_CP = eeprom_vars.K_Ta_CP;
+    let K_V_CP = eeprom_vars.K_V_CP;
+    let Off_CP = eeprom_vars.Off_CP;
 
     let mut pix_gain_CP_SP0_RAM = super::read_value(0x0708)? as f32;
     let mut pix_gain_CP_SP1_RAM = super::read_value(0x0728)? as f32;
@@ -360,8 +427,10 @@ fn calc_pix_OS_CP_SPX(V_dd: f32, T_a: f32, K_gain: f32) -> Result<(f32, f32), St
 }
 
 fn calc_V_IR_compensated(V_IR_Em_compensated: [f32; PIXEL_COUNT], pix_OS_CP_SP: (f32, f32)) -> [f32; PIXEL_COUNT] {
-    let TGC = EEPROM_VARS.TGC;
-    let pattern = EEPROM_VARS.pattern;
+    let eeprom_vars = EEPROM_VARS.as_ref().unwrap();
+
+    let TGC = eeprom_vars.TGC;
+    let pattern = eeprom_vars.pattern;
 
     let mut V_IR_compensated: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
     for i in 0..PIXEL_COUNT {
@@ -372,11 +441,13 @@ fn calc_V_IR_compensated(V_IR_Em_compensated: [f32; PIXEL_COUNT], pix_OS_CP_SP: 
 }
 
 fn calc_a_comp(T_a: f32) -> [f32; PIXEL_COUNT] {
-    let a = EEPROM_VARS.a;
-    let TGC = EEPROM_VARS.TGC;
-    let pattern = EEPROM_VARS.pattern;
-    let a_CP = EEPROM_VARS.a_CP;
-    let Ks_Ta = EEPROM_VARS.Ks_Ta;
+    let eeprom_vars = EEPROM_VARS.as_ref().unwrap();
+
+    let a = eeprom_vars.a;
+    let TGC = eeprom_vars.TGC;
+    let pattern = eeprom_vars.pattern;
+    let a_CP = eeprom_vars.a_CP;
+    let Ks_Ta = eeprom_vars.Ks_Ta;
 
     let mut a_comp: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
     for i in 0..PIXEL_COUNT {
@@ -391,7 +462,9 @@ fn calc_a_comp(T_a: f32) -> [f32; PIXEL_COUNT] {
 }
 
 fn calc_T_o(emissivity: f32, T_a: f32, V_IR_compensated: [f32; PIXEL_COUNT], a_comp: [f32; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
-    let Ks_To2 = EEPROM_VARS.Ks_To.2;
+    let eeprom_vars = EEPROM_VARS.as_ref().unwrap();
+
+    let Ks_To2 = eeprom_vars.Ks_To.2;
 
     let T_r = T_a - 8.0;
     let T_aK4 = (T_a + 273.15).powi(4);
@@ -419,6 +492,8 @@ fn calc_T_o(emissivity: f32, T_a: f32, V_IR_compensated: [f32; PIXEL_COUNT], a_c
 }
 
 fn calc_T_o_extra(T_o: [f32; PIXEL_COUNT], emissivity: f32, T_a: f32, V_IR_compensated: [f32; PIXEL_COUNT], a_comp: [f32; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
+    let eeprom_vars = EEPROM_VARS.as_ref().unwrap();
+
     let T_r = T_a - 8.0;
     let T_aK4 = (T_a + 273.15).powi(4);
     let T_rK4 = (T_r + 273.15).powi(4);
@@ -432,24 +507,24 @@ fn calc_T_o_extra(T_o: [f32; PIXEL_COUNT], emissivity: f32, T_a: f32, V_IR_compe
         let CT_x: f32;
 
         if T_o[i] < 0.0 {
-            Ks_To_x = EEPROM_VARS.Ks_To.0;
-            Alpha_corr_x = EEPROM_VARS.Ks_To.0;
+            Ks_To_x = eeprom_vars.Ks_To.0;
+            Alpha_corr_x = eeprom_vars.Ks_To.0;
             CT_x = -40.0;
         }
-        else if T_o[i] < EEPROM_VARS.CT3 as f32 {
-            Ks_To_x = EEPROM_VARS.Ks_To.1;
-            Alpha_corr_x = EEPROM_VARS.Alpha_corr.1;
+        else if T_o[i] < eeprom_vars.CT3 as f32 {
+            Ks_To_x = eeprom_vars.Ks_To.1;
+            Alpha_corr_x = eeprom_vars.Alpha_corr.1;
             CT_x = 0.0;
         }
-        else if T_o[i] < EEPROM_VARS.CT4 as f32 {
-            Ks_To_x = EEPROM_VARS.Ks_To.2;
-            Alpha_corr_x = EEPROM_VARS.Alpha_corr.2;
-            CT_x = EEPROM_VARS.CT3 as f32;
+        else if T_o[i] < eeprom_vars.CT4 as f32 {
+            Ks_To_x = eeprom_vars.Ks_To.2;
+            Alpha_corr_x = eeprom_vars.Alpha_corr.2;
+            CT_x = eeprom_vars.CT3 as f32;
         }
         else {
-            Ks_To_x = EEPROM_VARS.Ks_To.3;
-            Alpha_corr_x = EEPROM_VARS.Alpha_corr.3;
-            CT_x = EEPROM_VARS.CT4 as f32;
+            Ks_To_x = eeprom_vars.Ks_To.3;
+            Alpha_corr_x = eeprom_vars.Alpha_corr.3;
+            CT_x = eeprom_vars.CT4 as f32;
         }
  
         T_o_extra[i] = V_IR_compensated[i];
