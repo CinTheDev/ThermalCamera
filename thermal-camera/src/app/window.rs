@@ -50,7 +50,7 @@ pub struct ThermalApp {
 
     show_options: bool,
 
-    image_rx: Option<mpsc::Receiver<ImageRead>>,
+    image_rx: Option<mpsc::Receiver<Result<ImageRead, String>>>,
     rx_active: bool,
     args_tx: Option<mpsc::Sender<Opt>>,
 
@@ -74,7 +74,7 @@ impl ThermalApp {
         return s;
     }
 
-    fn get_thread_receiver(&mut self, ctx: &egui::Context) -> &mut Receiver<ImageRead> {
+    fn get_thread_receiver(&mut self, ctx: &egui::Context) -> &mut Receiver<Result<ImageRead, String>> {
         let options_clone = self.options.clone();
 
         self.image_rx.get_or_insert_with(|| {
