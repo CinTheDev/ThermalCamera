@@ -102,6 +102,7 @@ impl ThermalApp {
 
             if temp_grid.is_err() {
                 tx.send(Err(temp_grid.unwrap_err())).unwrap();
+                thread::sleep(std::time::Duration::from_millis(5000)); // Don't spam error messages
                 continue;
             }
 
