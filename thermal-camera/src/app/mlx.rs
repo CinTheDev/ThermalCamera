@@ -130,12 +130,9 @@ fn wait_for_data() {
         if new_data { break }
     }
 
-    //let mut status_reg = bsp_mlx::read_value(0x8000);
     status_reg &= !0x8; // Clear that bit
     
-    bsp_mlx::write(0x8000, status_reg).unwrap_or_else(|err| {
-        println!("Couldn't wait for data: {}", err);
-    });
+    bsp_mlx::write(0x8000, status_reg).unwrap_or(()); // Ignore errors
 }
 
 impl Default for TemperatureRead {

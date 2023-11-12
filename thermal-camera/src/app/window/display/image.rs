@@ -1,5 +1,5 @@
 use super::{egui, ThermalApp, mlx};
-use super::IMAGE_X_SPACE;
+use super::{IMAGE_X_SPACE, SCALE_X_SPACE};
 
 pub fn show_image(app: &mut ThermalApp, ui: &mut egui::Ui) {
     let texture = app.picture.as_ref().unwrap();
@@ -14,8 +14,11 @@ pub fn show_image(app: &mut ThermalApp, ui: &mut egui::Ui) {
         // Draw error message
         let txt_col = egui::Color32::RED;
         let bg_col = egui::Color32::BLACK;
-        let error_msg = format!("Error while reading picture: {}", app.last_read.as_ref().unwrap_err());
-        let pos = app.window_size / 2.0;
+        let error_msg = format!("Error while reading picture:\n{}", app.last_read.as_ref().unwrap_err());
+        let pos = egui::vec2(
+            app.window_size.x * SCALE_X_SPACE + 0.05,
+            app.window_size.y / 2.0
+        );
 
         let painter = ui.painter();
         let txt_galley = painter.layout_no_wrap(error_msg, egui::FontId::default(), txt_col);
