@@ -44,7 +44,11 @@ pub fn get_scale(color_type: ColorTypes) -> [u8; GRADIENT_COUNT * 3] {
 pub fn set_framerate(val: u8) {
     let speed_val: u16 = val.min(7) as u16;
 
-    let mut ctrl_register_1 = bsp_mlx::read_value(0x800D);
+    let mut mlx_response = bsp_mlx::read_value(0x800D);
+
+    if mlx_response.is_err() { return; }
+    let mut ctrl_register_1 = mlx_response.unwrap();
+
     ctrl_register_1 &= 0b111_1_11_000_111_1111;
     ctrl_register_1 |= speed_val << 7;
 
@@ -89,7 +93,11 @@ pub fn read_temperatures() -> TemperatureRead {
 fn read_raw_image() -> [u16; PIXEL_COUNT] {
     let mut img: [u16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
 
-    let subpage = bsp_mlx::read_value(0x8000) & 0x1;
+    let mlx_response = bsp_mlx::read_value(0x8000);
+
+    if mlx_response.is_err() { return img; }
+    let subpage = mlx_response.unwrap() & 0x1;
+
     let mut offset = subpage;
 
     for _sub in 0..2 {
@@ -102,9 +110,11 @@ fn read_raw_image() -> [u16; PIXEL_COUNT] {
     
                 addr += pos;
     
-                let meas = bsp_mlx::read_value(0x0400 + addr);
+                let mlx_response = bsp_mlx::read_value(0x0400 + addr);
+
+                if mlx_response.is_err() { continue; }
     
-                img[addr as usize ] = meas;
+                img[addr as usize ] = mlx_response.unwrap();
             }
         }
 
