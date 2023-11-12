@@ -83,10 +83,10 @@ fn get_eeprom_val(address: u16) -> u16 {
 // | Temperature Calculations |
 // ----------------------------
 
-pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
+pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> Result<[f32; PIXEL_COUNT], String> {
     const EMISSIVITY: f32 = 1.0;
 
-    let Resolution_corr: f32 = 2_f32.powi(EEPROM_VARS.Resolution as i32) / 2_f32.powi((super::read_value(0x800D) as i32 & 0x0C00) >> 10);
+    let Resolution_corr: f32 = 2_f32.powi(EEPROM_VARS.Resolution as i32) / 2_f32.powi((super::read_value(0x800D)? as i32 & 0x0C00) >> 10);
 
     // Calculate Voltage
     let V_dd = calc_V_dd(Resolution_corr);
@@ -123,7 +123,7 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
     let bad_pixels = EEPROM_VARS.bad_pixels;
     let fixed_t_o = fix_bad_pixels(T_o_extra, bad_pixels);
     
-    return fixed_t_o;
+    return Ok(fixed_t_o);
 }
 
 
