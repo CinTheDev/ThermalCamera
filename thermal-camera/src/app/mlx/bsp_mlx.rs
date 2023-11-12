@@ -16,24 +16,28 @@ pub fn init() {
     mlx_eeprom::restore();
 }
 
-pub fn write(address: u16, data: u16) {
+pub fn write(address: u16, data: u16) -> Result<u8, String> {
     let _i2c_lock = I2C_MUTEX.lock().unwrap();
 
-    let i2c_response = I2c::new();
+    let i2c_new_response = I2c::new();
 
-    if i2c_response.is_err() {
-        // TODO: Add error message
-        return;
+    if i2c_new_response.is_err() {
+        return Err("Error when accessing i2c peripheral".to_string());
     }
 
-    let mut i2c = i2c_response.unwrap();
+    let mut i2c = i2c_new_response.unwrap();
     i2c.set_slave_address(CAM_ADDR as u16).unwrap();
 
     let mut buffer: [u8; 4] = [0x00; 4];
     buffer[0..2].copy_from_slice(&address.to_be_bytes());
     buffer[2..4].copy_from_slice(&data.to_be_bytes());
     
-    i2c.write(&buffer).expect("I2C write failed.");
+    let i2c_write_response = i2c.write(&buffer);
+    if i2c_write_response.is_err() {
+        return Err("Error in i2c protocol: write".to_string());
+    }
+
+    return Ok(0);
 }
 
 pub fn read(address: u16, read_buffer: &mut [u8]) {
