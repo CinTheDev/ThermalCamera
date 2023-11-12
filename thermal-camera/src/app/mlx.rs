@@ -55,9 +55,9 @@ pub fn set_framerate(val: u8) {
     bsp_mlx::write(0x800D, ctrl_register_1);
 }
 
-pub fn read_temperatures() -> TemperatureRead {
-    let image_raw = read_raw_image();
-    let image_eval = bsp_mlx::evaluate_image(image_raw);
+pub fn read_temperatures() -> Result<TemperatureRead, String> {
+    let image_raw = read_raw_image()?;
+    let image_eval = bsp_mlx::evaluate_image(image_raw)?;
 
     let mut image_flip: [f32; PIXEL_COUNT] = [0.0; PIXEL_COUNT];
 
@@ -83,21 +83,17 @@ pub fn read_temperatures() -> TemperatureRead {
         }
     }
 
-    return TemperatureRead {
+    return Ok(TemperatureRead {
         temperature_grid: image_flip,
         min_temp,
         max_temp,
-    }
+    })
 }
 
-fn read_raw_image() -> [u16; PIXEL_COUNT] {
+fn read_raw_image() -> Result<[u16; PIXEL_COUNT], String> {
     let mut img: [u16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
 
-    let mlx_response = bsp_mlx::read_value(0x8000);
-
-    if mlx_response.is_err() { return img; }
-    let subpage = mlx_response.unwrap() & 0x1;
-
+    let subpage = bsp_mlx::read_value(0x8000)? & 0x1;
     let mut offset = subpage;
 
     for _sub in 0..2 {
@@ -110,18 +106,14 @@ fn read_raw_image() -> [u16; PIXEL_COUNT] {
     
                 addr += pos;
     
-                let mlx_response = bsp_mlx::read_value(0x0400 + addr);
-
-                if mlx_response.is_err() { continue; }
-    
-                img[addr as usize ] = mlx_response.unwrap();
+                img[addr as usize ] = bsp_mlx::read_value(0x0400 + addr)?;
             }
         }
 
         offset += 1;
     }
 
-    return img;
+    return Ok(img);
 }
 
 fn wait_for_data() {
