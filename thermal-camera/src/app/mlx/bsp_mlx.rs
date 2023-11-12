@@ -18,7 +18,7 @@ pub fn write(address: u16, data: u16) -> Result<(), String> {
     let i2c_p_response = I2c::new();
 
     if i2c_p_response.is_err() {
-        return Err("Error when accessing i2c peripheral for write".to_string());
+        return Err("I2C Peripheral failure".to_string());
     }
 
     let mut i2c = i2c_p_response.unwrap();
@@ -30,7 +30,7 @@ pub fn write(address: u16, data: u16) -> Result<(), String> {
     
     let i2c_write_response = i2c.write(&buffer);
     if i2c_write_response.is_err() {
-        return Err("Error in i2c protocol: write".to_string());
+        return Err("I2C Write failure".to_string());
     }
 
     return Ok(());
@@ -42,7 +42,7 @@ pub fn read(address: u16, read_buffer: &mut [u8]) -> Result<(), String> {
     let i2c_p_response = I2c::new();
 
     if i2c_p_response.is_err() {
-        return Err("Error when accessing i2c peripheral for read".to_string());
+        return Err("I2C Peripheral failure".to_string());
     }
 
     let mut i2c = i2c_p_response.unwrap();
@@ -53,7 +53,7 @@ pub fn read(address: u16, read_buffer: &mut [u8]) -> Result<(), String> {
 
     let i2c_read_response = i2c.write_read(&write_buffer, read_buffer);
     if i2c_read_response.is_err() {
-        return Err("Error in i2c protocol: read".to_string());
+        return Err("I2C Read failure".to_string());
     }
 
     return Ok(());
