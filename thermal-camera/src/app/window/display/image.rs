@@ -39,7 +39,7 @@ pub fn update_image(app: &mut ThermalApp, ctx: &egui::Context) {
         
         app.scale_bound = (img_read.temperature_read.min_temp, img_read.temperature_read.max_temp);
 
-        app.last_read.replace(img_read);
+        app.last_read = Ok(img_read);
     }
 }
 
@@ -88,7 +88,7 @@ pub fn check_clicked(app: &mut ThermalApp, ui: &mut egui::Ui, response: egui::Re
 
     let mut temperature = 0.0;
 
-    if app.last_read.is_some() {
+    if app.last_read.is_ok() {
         temperature = app.last_read.as_ref().unwrap().temperature_read.temperature_grid[index];
     }
 

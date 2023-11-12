@@ -33,13 +33,12 @@ pub fn open_window(args: Opt) {
     .unwrap();
 }
 
-#[derive(Default)]
 pub struct ThermalApp {
     window_size: egui::Vec2,
 
     options: Opt,
 
-    last_read: Option<mlx::ImageRead>,
+    last_read: Result<mlx::ImageRead, String>,
 
     picture: Option<egui::TextureHandle>,
     picture_options: egui::TextureOptions,
@@ -113,7 +112,7 @@ impl ThermalApp {
     }
 
     fn recolor_image(&mut self, ctx: &egui::Context) {
-        if self.last_read.is_none() { return; }
+        if self.last_read.is_err() { return; }
 
         let last_read = self.last_read.as_ref().unwrap();
 
@@ -126,7 +125,7 @@ impl ThermalApp {
 
         self.picture.as_mut().unwrap().set(img, self.picture_options);
 
-        self.last_read.replace(color_grid);
+        self.last_read = Ok(color_grid);
 
         ctx.request_repaint();
     }
@@ -175,5 +174,32 @@ impl eframe::App for ThermalApp {
 
             options::show(self, ui);
         });
+    }
+}
+
+impl Default for ThermalApp {
+    fn default() -> Self {
+        Self {
+            window_size: egui::Vec2::ZERO,
+
+            options: Opt::default(),
+
+            last_read: Err("Not initialized".to_string()),
+
+            picture: None,
+            picture_options: egui::TextureOptions::default(),
+
+            raw_scale: None,
+            scale: None,
+            scale_bound: (0.0, 0.0),
+
+            show_options: false,
+
+            image_rx: None,
+            rx_active: false,
+            args_tx: None,
+
+            usb_detected: false,
+        }
     }
 }
