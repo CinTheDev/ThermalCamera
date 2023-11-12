@@ -16,6 +16,7 @@ pub enum ColorTypes {
     Hue,
 }
 
+#[derive(Debug)]
 pub struct TemperatureRead {
     pub temperature_grid: [f32; PIXEL_COUNT],
     pub min_temp: f32,
