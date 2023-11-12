@@ -16,7 +16,7 @@ pub fn init() {
     mlx_eeprom::restore();
 }
 
-pub fn write(address: u16, data: u16) -> Result<u8, String> {
+pub fn write(address: u16, data: u16) -> Result<(), String> {
     let _i2c_lock = I2C_MUTEX.lock().unwrap();
 
     let i2c_p_response = I2c::new();
@@ -37,10 +37,10 @@ pub fn write(address: u16, data: u16) -> Result<u8, String> {
         return Err("Error in i2c protocol: write".to_string());
     }
 
-    return Ok(0);
+    return Ok(());
 }
 
-pub fn read(address: u16, read_buffer: &mut [u8]) -> Result<u8, String> {
+pub fn read(address: u16, read_buffer: &mut [u8]) -> Result<(), String> {
     let _i2c_lock = I2C_MUTEX.lock().unwrap();
 
     let i2c_p_response = I2c::new();
@@ -60,7 +60,7 @@ pub fn read(address: u16, read_buffer: &mut [u8]) -> Result<u8, String> {
         return Err("Error in i2c protocol: read".to_string());
     }
 
-    return Ok(0);
+    return Ok(());
 }
 
 pub fn read_value(address: u16) -> u16 {
