@@ -89,13 +89,13 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> Result<[f32; PIXEL_COUNT], Stri
     let Resolution_corr: f32 = 2_f32.powi(EEPROM_VARS.Resolution as i32) / 2_f32.powi((super::read_value(0x800D)? as i32 & 0x0C00) >> 10);
 
     // Calculate Voltage
-    let V_dd = calc_V_dd(Resolution_corr);
+    let V_dd = calc_V_dd(Resolution_corr)?;
 
     // Calculate Ambient temperature
-    let T_a = calc_T_a();
+    let T_a = calc_T_a()?;
 
     // Compensate for gain
-    let K_gain = calc_K_gain();
+    let K_gain = calc_K_gain()?;
 
     let pix_gain = calc_pix_gain(K_gain, pix_data);
 
@@ -106,7 +106,7 @@ pub fn evaluate(pix_data: [u16; PIXEL_COUNT]) -> Result<[f32; PIXEL_COUNT], Stri
     let V_IR_Em_compensated = calc_V_IR_Em_compensated(EMISSIVITY, pix_os);
 
     // CP gain compensation
-    let pix_OS_CP_SP = calc_pix_OS_CP_SPX(V_dd, T_a, K_gain);
+    let pix_OS_CP_SP = calc_pix_OS_CP_SPX(V_dd, T_a, K_gain)?;
 
     // Gradient compensation
     let V_IR_compensated = calc_V_IR_compensated(V_IR_Em_compensated, pix_OS_CP_SP);
@@ -244,17 +244,17 @@ pub fn restore() -> EepromVars {
 // | Temperature calculation functions |
 // -------------------------------------
 
-fn calc_V_dd(Resolution_corr: f32) -> f32 {
+fn calc_V_dd(Resolution_corr: f32) -> Result<f32, String> {
     let VDD_25: f32 = EEPROM_VARS.VDD_25 as f32;
     let K_Vdd: f32 = EEPROM_VARS.K_Vdd as f32;
 
-    let mut V_ram: f32 = super::read_value(0x072A) as f32;
+    let mut V_ram: f32 = super::read_value(0x072A)? as f32;
     if V_ram > 32767.0 { V_ram -= 65536.0 }
     let V_dd: f32 = (Resolution_corr * V_ram - VDD_25) / K_Vdd + 3.3;
-    return V_dd;
+    return Ok(V_dd);
 }
 
-fn calc_T_a() -> f32 {
+fn calc_T_a() -> Result<f32, String> {
     let VDD_25 = EEPROM_VARS.VDD_25;
     let K_Vdd = EEPROM_VARS.K_Vdd;
     let K_V_PTAT = EEPROM_VARS.K_V_PTAT;
@@ -262,19 +262,19 @@ fn calc_T_a() -> f32 {
     let V_PTAT_25 = EEPROM_VARS.V_PTAT_25;
     let Alpha_PTAT = EEPROM_VARS.Alpha_PTAT;
 
-    let mut dV: f32 = super::read_value(0x072A) as f32;
+    let mut dV: f32 = super::read_value(0x072A)? as f32;
     if dV > 32767.0 {
         dV -= 65536.0;
     }
     dV -= VDD_25 as f32;
     dV /= K_Vdd as f32;
 
-    let mut V_PTAT: f32 = super::read_value(0x0720) as f32;
+    let mut V_PTAT: f32 = super::read_value(0x0720)? as f32;
     if V_PTAT > 32767.0 {
         V_PTAT -= 65536.0;
     }
 
-    let mut V_BE: f32 = super::read_value(0x0700) as f32;
+    let mut V_BE: f32 = super::read_value(0x0700)? as f32;
     if V_BE > 32767.0 {
         V_BE -= 65536.0;
     }
@@ -286,16 +286,16 @@ fn calc_T_a() -> f32 {
     T_a /= K_T_PTAT;
     T_a += 25.0;
 
-    return T_a;
+    return Ok(T_a);
 }
 
-fn calc_K_gain() -> f32 {
+fn calc_K_gain() -> Result<f32, String> {
     let GAIN: f32 = EEPROM_VARS.GAIN as f32;
 
-    let mut gain_ram: f32 = super::read_value(0x070A) as f32;
+    let mut gain_ram: f32 = super::read_value(0x070A)? as f32;
     if gain_ram > 32767.0 { gain_ram -= 65536.0 }
     let K_gain: f32 = GAIN / gain_ram;
-    return K_gain;
+    return Ok(K_gain);
 }
 
 fn calc_pix_gain(K_gain: f32, pixel_data: [u16; PIXEL_COUNT]) -> [f32; PIXEL_COUNT] {
@@ -333,13 +333,13 @@ fn calc_V_IR_Em_compensated(emissivity: f32, pix_os: [f32; PIXEL_COUNT]) -> [f32
     return V_IR_Em_compensated;
 }
 
-fn calc_pix_OS_CP_SPX(V_dd: f32, T_a: f32, K_gain: f32) -> (f32, f32) {
+fn calc_pix_OS_CP_SPX(V_dd: f32, T_a: f32, K_gain: f32) -> Result<(f32, f32), String> {
     let K_Ta_CP = EEPROM_VARS.K_Ta_CP;
     let K_V_CP = EEPROM_VARS.K_V_CP;
     let Off_CP = EEPROM_VARS.Off_CP;
 
-    let mut pix_gain_CP_SP0_RAM = super::read_value(0x0708) as f32;
-    let mut pix_gain_CP_SP1_RAM = super::read_value(0x0728) as f32;
+    let mut pix_gain_CP_SP0_RAM = super::read_value(0x0708)? as f32;
+    let mut pix_gain_CP_SP1_RAM = super::read_value(0x0728)? as f32;
     if pix_gain_CP_SP0_RAM > 32767.0 { pix_gain_CP_SP0_RAM -= 65536.0 }
     if pix_gain_CP_SP1_RAM > 32767.0 { pix_gain_CP_SP1_RAM -= 65536.0 }
 
@@ -355,7 +355,7 @@ fn calc_pix_OS_CP_SPX(V_dd: f32, T_a: f32, K_gain: f32) -> (f32, f32) {
     pix_OS_CP_SP0 -= Off_CP.0 as f32 * coef_1 * coef_2;
     pix_OS_CP_SP1 -= Off_CP.1 as f32 * coef_1 * coef_2;
 
-    return (pix_OS_CP_SP0, pix_OS_CP_SP1);
+    return Ok((pix_OS_CP_SP0, pix_OS_CP_SP1));
 }
 
 fn calc_V_IR_compensated(V_IR_Em_compensated: [f32; PIXEL_COUNT], pix_OS_CP_SP: (f32, f32)) -> [f32; PIXEL_COUNT] {
