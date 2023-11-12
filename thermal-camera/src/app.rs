@@ -9,8 +9,6 @@ use mlx::ColorTypes;
 use mlx::ImageRead;
 
 pub fn run() {
-    mlx::init();
-
     let opt = Opt::from_args();
 
     if opt.windowed {

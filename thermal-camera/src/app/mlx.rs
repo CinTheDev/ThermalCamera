@@ -28,10 +28,6 @@ pub struct ImageRead {
     pub temperature_read: TemperatureRead,
 }
 
-pub fn init() {
-    bsp_mlx::init();
-}
-
 pub fn take_image(color_type: &ColorTypes) -> Result<ImageRead, String> {
     let temperature_grid = read_temperatures()?;
 

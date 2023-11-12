@@ -12,10 +12,6 @@ lazy_static! {
     static ref I2C_MUTEX: Mutex<u32> = Mutex::new(0);
 }
 
-pub fn init() {
-    mlx_eeprom::restore();
-}
-
 pub fn write(address: u16, data: u16) -> Result<(), String> {
     let _i2c_lock = I2C_MUTEX.lock().unwrap();
 
