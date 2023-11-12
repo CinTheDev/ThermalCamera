@@ -24,7 +24,7 @@ pub fn update_image(app: &mut ThermalApp, ctx: &egui::Context) {
         let img_response = rx_img.unwrap();
 
         if img_response.is_err() {
-            // TODO: Display Error
+            app.last_read = img_response;
             return;
         }
 
