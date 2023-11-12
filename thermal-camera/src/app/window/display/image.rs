@@ -21,7 +21,14 @@ pub fn update_image(app: &mut ThermalApp, ctx: &egui::Context) {
     let rx_img = rx.try_recv();
 
     if rx_img.is_ok() {
-        let img_read = rx_img.unwrap();
+        let img_response = rx_img.unwrap();
+
+        if img_response.is_err() {
+            // TODO: Display Error
+            return;
+        }
+
+        let img_read = img_response.unwrap();
         
         let img = egui::ColorImage::from_rgb(
             [mlx::PIXELS_WIDTH, mlx::PIXELS_HEIGHT],
