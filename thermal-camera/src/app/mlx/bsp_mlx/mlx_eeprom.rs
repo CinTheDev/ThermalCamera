@@ -57,16 +57,11 @@ lazy_static!(
     static ref EEPROM_VARS: Result<EepromVars, String> = restore();
 );
 
-static mut EEPROM_RAW: Result<[u16; EEPROM_SIZE], String> = Err("EEPROM values haven't been read".to_string());
+//static mut EEPROM_RAW: Result<[u16; EEPROM_SIZE], String> = Err("EEPROM values haven't been read".to_string());
 
-// TODO: Do Error checking here
-fn read_eeprom() {
+fn read_eeprom() -> Result<[u16; EEPROM_SIZE], String> {
     let mut d: [u8; EEPROM_SIZE * 2] = [0x00; EEPROM_SIZE * 2];
-    let mlx_response = super::read(0x2410, &mut d);
-
-    if mlx_response.is_err() {
-        unsafe { EEPROM_RAW = Err(mlx_response.unwrap_err()); }
-    }
+    super::read(0x2410, &mut d)?;
 
     let mut converted: [u16; EEPROM_SIZE] = [0x00; EEPROM_SIZE];
 
@@ -76,17 +71,12 @@ fn read_eeprom() {
         converted[i] = (msb << 8) | lsb;
     }
 
-    unsafe { EEPROM_RAW = Ok(converted) };
+    return Ok(converted);
 }
 
-fn get_eeprom_val(address: u16) -> u16 {
-    let index:usize = (address - 0x2410) as usize;
-    unsafe {
-        if EEPROM_RAW.is_err() {
-            return 0;
-        }
-        return EEPROM_RAW.as_ref().unwrap()[index];
-    }
+fn get_eeprom_val(address: u16, eeprom_raw: [u16; EEPROM_SIZE]) -> u16 {
+    let index: usize = (address - 0x2410) as usize;
+    return eeprom_raw[index];
 }
 
 // ----------------------------
