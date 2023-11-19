@@ -108,8 +108,6 @@ Use the display guide mentioned above in Display Setup to connect the relevant p
 ## TODOs
 
 - Disable energy saver on raspi (with script)
-- Disable mouse appearance (with script)
-- Disable ratpoison splash screen (or replace with other window manager)
 - Add left-hand-layout option
 - Remember options in config file
 - Display selected in option menu
