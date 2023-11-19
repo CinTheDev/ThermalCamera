@@ -10,4 +10,6 @@ sudo dpkg-buildpackage -us -uc -b
 cd ..
 sudo dpkg -i usbmount_0.0.24_all.deb
 
+sudo apt --fix-broken -y install
+
 sudo sed -i "s/FS_MOUNTOPTIONS=.*/FS_MOUNTOPTIONS=\"gid=users,dmask=0007,fmask=0117\"/g" /etc/usbmount/usbmount.conf
