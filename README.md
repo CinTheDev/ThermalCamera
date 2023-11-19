@@ -107,4 +107,9 @@ Use the display guide mentioned above in Display Setup to connect the relevant p
 
 ## TODOs
 
-- Improve eframe UI (aspect ratio correction, nicer buttons, ...)
+- Disable energy saver on raspi (with script)
+- Disable mouse appearance (with script)
+- (Automate wifi stick configuration)
+- Fine tune case dimensions
+- Add hole to carrier_raspi for easier sd card access
+- Make handgrip change easier (without requiring inner access)
