@@ -109,7 +109,10 @@ Use the display guide mentioned above in Display Setup to connect the relevant p
 
 - Disable energy saver on raspi (with script)
 - Disable mouse appearance (with script)
-- (Automate wifi stick configuration)
+- Disable ratpoison splash screen (or replace with other window manager)
+- Add left-hand-layout option
+- Remember options in config file
+- Display selected in option menu
 - Fine tune case dimensions
 - Add hole to carrier_raspi for easier sd card access
 - Make handgrip change easier (without requiring inner access)
