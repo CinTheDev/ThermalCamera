@@ -13,7 +13,7 @@ sudo apt -y install git xorg xserver-xorg-video-fbturbo xserver-xorg-input-evdev
 sudo raspi-config nonint do_boot_behaviour B4
 
 sudo sed -i "s/autologin-user=pi/autologin-user=thermal-camera/g" /etc/lightdm/lightdm.conf
-sudo sed -i "s/#xserver-command=X/xserver-command=X -s 0 dpms/g" /etc/lightdm/lightdm.conf
+sudo sed -i "s/#xserver-command=X/xserver-command=X -s 0 dpms -nocursor/g" /etc/lightdm/lightdm.conf
 
 # Move thermal-camera binary and run script
 sudo mkdir /opt/thermal-camera
