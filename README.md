@@ -107,6 +107,7 @@ Use the display guide mentioned above in Display Setup to connect the relevant p
 
 ## TODOs
 
+- Improve info messages in scripts
 - Disable energy saver on raspi (with script)
 - Add left-hand-layout option
 - Remember options in config file

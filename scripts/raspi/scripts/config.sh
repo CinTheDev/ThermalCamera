@@ -1,11 +1,7 @@
 #!/bin/bash
 
-echo "Updating system..."
-
 sudo apt update
 sudo apt -y full-upgrade
-
-echo "Installing X"
 
 sudo apt -y install git xorg xserver-xorg-video-fbturbo xserver-xorg-input-evdev x11-xserver-utils lightdm ratpoison
 
