@@ -13,7 +13,7 @@ sudo sed -i "s/#xserver-command=X/xserver-command=X -s 0 dpms -nocursor/g" /etc/
 
 # Disable ratpoison splash message
 sudo touch /etc/ratpoisonrc
-sudo echo "startup_message off" >> /etc/ratpoisonrc
+sudo bash -c 'echo "startup_message off" > /etc/ratpoisonrc'
 
 # Move thermal-camera binary and run script
 sudo mkdir /opt/thermal-camera
