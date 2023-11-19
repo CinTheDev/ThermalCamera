@@ -93,7 +93,7 @@ pub fn check_clicked(app: &mut ThermalApp, ui: &mut egui::Ui, response: egui::Re
     }
 
     // Calculate position inside image
-    let pos = pos_option.unwrap();
+    let pos = pos_option.unwrap() + egui::vec2(-20.0, -40.0);
 
     let rect_image = response.rect;
 
