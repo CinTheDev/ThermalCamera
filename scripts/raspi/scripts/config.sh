@@ -15,6 +15,10 @@ sudo raspi-config nonint do_boot_behaviour B4
 sudo sed -i "s/autologin-user=pi/autologin-user=thermal-camera/g" /etc/lightdm/lightdm.conf
 sudo sed -i "s/#xserver-command=X/xserver-command=X -s 0 dpms -nocursor/g" /etc/lightdm/lightdm.conf
 
+# Disable ratpoison splash message
+touch /etc/ratpoisonrc
+echo "startup_message off" >> /etc/ratpoisonrc
+
 # Move thermal-camera binary and run script
 sudo mkdir /opt/thermal-camera
 sudo mkdir /opt/thermal-camera/bin
