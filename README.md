@@ -107,10 +107,9 @@ Use the display guide mentioned above in Display Setup to connect the relevant p
 
 ## TODOs
 
-- Improve info messages in scripts
+- Update README
 - Add left-hand-layout option
 - Remember options in config file
 - Display selected in option menu
-- Fine tune case dimensions
-- Add hole to carrier_raspi for easier sd card access
+- Fix bug where if an image is freezed, new images from the mlx queue up.
 - Make handgrip change easier (without requiring inner access)
