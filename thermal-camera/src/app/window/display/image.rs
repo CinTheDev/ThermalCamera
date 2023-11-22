@@ -36,11 +36,16 @@ pub fn show_image(app: &mut ThermalApp, ui: &mut egui::Ui) {
 }
 
 pub fn update_image(app: &mut ThermalApp, ctx: &egui::Context) {
-    // Don't update image if not supposed to
-    if !app.rx_active { return }
-
+    let should_update = app.rx_active;
     let rx = app.get_thread_receiver(ctx);
-
+    
+    // Don't update image and clear incoming frames if not supposed to
+    if !should_update {
+        while rx.try_recv().is_ok() {}
+        
+        return;
+    }
+    
     let rx_img = rx.try_recv();
 
     if rx_img.is_ok() {
