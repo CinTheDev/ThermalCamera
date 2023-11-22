@@ -111,5 +111,4 @@ Use the display guide mentioned above in Display Setup to connect the relevant p
 - Add left-hand-layout option
 - Remember options in config file
 - Display selected in option menu
-- Fix bug where if an image is freezed, new images from the mlx queue up.
 - Make handgrip change easier (without requiring inner access)
