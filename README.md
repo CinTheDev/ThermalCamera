@@ -109,6 +109,6 @@ Use the display guide mentioned above in Display Setup to connect the relevant p
 
 - Update README
 - Add left-hand-layout option
-- Remember options in config file
-- Display selected in option menu
-- Make handgrip change easier (without requiring inner access)
+- Remember settings in config file
+- Display selected in settings menu
+- Improve MLX Framerate setting
