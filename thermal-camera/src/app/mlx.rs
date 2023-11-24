@@ -9,6 +9,17 @@ pub const GRADIENT_WIDTH: usize = 1;
 pub const GRADIENT_HEIGHT: usize = 256;
 pub const GRADIENT_COUNT: usize = GRADIENT_WIDTH * GRADIENT_HEIGHT;
 
+pub enum Framerates {
+    Half = 0b000,
+    One = 0b001,
+    Two = 0b010,
+    Four = 0b011,
+    Eight = 0b100,
+    Sixteen = 0b101,
+    Thirtytwo = 0b110,
+    Sixtyfour = 0b111,
+}
+
 #[derive(Debug, Clone, Copy)]
 pub enum ColorTypes {
     Gray,
