@@ -12,6 +12,7 @@ mod display;
 mod controls;
 mod options;
 
+// TODO: Define space between elements with style.space
 // How much of the screen is covered by these widgets
 const SCALE_X_SPACE: f32 = 0.1;
 const CONTROLS_X_SPACE: f32 = 0.12;
