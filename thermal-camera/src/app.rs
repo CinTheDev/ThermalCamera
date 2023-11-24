@@ -58,6 +58,9 @@ pub struct Opt {
 
     #[structopt(short, long)]
     windowed: bool,
+
+    #[structopt(short, long)]
+    left_handed: bool,
 }
 
 impl Default for Opt {
@@ -67,6 +70,7 @@ impl Default for Opt {
             color_type: ColorTypes::Cheap,
             framerate: mlx::Framerates::Two,
             windowed: false,
+            left_handed: false,
         }
     }
 }
