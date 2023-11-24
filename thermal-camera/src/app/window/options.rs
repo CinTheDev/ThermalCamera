@@ -18,7 +18,7 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
     let bg_painter = ui.painter();
     bg_painter.rect_filled(ui.max_rect().expand(10.0), 5.0, bg_color);
 
-    const ROWS: u32 = 3;
+    const ROWS: u32 = 4;
     let spacing_y = ui.spacing().item_spacing.y;
     let elements_height = ui.available_height() / ROWS as f32 - spacing_y;
     let element_standard_size = egui::vec2(0.0, elements_height);
@@ -99,6 +99,23 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
                 }
             });
         });
+
+        // Handedness
+        ui.horizontal(|ui| {
+            ui.add_sized(
+                element_standard_size,
+                egui::Label::new("Left Hand Mode")
+            );
+
+            let btn_left_hand = ui.add_sized(
+                element_standard_size,
+                egui::Button::new("Toggle")
+            );
+
+            if btn_left_hand.clicked() {
+                on_toggle_hand(app);
+            }
+        });
     });
 }
 
@@ -120,4 +137,8 @@ fn on_btn_speed(app: &mut ThermalApp, framerate: mlx::Framerates) {
     
     app.show_options = false;
     app.update_options();
+}
+
+fn on_toggle_hand(app: &mut ThermalApp) {
+
 }
