@@ -140,5 +140,8 @@ fn on_btn_speed(app: &mut ThermalApp, framerate: mlx::Framerates) {
 }
 
 fn on_toggle_hand(app: &mut ThermalApp) {
+    app.options.left_handed = !app.options.left_handed;
 
+    app.show_options = false;
+    app.update_options();
 }
