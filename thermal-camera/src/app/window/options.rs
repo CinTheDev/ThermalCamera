@@ -89,13 +89,13 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
                 );
 
                 if btn_speed_low.clicked() {
-                    on_btn_speed(app, 2);
+                    on_btn_speed(app, mlx::Framerates::Two);
                 }
                 if btn_speed_medium.clicked() {
-                    on_btn_speed(app, 4);
+                    on_btn_speed(app, mlx::Framerates::Eight);
                 }
                 if btn_speed_high.clicked() {
-                    on_btn_speed(app, 6);
+                    on_btn_speed(app, mlx::Framerates::Thirtytwo);
                 }
             });
         });
