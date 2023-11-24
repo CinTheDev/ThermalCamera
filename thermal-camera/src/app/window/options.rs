@@ -41,30 +41,7 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
                 egui::Label::new("Coloring Algorithm")
             );
 
-            ui.columns(3, |col| {
-                let btn_coloring_gray = col[0].add_sized(
-                    element_standard_size,
-                    egui::Button::new("Grayscale")
-                );
-                let btn_coloring_cheap = col[1].add_sized(
-                    element_standard_size,
-                    egui::Button::new("Cheap")
-                );
-                let btn_coloring_hue = col[2].add_sized(
-                    element_standard_size,
-                    egui::Button::new("Hue")
-                );
-    
-                if btn_coloring_gray.clicked() {
-                    on_btn_coloring(app, col[0].ctx(), mlx::ColorTypes::Gray);
-                }
-                if btn_coloring_cheap.clicked() {
-                    on_btn_coloring(app, col[1].ctx(), mlx::ColorTypes::Cheap);
-                }
-                if btn_coloring_hue.clicked() {
-                    on_btn_coloring(app, col[2].ctx(), mlx::ColorTypes::Hue);
-                }
-            });
+            handle_options_color(ui, app, element_standard_size);
         });
 
         // Speed options
@@ -74,30 +51,7 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
                 egui::Label::new("Framerate")
             );
 
-            ui.columns(3, |col| {
-                let btn_speed_low = col[0].add_sized(
-                    element_standard_size,
-                    egui::Button::new("Low")
-                );
-                let btn_speed_medium = col[1].add_sized(
-                    element_standard_size,
-                    egui::Button::new("Medium")
-                );
-                let btn_speed_high = col[2].add_sized(
-                    element_standard_size,
-                    egui::Button::new("High")
-                );
-
-                if btn_speed_low.clicked() {
-                    on_btn_speed(app, mlx::Framerates::Two);
-                }
-                if btn_speed_medium.clicked() {
-                    on_btn_speed(app, mlx::Framerates::Eight);
-                }
-                if btn_speed_high.clicked() {
-                    on_btn_speed(app, mlx::Framerates::Thirtytwo);
-                }
-            });
+            handle_options_speed(ui, app, element_standard_size);
         });
 
         // Handedness
@@ -107,16 +61,74 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
                 egui::Label::new("Left Hand Mode")
             );
 
-            let btn_left_hand = ui.add_sized(
-                element_standard_size,
-                egui::Button::new("Toggle")
-            );
-
-            if btn_left_hand.clicked() {
-                on_toggle_hand(app);
-            }
+            handle_options_handedness(ui, app, element_standard_size);
         });
     });
+}
+
+fn handle_options_color(ui: &mut egui::Ui, app: &mut ThermalApp, element_size: egui::Vec2) {
+    ui.columns(3, |col| {
+        let btn_coloring_gray = col[0].add_sized(
+            element_size,
+            egui::Button::new("Grayscale")
+        );
+        let btn_coloring_cheap = col[1].add_sized(
+            element_size,
+            egui::Button::new("Cheap")
+        );
+        let btn_coloring_hue = col[2].add_sized(
+            element_size,
+            egui::Button::new("Hue")
+        );
+
+        if btn_coloring_gray.clicked() {
+            on_btn_coloring(app, col[0].ctx(), mlx::ColorTypes::Gray);
+        }
+        if btn_coloring_cheap.clicked() {
+            on_btn_coloring(app, col[1].ctx(), mlx::ColorTypes::Cheap);
+        }
+        if btn_coloring_hue.clicked() {
+            on_btn_coloring(app, col[2].ctx(), mlx::ColorTypes::Hue);
+        }
+    });
+}
+
+fn handle_options_speed(ui: &mut egui::Ui, app: &mut ThermalApp, element_size: egui::Vec2) {
+    ui.columns(3, |col| {
+        let btn_speed_low = col[0].add_sized(
+            element_size,
+            egui::Button::new("Low")
+        );
+        let btn_speed_medium = col[1].add_sized(
+            element_size,
+            egui::Button::new("Medium")
+        );
+        let btn_speed_high = col[2].add_sized(
+            element_size,
+            egui::Button::new("High")
+        );
+
+        if btn_speed_low.clicked() {
+            on_btn_speed(app, mlx::Framerates::Two);
+        }
+        if btn_speed_medium.clicked() {
+            on_btn_speed(app, mlx::Framerates::Eight);
+        }
+        if btn_speed_high.clicked() {
+            on_btn_speed(app, mlx::Framerates::Thirtytwo);
+        }
+    });
+}
+
+fn handle_options_handedness(ui: &mut egui::Ui, app: &mut ThermalApp, element_size: egui::Vec2) {
+    let btn_left_hand = ui.add_sized(
+        element_size,
+        egui::Button::new("Toggle")
+    );
+
+    if btn_left_hand.clicked() {
+        on_toggle_hand(app);
+    }
 }
 
 fn on_btn_close(app: &mut ThermalApp) {
