@@ -9,6 +9,7 @@ pub const GRADIENT_WIDTH: usize = 1;
 pub const GRADIENT_HEIGHT: usize = 256;
 pub const GRADIENT_COUNT: usize = GRADIENT_WIDTH * GRADIENT_HEIGHT;
 
+#[derive(Debug, Clone)]
 pub enum Framerates {
     Half = 0b000,
     One = 0b001,
