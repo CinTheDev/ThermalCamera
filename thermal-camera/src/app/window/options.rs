@@ -13,6 +13,7 @@ pub fn show(app: &mut ThermalApp, ui: &mut egui::Ui) {
     draw_options(app, &mut option_ui);
 }
 
+// TODO: Mirror options in left-hand-mode in a sensical way
 fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
     let bg_color = egui::Color32::BLACK;
     let bg_painter = ui.painter();

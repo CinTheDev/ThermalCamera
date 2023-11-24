@@ -108,7 +108,6 @@ Use the display guide mentioned above in Display Setup to connect the relevant p
 ## TODOs
 
 - Update README
-- Add left-hand-layout option
 - Remember settings in config file
 - Display selected in settings menu
 - Improve MLX Framerate setting
