@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 mod bsp_mlx;
 pub mod mlx_image;
 
@@ -162,6 +164,24 @@ impl Default for ImageRead {
         ImageRead {
             pixels: [0x00; PIXEL_COUNT * 3],
             temperature_read: TemperatureRead::default()
+        }
+    }
+}
+
+impl FromStr for Framerates {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "0.5" | "h" | "half" => Ok(Framerates::Half),
+            "1" | "one" => Ok(Framerates::One),
+            "2" | "two" => Ok(Framerates::Two),
+            "4" | "four" => Ok(Framerates::Four),
+            "8" | "eight" => Ok(Framerates::Eight),
+            "16" | "sixteen" => Ok(Framerates::Sixteen),
+            "32" | "thirtytwo" => Ok(Framerates::Thirtytwo),
+            "64" | "sixtyfour" => Ok(Framerates::Sixtyfour),
+            _ => Err("Unrecognised refresh rate. Only powers of 2 up to 64 are allowed")
         }
     }
 }

@@ -53,6 +53,8 @@ pub struct Opt {
     #[structopt(default_value = "hue")]
     color_type: ColorTypes,
 
+    framerate: mlx::Framerates,
+
     #[structopt(short, long)]
     windowed: bool,
 }
@@ -62,6 +64,7 @@ impl Default for Opt {
         Self {
             filename: "out.png".to_string(),
             color_type: ColorTypes::Cheap,
+            framerate: mlx::Framerates::Two,
             windowed: false,
         }
     }
