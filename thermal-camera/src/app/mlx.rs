@@ -53,8 +53,8 @@ pub fn get_scale(color_type: ColorTypes) -> [u8; GRADIENT_COUNT * 3] {
     return mlx_image::color_gradient(color_type);
 }
 
-pub fn set_framerate(val: u8) {
-    let speed_val: u16 = val.min(7) as u16;
+pub fn set_framerate(val: Framerates) {
+    let speed_val: u16 = val as u16;
 
     let mlx_response = bsp_mlx::read_value(0x800D);
 
