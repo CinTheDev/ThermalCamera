@@ -168,9 +168,15 @@ impl eframe::App for ThermalApp {
             self.window_size = ui.available_size();
 
             ui.horizontal_centered(|ui| {
-                display::show(self, ui, ctx);
+                if !self.options.left_handed {
+                    display::show(self, ui, ctx);
+                    controls::show(self, ui);
+                }
 
-                controls::show(self, ui);
+                else {
+                    controls::show(self, ui);
+                    display::show(self, ui, ctx);
+                }
             });
 
             options::show(self, ui);

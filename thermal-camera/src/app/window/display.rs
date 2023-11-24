@@ -11,8 +11,14 @@ pub fn show(app: &mut ThermalApp, ui: &mut egui::Ui, ctx: &egui::Context) {
         |ui| {
             ui.horizontal_centered(
                 |ui| {
-                    scale::show_scale(app, ui);
-                    image::show_image(app, ui);
+                    if !app.options.left_handed {
+                        scale::show_scale(app, ui);
+                        image::show_image(app, ui);    
+                    }
+                    else {
+                        image::show_image(app, ui);
+                        scale::show_scale(app, ui);
+                    }
                 }
             );
     });
