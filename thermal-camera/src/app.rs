@@ -53,6 +53,7 @@ pub struct Opt {
     #[structopt(default_value = "hue")]
     color_type: ColorTypes,
 
+    #[structopt(default_value = "2")]
     framerate: mlx::Framerates,
 
     #[structopt(short, long)]
