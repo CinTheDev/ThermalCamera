@@ -1,12 +1,13 @@
-use super::{egui, ThermalApp};
+use super::{egui, ThermalApp, CONTROLS_X_SPACE};
 
 pub fn show(app: &mut ThermalApp, ui: &mut egui::Ui) {
     const BUTTONS_COUNT: u32 = 3;
+    let width = CONTROLS_X_SPACE * app.window_size.x;
     let spacing_y = ui.spacing().item_spacing.y;
     let height_buttons = ui.available_height() / BUTTONS_COUNT as f32 - spacing_y;
-    let size_buttons = egui::Vec2::new(0.0, height_buttons);
+    let size_buttons = egui::Vec2::new(width, height_buttons);
 
-    ui.vertical_centered_justified(|ui| {
+    ui.vertical(|ui| {
         let button_freeze = ui.add_sized(
             size_buttons,
             egui::Button::new("Freeze image")
