@@ -40,14 +40,14 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
 
         // Speed options
         ui.horizontal(|ui| {
-            draw_label_speed(ui, element_standard_size);
+            draw_label_speed(ui, app, element_standard_size);
 
             handle_options_speed(ui, app, element_standard_size);
         });
 
         // Handedness
         ui.horizontal(|ui| {
-            draw_label_handedness(ui, element_standard_size);
+            draw_label_handedness(ui, app, element_standard_size);
 
             handle_options_handedness(ui, app, element_standard_size);
         });
@@ -116,11 +116,11 @@ fn handle_options_color(ui: &mut egui::Ui, app: &mut ThermalApp, element_size: e
     });
 }
 
-fn draw_label_speed(ui: &mut egui::Ui, element_size: egui::Vec2) {
-    ui.add_sized(
-        element_size,
-        egui::Label::new("Framerate")
-    );
+fn draw_label_speed(ui: &mut egui::Ui, app: &ThermalApp, label_size: egui::Vec2) {
+    let label_text = "Refresh Rate";
+    let label_val = app.options.framerate.to_string();
+
+    draw_label(ui, label_size, label_text, label_val);
 }
 
 fn handle_options_speed(ui: &mut egui::Ui, app: &mut ThermalApp, element_size: egui::Vec2) {
@@ -150,11 +150,14 @@ fn handle_options_speed(ui: &mut egui::Ui, app: &mut ThermalApp, element_size: e
     });
 }
 
-fn draw_label_handedness(ui: &mut egui::Ui, element_size: egui::Vec2) {
-    ui.add_sized(
-        element_size,
-        egui::Label::new("Left Hand Mode")
-    );
+fn draw_label_handedness(ui: &mut egui::Ui, app: &ThermalApp, label_size: egui::Vec2) {
+    let label_text = "Layout";
+    let label_val = match app.options.left_handed {
+        false => "Right handed".into(),
+        true => "Left handed".into(),
+    };
+
+    draw_label(ui, label_size, label_text, label_val);
 }
 
 fn handle_options_handedness(ui: &mut egui::Ui, app: &mut ThermalApp, element_size: egui::Vec2) {
