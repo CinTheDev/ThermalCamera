@@ -13,19 +13,15 @@ pub fn show(app: &mut ThermalApp, ui: &mut egui::Ui) {
             egui::Button::new("Freeze image")
         );
 
-        ui.add_enabled_ui(
+        let button_save = ui.add_enabled_ui(
             app.usb_detected,
             |ui| {
-                let button_save = ui.add_sized(
+                ui.add_sized(
                     size_buttons,
                     egui::Button::new("Save image")
-                );
-
-                if button_save.clicked() {
-                    on_button_save(app);
-                }
+                )
             }
-        ).response;
+        ).inner;
 
         let button_options = ui.add_sized(
             size_buttons,
@@ -34,6 +30,9 @@ pub fn show(app: &mut ThermalApp, ui: &mut egui::Ui) {
 
         if button_freeze.clicked() {
             on_button_freeze(app);
+        }
+        if button_save.clicked() {
+            on_button_save(app);
         }
         if button_options.clicked() {
             on_button_options(app);
