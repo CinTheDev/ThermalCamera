@@ -84,11 +84,9 @@ pub fn init_image_texture(app: &mut ThermalApp, ctx: &egui::Context) {
 }
 
 pub fn check_clicked(app: &mut ThermalApp, ui: &mut egui::Ui, response: egui::Response) {
-    // TODO: Only when dragging the mouse this is registered
-    // Could be the display, but should be investigated
-    let mut left_mouse_down = false;
-    ui.input(|i| left_mouse_down = i.pointer.button_down(egui::PointerButton::Primary));
-    if ! left_mouse_down {
+    let mut is_touch = false;
+    ui.input(|i| is_touch = i.pointer.any_down());
+    if ! is_touch {
         return;
     }
 
