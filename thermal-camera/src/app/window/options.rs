@@ -2,6 +2,7 @@ use super::{egui, ThermalApp, mlx};
 
 const WINDOW_RELATIVE_SIZE: f32 = 0.8;
 const LABEL_WIDTH: f32 = 100.0;
+const LABEL_SELECTED_COL: egui::Color32 = egui::Color32::YELLOW;
 
 pub fn show(app: &mut ThermalApp, ui: &mut egui::Ui) {
     if ! app.show_options { return }
@@ -65,7 +66,9 @@ fn handle_close_button(ui: &mut egui::Ui, app: &mut ThermalApp, element_size: eg
 }
 
 fn draw_label_color(ui: &mut egui::Ui, app: &ThermalApp, label_size: egui::Vec2) {
-    let current_selected = app.options.color_type.to_string();
+    let current_selected_string = app.options.color_type.to_string();
+    let current_selected = egui::RichText::new(current_selected_string)
+        .color(LABEL_SELECTED_COL);
 
     ui.vertical(|ui| {
         ui.add_sized(
