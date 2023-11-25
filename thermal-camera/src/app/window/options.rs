@@ -28,24 +28,20 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
     let label_size = egui::vec2(LABEL_WIDTH, elements_height / 2.0);
 
     ui.vertical_centered_justified(|ui| {
-        // Close menu button
         handle_close_button(ui, app, element_standard_size);
 
-        // Color options
         ui.horizontal(|ui| {
             draw_label_color(ui, &app, label_size);
 
             handle_options_color(ui, app, element_standard_size);
         });
 
-        // Speed options
         ui.horizontal(|ui| {
             draw_label_speed(ui, app, label_size);
 
             handle_options_speed(ui, app, element_standard_size);
         });
 
-        // Handedness
         ui.horizontal(|ui| {
             draw_label_handedness(ui, app, label_size);
 
@@ -209,7 +205,7 @@ fn on_btn_close(app: &mut ThermalApp) {
 
 fn on_btn_coloring(app: &mut ThermalApp, ctx: &egui::Context, color_type: mlx::ColorTypes) {
     app.options.color_type = color_type;
-    
+
     app.show_options = false;
     app.update_options();
     app.recolor_image(ctx);
