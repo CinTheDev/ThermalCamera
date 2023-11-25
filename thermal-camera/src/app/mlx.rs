@@ -195,3 +195,18 @@ impl FromStr for Framerates {
         }
     }
 }
+
+impl ToString for Framerates {
+    fn to_string(&self) -> String {
+        match self {
+            Framerates::Half => "0.5".into(),
+            Framerates::One => "1".into(),
+            Framerates::Two => "2".into(),
+            Framerates::Four => "4".into(),
+            Framerates::Eight => "8".into(),
+            Framerates::Sixteen => "16".into(),
+            Framerates::Thirtytwo => "32".into(),
+            Framerates::Sixtyfour => "64".into(),
+        }
+    }
+}

@@ -118,7 +118,7 @@ fn handle_options_color(ui: &mut egui::Ui, app: &mut ThermalApp, element_size: e
 
 fn draw_label_speed(ui: &mut egui::Ui, app: &ThermalApp, label_size: egui::Vec2) {
     let label_text = "Refresh Rate";
-    let label_val = app.options.framerate.to_string();
+    let label_val = app.options.framerate.to_string() + " fps";
 
     draw_label(ui, label_size, label_text, label_val);
 }
