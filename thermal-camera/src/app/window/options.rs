@@ -65,6 +65,8 @@ fn handle_close_button(ui: &mut egui::Ui, app: &mut ThermalApp, element_size: eg
 }
 
 fn draw_label_color(ui: &mut egui::Ui, app: &ThermalApp, label_size: egui::Vec2) {
+    let current_selected = app.options.color_type.to_string();
+
     ui.vertical(|ui| {
         ui.add_sized(
             label_size,
@@ -73,7 +75,7 @@ fn draw_label_color(ui: &mut egui::Ui, app: &ThermalApp, label_size: egui::Vec2)
 
         ui.add_sized(
             label_size,
-            egui::Label::new("Test")
+            egui::Label::new(current_selected)
         );
     });
 }

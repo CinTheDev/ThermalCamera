@@ -168,6 +168,16 @@ impl Default for ImageRead {
     }
 }
 
+impl ToString for ColorTypes {
+    fn to_string(&self) -> String {
+        match self {
+            ColorTypes::Gray => "Gray".into(),
+            ColorTypes::Cheap => "Cheap".into(),
+            ColorTypes::Hue => "Hue".into()
+        }
+    }
+}
+
 impl FromStr for Framerates {
     type Err = &'static str;
 
