@@ -37,34 +37,32 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
 
         // Color options
         ui.horizontal(|ui| {
-            ui.add_sized(
-                element_standard_size,
-                egui::Label::new("Coloring Algorithm")
-            );
+            draw_label_color(ui, element_standard_size);
 
             handle_options_color(ui, app, element_standard_size);
         });
 
         // Speed options
         ui.horizontal(|ui| {
-            ui.add_sized(
-                element_standard_size,
-                egui::Label::new("Framerate")
-            );
+            draw_label_speed(ui, element_standard_size);
 
             handle_options_speed(ui, app, element_standard_size);
         });
 
         // Handedness
         ui.horizontal(|ui| {
-            ui.add_sized(
-                element_standard_size,
-                egui::Label::new("Left Hand Mode")
-            );
+            draw_label_handedness(ui, element_standard_size);
 
             handle_options_handedness(ui, app, element_standard_size);
         });
     });
+}
+
+fn draw_label_color(ui: &mut egui::Ui, element_size: egui::Vec2) {
+    ui.add_sized(
+        element_size,
+        egui::Label::new("Coloring Algorithm")
+    );
 }
 
 fn handle_options_color(ui: &mut egui::Ui, app: &mut ThermalApp, element_size: egui::Vec2) {
@@ -94,6 +92,13 @@ fn handle_options_color(ui: &mut egui::Ui, app: &mut ThermalApp, element_size: e
     });
 }
 
+fn draw_label_speed(ui: &mut egui::Ui, element_size: egui::Vec2) {
+    ui.add_sized(
+        element_size,
+        egui::Label::new("Framerate")
+    );
+}
+
 fn handle_options_speed(ui: &mut egui::Ui, app: &mut ThermalApp, element_size: egui::Vec2) {
     ui.columns(3, |col| {
         let btn_speed_low = col[0].add_sized(
@@ -119,6 +124,13 @@ fn handle_options_speed(ui: &mut egui::Ui, app: &mut ThermalApp, element_size: e
             on_btn_speed(app, mlx::Framerates::Thirtytwo);
         }
     });
+}
+
+fn draw_label_handedness(ui: &mut egui::Ui, element_size: egui::Vec2) {
+    ui.add_sized(
+        element_size,
+        egui::Label::new("Left Hand Mode")
+    );
 }
 
 fn handle_options_handedness(ui: &mut egui::Ui, app: &mut ThermalApp, element_size: egui::Vec2) {
