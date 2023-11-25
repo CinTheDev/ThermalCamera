@@ -64,20 +64,17 @@ fn handle_close_button(ui: &mut egui::Ui, app: &mut ThermalApp, element_size: eg
     }
 }
 
-fn draw_label_color(ui: &mut egui::Ui, app: &ThermalApp, element_size: egui::Vec2) {
-    ui.allocate_ui(element_size,
-        |ui| {
-        ui.vertical(|ui| {
-            ui.add_sized(
-                element_size,
-                egui::Label::new("Color Mode")
-            );
-    
-            ui.add_sized(
-                element_size,
-                egui::Label::new("Test")
-            );
-        });
+fn draw_label_color(ui: &mut egui::Ui, app: &ThermalApp, label_size: egui::Vec2) {
+    ui.vertical(|ui| {
+        ui.add_sized(
+            label_size,
+            egui::Label::new("Color Mode")
+        );
+
+        ui.add_sized(
+            label_size,
+            egui::Label::new("Test")
+        );
     });
 }
 
