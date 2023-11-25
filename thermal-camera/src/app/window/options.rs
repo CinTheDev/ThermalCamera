@@ -161,23 +161,25 @@ fn draw_label_handedness(ui: &mut egui::Ui, app: &ThermalApp, label_size: egui::
 }
 
 fn handle_options_handedness(ui: &mut egui::Ui, app: &mut ThermalApp, element_size: egui::Vec2) {
-    let btn_left_hand = ui.add_sized(
-        element_size,
-        egui::Button::new("Left hand")
-    );
-
-    let btn_right_hand = ui.add_sized(
-        element_size,
-        egui::Button::new("Right hand")
-    );
-
-    if btn_left_hand.clicked() {
-        on_btn_hand(app, true);
-    }
+    ui.columns(2, |col| {
+        let btn_left_hand = col[0].add_sized(
+            element_size,
+            egui::Button::new("Left hand")
+        );
     
-    if btn_right_hand.clicked() {
-        on_btn_hand(app, false);
-    }
+        let btn_right_hand = col[1].add_sized(
+            element_size,
+            egui::Button::new("Right hand")
+        );
+    
+        if btn_left_hand.clicked() {
+            on_btn_hand(app, true);
+        }
+        
+        if btn_right_hand.clicked() {
+            on_btn_hand(app, false);
+        }
+    });
 }
 
 fn on_btn_close(app: &mut ThermalApp) {
