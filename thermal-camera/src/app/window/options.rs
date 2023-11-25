@@ -209,6 +209,7 @@ fn on_btn_close(app: &mut ThermalApp) {
 
 fn on_btn_coloring(app: &mut ThermalApp, ctx: &egui::Context, color_type: mlx::ColorTypes) {
     app.options.color_type = color_type;
+    
     app.show_options = false;
     app.update_options();
     app.recolor_image(ctx);
@@ -218,7 +219,6 @@ fn on_btn_speed(app: &mut ThermalApp, framerate: mlx::Framerates) {
     app.options.framerate = framerate;
     mlx::set_framerate(framerate);
     
-    app.show_options = false;
     app.update_options();
 }
 
