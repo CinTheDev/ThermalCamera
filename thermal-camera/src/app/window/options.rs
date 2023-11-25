@@ -54,6 +54,23 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
     });
 }
 
+fn draw_label(ui: &mut egui::Ui, label_size: egui::Vec2, label_text: &str, label_val: String) {
+    let label_val_richtext = egui::RichText::new(label_val)
+        .color(LABEL_SELECTED_COL);
+
+    ui.vertical(|ui| {
+        ui.add_sized(
+            label_size,
+            egui::Label::new(label_text)
+        );
+
+        ui.add_sized(
+            label_size,
+            egui::Label::new(label_val_richtext)
+        );
+    });
+}
+
 fn handle_close_button(ui: &mut egui::Ui, app: &mut ThermalApp, element_size: egui::Vec2) {
     let btn_close = ui.add_sized(
         element_size,
@@ -66,21 +83,10 @@ fn handle_close_button(ui: &mut egui::Ui, app: &mut ThermalApp, element_size: eg
 }
 
 fn draw_label_color(ui: &mut egui::Ui, app: &ThermalApp, label_size: egui::Vec2) {
-    let current_selected_string = app.options.color_type.to_string();
-    let current_selected = egui::RichText::new(current_selected_string)
-        .color(LABEL_SELECTED_COL);
+    let label_text = "Color mode";
+    let label_val = app.options.color_type.to_string();
 
-    ui.vertical(|ui| {
-        ui.add_sized(
-            label_size,
-            egui::Label::new("Color Mode")
-        );
-
-        ui.add_sized(
-            label_size,
-            egui::Label::new(current_selected)
-        );
-    });
+    draw_label(ui, label_size, label_text, label_val);
 }
 
 fn handle_options_color(ui: &mut egui::Ui, app: &mut ThermalApp, element_size: egui::Vec2) {
