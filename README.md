@@ -110,5 +110,3 @@ Use the display guide mentioned above in Display Setup to connect the relevant p
 - Update README
 - Remember settings in config file
 - Read MLX-specific settings at start of application
-- Display selected in settings menu
-- Improve MLX Framerate setting
