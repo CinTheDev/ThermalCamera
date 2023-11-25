@@ -124,28 +124,36 @@ fn draw_label_speed(ui: &mut egui::Ui, app: &ThermalApp, label_size: egui::Vec2)
 }
 
 fn handle_options_speed(ui: &mut egui::Ui, app: &mut ThermalApp, element_size: egui::Vec2) {
-    ui.columns(3, |col| {
-        let btn_speed_low = col[0].add_sized(
-            element_size,
-            egui::Button::new("Low")
-        );
-        let btn_speed_medium = col[1].add_sized(
-            element_size,
-            egui::Button::new("Medium")
-        );
-        let btn_speed_high = col[2].add_sized(
-            element_size,
-            egui::Button::new("High")
-        );
+    let is_on_lower_bound = app.options.framerate as u8 == mlx::Framerates::Half as u8;
+    let is_on_upper_bound = app.options.framerate as u8 == mlx::Framerates::Sixtyfour as u8;
 
-        if btn_speed_low.clicked() {
-            on_btn_speed(app, mlx::Framerates::Two);
+    ui.columns(2, |col| {
+        let btn_speed_decrease = col[0].add_enabled_ui(
+            !is_on_lower_bound,
+            |ui| {
+                ui.add_sized(
+                    element_size,
+                    egui::Button::new("Decrease")
+                )
+            }
+        ).inner;
+
+        let btn_speed_increase = col[1].add_enabled_ui(
+            !is_on_upper_bound,
+            |ui| {
+                ui.add_sized(
+                    element_size,
+                    egui::Button::new("Increase")
+                )
+            }
+        ).inner;
+
+        if btn_speed_decrease.clicked() {
+
         }
-        if btn_speed_medium.clicked() {
-            on_btn_speed(app, mlx::Framerates::Eight);
-        }
-        if btn_speed_high.clicked() {
-            on_btn_speed(app, mlx::Framerates::Thirtytwo);
+
+        if btn_speed_increase.clicked() {
+
         }
     });
 }
