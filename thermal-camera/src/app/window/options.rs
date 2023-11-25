@@ -23,6 +23,7 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
     let spacing_y = ui.spacing().item_spacing.y;
     let elements_height = ui.available_height() / ROWS as f32 - spacing_y;
     let element_standard_size = egui::vec2(0.0, elements_height);
+    let label_size = egui::vec2(100.0, elements_height / 2.0);
 
     ui.vertical_centered_justified(|ui| {
         // Close menu button
@@ -30,7 +31,7 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
 
         // Color options
         ui.horizontal(|ui| {
-            draw_label_color(ui, element_standard_size);
+            draw_label_color(ui, &app, label_size);
 
             handle_options_color(ui, app, element_standard_size);
         });
@@ -62,11 +63,21 @@ fn handle_close_button(ui: &mut egui::Ui, app: &mut ThermalApp, element_size: eg
     }
 }
 
-fn draw_label_color(ui: &mut egui::Ui, element_size: egui::Vec2) {
-    ui.add_sized(
-        element_size,
-        egui::Label::new("Coloring Algorithm")
-    );
+fn draw_label_color(ui: &mut egui::Ui, app: &ThermalApp, element_size: egui::Vec2) {
+    ui.allocate_ui(element_size,
+        |ui| {
+        ui.vertical(|ui| {
+            ui.add_sized(
+                element_size,
+                egui::Label::new("Color Mode")
+            );
+    
+            ui.add_sized(
+                element_size,
+                egui::Label::new("Test")
+            );
+        });
+    });
 }
 
 fn handle_options_color(ui: &mut egui::Ui, app: &mut ThermalApp, element_size: egui::Vec2) {
