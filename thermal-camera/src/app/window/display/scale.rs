@@ -2,7 +2,7 @@ use super::{egui, ThermalApp, mlx};
 use super::SCALE_X_SPACE;
 
 pub fn show_scale(app: &mut ThermalApp, ui: &mut egui::Ui) {
-    let width_allocate = SCALE_X_SPACE * app.window_size.x;
+    let width_allocate = SCALE_X_SPACE * app.window_size.x - ui.spacing().item_spacing.x;
 
     let texture = app.scale.as_ref().unwrap();
 

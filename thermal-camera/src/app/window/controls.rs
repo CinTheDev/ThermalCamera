@@ -2,9 +2,9 @@ use super::{egui, ThermalApp, CONTROLS_X_SPACE};
 
 pub fn show(app: &mut ThermalApp, ui: &mut egui::Ui) {
     const BUTTONS_COUNT: u32 = 3;
+    let spacing = ui.spacing().item_spacing;
     let width = CONTROLS_X_SPACE * app.window_size.x;
-    let spacing_y = ui.spacing().item_spacing.y;
-    let height_buttons = ui.available_height() / BUTTONS_COUNT as f32 - spacing_y;
+    let height_buttons = ui.available_height() / BUTTONS_COUNT as f32 - spacing.y;
     let size_buttons = egui::Vec2::new(width, height_buttons);
 
     ui.vertical(|ui| {

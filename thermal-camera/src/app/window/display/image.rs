@@ -4,7 +4,7 @@ use super::{IMAGE_X_SPACE, SCALE_X_SPACE};
 pub fn show_image(app: &mut ThermalApp, ui: &mut egui::Ui) {
     let texture = app.picture.as_ref().unwrap();
 
-    let width = IMAGE_X_SPACE * app.window_size.x;
+    let width = IMAGE_X_SPACE * app.window_size.x - ui.spacing().item_spacing.x;
     let height = width * (mlx::PIXELS_HEIGHT as f32 / mlx::PIXELS_WIDTH as f32);
     let size = egui::Vec2::new(width, height);
 
