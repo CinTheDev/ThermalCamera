@@ -179,13 +179,13 @@ impl ToString for ColorTypes {
 }
 
 impl Framerates {
-    fn increase(&self) -> Self {
+    pub fn increase(&self) -> Self {
         let current_val = *self as i8;
         let new_val = (current_val + 1).min(7) as u8;
         return new_val.try_into().unwrap();
     }
 
-    fn decrease(&self) -> Self {
+    pub fn decrease(&self) -> Self {
         let current_val = *self as i8;
         let new_val = (current_val - 1).max(0) as u8;
         return new_val.try_into().unwrap();

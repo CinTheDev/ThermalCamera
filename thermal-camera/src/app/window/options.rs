@@ -149,11 +149,11 @@ fn handle_options_speed(ui: &mut egui::Ui, app: &mut ThermalApp, element_size: e
         ).inner;
 
         if btn_speed_decrease.clicked() {
-
+            on_btn_speed(app, app.options.framerate.decrease())
         }
 
         if btn_speed_increase.clicked() {
-
+            on_btn_speed(app, app.options.framerate.increase())
         }
     });
 }
