@@ -26,14 +26,7 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
 
     ui.vertical_centered_justified(|ui| {
         // Close menu button
-        let btn_close = ui.add_sized(
-            element_standard_size,
-            egui::Button::new("Close")
-        );
-
-        if btn_close.clicked() {
-            on_btn_close(app);
-        }
+        handle_close_button(ui, app, element_standard_size);
 
         // Color options
         ui.horizontal(|ui| {
@@ -56,6 +49,17 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
             handle_options_handedness(ui, app, element_standard_size);
         });
     });
+}
+
+fn handle_close_button(ui: &mut egui::Ui, app: &mut ThermalApp, element_size: egui::Vec2) {
+    let btn_close = ui.add_sized(
+        element_size,
+        egui::Button::new("Close")
+    );
+
+    if btn_close.clicked() {
+        on_btn_close(app);
+    }
 }
 
 fn draw_label_color(ui: &mut egui::Ui, element_size: egui::Vec2) {
