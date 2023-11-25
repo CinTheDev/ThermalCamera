@@ -178,6 +178,38 @@ impl ToString for ColorTypes {
     }
 }
 
+impl Framerates {
+    fn increase(&self) -> Self {
+        let current_val = *self as i8;
+        let new_val = (current_val + 1).min(7) as u8;
+        return new_val.try_into().unwrap();
+    }
+
+    fn decrease(&self) -> Self {
+        let current_val = *self as i8;
+        let new_val = (current_val - 1).max(0) as u8;
+        return new_val.try_into().unwrap();
+    }
+}
+
+impl TryFrom<u8> for Framerates {
+    type Error = ();
+
+    fn try_from(v: u8) -> Result<Self, Self::Error> {
+        match v {
+            0b000 => Ok(Framerates::Half),
+            0b001 => Ok(Framerates::One),
+            0b010 => Ok(Framerates::Two),
+            0b011 => Ok(Framerates::Four),
+            0b100 => Ok(Framerates::Eight),
+            0b101 => Ok(Framerates::Sixteen),
+            0b110 => Ok(Framerates::Thirtytwo),
+            0b111 => Ok(Framerates::Sixtyfour),
+            _ => Err(()),
+        }
+    }
+}
+
 impl FromStr for Framerates {
     type Err = &'static str;
 
