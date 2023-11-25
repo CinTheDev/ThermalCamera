@@ -1,6 +1,7 @@
 use super::{egui, ThermalApp, mlx};
 
 const WINDOW_RELATIVE_SIZE: f32 = 0.8;
+const LABEL_WIDTH: f32 = 100.0;
 
 pub fn show(app: &mut ThermalApp, ui: &mut egui::Ui) {
     if ! app.show_options { return }
@@ -23,7 +24,7 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
     let spacing_y = ui.spacing().item_spacing.y;
     let elements_height = ui.available_height() / ROWS as f32 - spacing_y;
     let element_standard_size = egui::vec2(0.0, elements_height);
-    let label_size = egui::vec2(100.0, elements_height / 2.0);
+    let label_size = egui::vec2(LABEL_WIDTH, elements_height / 2.0);
 
     ui.vertical_centered_justified(|ui| {
         // Close menu button
