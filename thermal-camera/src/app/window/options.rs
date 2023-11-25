@@ -40,14 +40,14 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
 
         // Speed options
         ui.horizontal(|ui| {
-            draw_label_speed(ui, app, element_standard_size);
+            draw_label_speed(ui, app, label_size);
 
             handle_options_speed(ui, app, element_standard_size);
         });
 
         // Handedness
         ui.horizontal(|ui| {
-            draw_label_handedness(ui, app, element_standard_size);
+            draw_label_handedness(ui, app, label_size);
 
             handle_options_handedness(ui, app, element_standard_size);
         });
@@ -163,11 +163,20 @@ fn draw_label_handedness(ui: &mut egui::Ui, app: &ThermalApp, label_size: egui::
 fn handle_options_handedness(ui: &mut egui::Ui, app: &mut ThermalApp, element_size: egui::Vec2) {
     let btn_left_hand = ui.add_sized(
         element_size,
-        egui::Button::new("Toggle")
+        egui::Button::new("Left hand")
+    );
+
+    let btn_right_hand = ui.add_sized(
+        element_size,
+        egui::Button::new("Right hand")
     );
 
     if btn_left_hand.clicked() {
-        on_toggle_hand(app);
+        on_btn_hand(app, true);
+    }
+    
+    if btn_right_hand.clicked() {
+        on_btn_hand(app, false);
     }
 }
 
@@ -191,8 +200,8 @@ fn on_btn_speed(app: &mut ThermalApp, framerate: mlx::Framerates) {
     app.update_options();
 }
 
-fn on_toggle_hand(app: &mut ThermalApp) {
-    app.options.left_handed = !app.options.left_handed;
+fn on_btn_hand(app: &mut ThermalApp, left_hand: bool) {
+    app.options.left_handed = left_hand;
 
     app.show_options = false;
     app.update_options();
