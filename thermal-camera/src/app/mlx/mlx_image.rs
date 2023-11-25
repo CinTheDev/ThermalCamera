@@ -3,6 +3,9 @@ use super::{
     TemperatureRead, ImageRead, ColorTypes
 };
 
+/*
+ * Interpolates temperature between black and white
+ */
 fn grayscale_function(temp: f32, min_temp: f32, max_temp: f32) -> [u8; 3] {
     let value: f32 = (temp - min_temp) / (max_temp - min_temp);
     let value_byte: u8 = (value * 255.0).round().max(0.0).min(255.0) as u8;
@@ -10,14 +13,16 @@ fn grayscale_function(temp: f32, min_temp: f32, max_temp: f32) -> [u8; 3] {
     return [value_byte; 3];
 }
 
+/* 
+ * Interpolates temperature using special functions where
+ * low temps are blue,
+ * medium temps are green,
+ * high temps are red
+ */
 fn rgb_cheap_function(temp: f32, min_temp: f32, max_temp :f32) -> [u8; 3] {
-    // Calculate interpolation value t, it is always between 0 and 1
     let mut t = (temp - min_temp) / (max_temp - min_temp);
     t = t.max(0.0).min(1.0);
 
-    // Use special formulas to get rgb colors, I created a really simple and cheap one here.
-    // Usually the rgb colors will be between 0 and 1, but sometimes it overshoots
-    // Later it's being clamped
     let factor = 2.0;
 
     let r = 0_f32.max(-factor * (1.0 - t) + 1.0);
@@ -32,8 +37,13 @@ fn rgb_cheap_function(temp: f32, min_temp: f32, max_temp :f32) -> [u8; 3] {
     return [r_byte, g_byte, b_byte];
 }
 
+/*
+ * Interpolates tempertaure on HSV color using Hue
+ * Lower temps are violet / blue
+ * Medium temps are green / yellow
+ * Higher temps are orange / red
+ */
 fn rgb_hue_function(temp: f32, min_temp: f32, max_temp :f32) -> [u8; 3] {
-    // Calculate interpolation value t, it is always between 0 and 1
     let mut t = (temp - min_temp) / (max_temp - min_temp);
     t = t.max(0.0).min(1.0);
 
