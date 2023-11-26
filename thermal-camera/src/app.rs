@@ -11,10 +11,9 @@ pub fn run() {
     let opt = Opt::from_args();
 
     if opt.windowed {
-        window::open_window(opt);
+        window::open_window();
     }
     else {
-        // TODO: Update this
         let path = opt.filename.as_str();
         let width = mlx::PIXELS_WIDTH as u32;
         let height = mlx::PIXELS_HEIGHT as u32;
@@ -52,7 +51,7 @@ impl Default for Opt {
     fn default() -> Self {
         Self {
             filename: "out.png".to_string(),
-            color_type: ColorTypes::Cheap,
+            color_type: ColorTypes::Hue,
             framerate: mlx::Framerates::Two,
             windowed: false,
             left_handed: false,

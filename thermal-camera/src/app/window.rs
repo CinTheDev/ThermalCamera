@@ -19,7 +19,7 @@ const CONTROLS_X_SPACE: f32 = 0.12;
 // Fills rest of space
 const IMAGE_X_SPACE: f32 = 1.0 - SCALE_X_SPACE - CONTROLS_X_SPACE;
 
-pub fn open_window(args: Opt) {
+pub fn open_window() {
     let native_options = eframe::NativeOptions {
         fullscreen: true,
         ..Default::default()
@@ -28,7 +28,7 @@ pub fn open_window(args: Opt) {
     eframe::run_native(
         "Thermal Camera",
         native_options,
-        Box::new(|cc| Box::new(ThermalApp::new(cc, args))),
+        Box::new(|cc| Box::new(ThermalApp::new(cc))),
     )
     .unwrap();
 }
@@ -57,8 +57,9 @@ pub struct ThermalApp {
 }
 
 impl ThermalApp {
-    fn new(_cc: &eframe::CreationContext<'_>, mut args: Opt) -> Self {
+    fn new(_cc: &eframe::CreationContext<'_>) -> Self {
         let refresh_rate = mlx::read_framerate().unwrap_or(mlx::Framerates::Half);
+
         let mut saved_options = bsp::read_options().unwrap_or_default();
         saved_options.framerate = refresh_rate;
 
