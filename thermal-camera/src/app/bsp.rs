@@ -1,6 +1,7 @@
 use image::{RgbImage, Rgb};
-use std::fs;
+use std::{fs, io, io::Write};
 use chrono;
+use super::Opt;
 
 pub fn check_usb() -> bool {
     let mut paths = fs::read_dir("/dev").unwrap();
@@ -54,4 +55,46 @@ fn get_path(file_path: &String) -> String {
     }
 
     return res;
+}
+
+fn write_options(opt: Opt) -> io::Result<()> {
+    let mut f = fs::File::open("options.txt")?;
+    f.write_all(buf)
+}
+
+fn read_options() -> Result<Opt, io::Error> {
+
+}
+
+impl Opt {
+    fn parse_to_string(&self) -> String {
+        format!(
+            "color:{}\n
+            left_hand:{}\n",
+            self.color_type.to_string(),
+            self.left_handed.to_string()
+        )
+    }
+
+    fn parse_from_string(s: String) -> Self {
+        let options = s.split('\n');
+        let mut res: Self = Self::default();
+
+        for o in options {
+            let mut words = o.split(':');
+            let key = words.next();
+            let val = words.next();
+
+            if key.is_none() || val.is_none() {
+                continue;
+            }
+
+            match key.unwrap() {
+                "color" => res.color_type = val.unwrap().into(),
+                "left_hand" => res.left_handed = val.unwrap().into(),
+            }
+        }
+
+        return res;
+    }
 }
