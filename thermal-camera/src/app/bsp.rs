@@ -1,7 +1,8 @@
 use image::{RgbImage, Rgb};
 use std::{fs, io, io::Write};
 use chrono;
-use super::Opt;
+use super::{Opt, mlx};
+use std::str::FromStr;
 
 pub fn check_usb() -> bool {
     let mut paths = fs::read_dir("/dev").unwrap();
@@ -90,7 +91,9 @@ impl Opt {
             }
 
             match key.unwrap() {
-                "color" => res.color_type = val.unwrap().into(),
+                "color" => res.color_type = mlx::ColorTypes::from_str(
+                    val.unwrap()
+                ).unwrap_or(mlx::ColorTypes::Hue),
 
                 "left_hand" => res.left_handed = match val.unwrap() {
                     "true" => true,
