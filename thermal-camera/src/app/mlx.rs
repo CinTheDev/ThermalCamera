@@ -186,6 +186,20 @@ impl ToString for ColorTypes {
     }
 }
 
+impl FromStr for ColorTypes {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "gray" => Ok(ColorTypes::Gray),
+            "cheap" => Ok(ColorTypes::Cheap),
+            "hue" => Ok(ColorTypes::Hue),
+
+            _ => Err("Unrecognised color type")
+        }
+    }
+}
+
 impl Framerates {
     pub fn increase(&self) -> Self {
         let current_val = *self as i8;

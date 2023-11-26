@@ -91,7 +91,12 @@ impl Opt {
 
             match key.unwrap() {
                 "color" => res.color_type = val.unwrap().into(),
-                "left_hand" => res.left_handed = val.unwrap().into(),
+
+                "left_hand" => res.left_handed = match val.unwrap() {
+                    "true" => true,
+                    "false" => false,
+                    _ => false,
+                },
             }
         }
 

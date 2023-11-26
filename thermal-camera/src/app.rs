@@ -1,4 +1,3 @@
-use std::str::FromStr;
 use structopt::StructOpt;
 
 mod bsp;
@@ -28,20 +27,6 @@ pub fn run() {
 
 fn get_mlx_output(args: &Opt) -> ImageRead {
     return mlx::take_image(&args.color_type).unwrap();
-}
-
-impl FromStr for ColorTypes {
-    type Err = &'static str;
-    
-    fn from_str(color_type: &str) -> Result<Self, Self::Err> {
-        match color_type {
-            "gray" => Ok(ColorTypes::Gray),
-            "cheap" => Ok(ColorTypes::Cheap),
-            "hue" => Ok(ColorTypes::Hue),
-
-            _ => Err("Unrecognised color type"),
-        }
-    }
 }
 
 #[derive(Debug, StructOpt, Clone)]
