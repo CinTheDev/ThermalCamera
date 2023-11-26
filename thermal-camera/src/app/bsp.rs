@@ -1,5 +1,5 @@
 use image::{RgbImage, Rgb};
-use std::{fs, io::{self, Write}, io::BufWriter};
+use std::{fs, io::{self, Write, Read}};
 use chrono;
 use super::{Opt, mlx};
 use std::str::FromStr;
@@ -69,7 +69,17 @@ fn write_options(opt: Opt) -> io::Result<()> {
 }
 
 fn read_options() -> Result<Opt, io::Error> {
+    let f_response = fs::File::open("options.txt");
+    if f_response.is_err() {
+        return Err(f_response.unwrap_err());
+    }
 
+    let mut f = f_response.unwrap();
+    
+    let mut buf = String::new();
+    f.read_to_string(&mut buf)?;
+
+    return Ok(Opt::parse_from_string(buf));
 }
 
 impl Opt {
@@ -105,6 +115,8 @@ impl Opt {
                     "false" => false,
                     _ => false,
                 },
+
+                _ => ()
             }
         }
 
