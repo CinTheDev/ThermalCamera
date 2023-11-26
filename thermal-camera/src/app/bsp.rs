@@ -58,7 +58,7 @@ fn get_path(file_path: &String) -> String {
     return res;
 }
 
-fn write_options(opt: Opt) -> io::Result<()> {
+pub fn write_options(opt: Opt) -> io::Result<()> {
     let opt_string = opt.parse_to_string();
     let buf = opt_string.as_bytes();
 
@@ -68,7 +68,7 @@ fn write_options(opt: Opt) -> io::Result<()> {
     return Ok(());
 }
 
-fn read_options() -> Result<Opt, io::Error> {
+pub fn read_options() -> Result<Opt, io::Error> {
     let f_response = fs::File::open("options.txt");
     if f_response.is_err() {
         return Err(f_response.unwrap_err());

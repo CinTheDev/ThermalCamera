@@ -59,10 +59,11 @@ pub struct ThermalApp {
 impl ThermalApp {
     fn new(_cc: &eframe::CreationContext<'_>, mut args: Opt) -> Self {
         let refresh_rate = mlx::read_framerate().unwrap_or(mlx::Framerates::Half);
-        args.framerate = refresh_rate;
+        let mut saved_options = bsp::read_options().unwrap_or_default();
+        saved_options.framerate = refresh_rate;
 
         let mut s = Self {
-            options: args,
+            options: saved_options,
             rx_active: true,
             picture_options: egui::TextureOptions::NEAREST,
             scale_bound: (20.0, 40.0),
