@@ -3,6 +3,8 @@ use std::str::FromStr;
 mod bsp_mlx;
 pub mod mlx_image;
 
+use bsp_mlx::{REGISTER_STATUS, REGISTER_CTRL, ADDRESS_RAM};
+
 pub const PIXELS_WIDTH: usize = 32;
 pub const PIXELS_HEIGHT: usize = 24;
 pub const PIXEL_COUNT: usize = PIXELS_WIDTH * PIXELS_HEIGHT;
@@ -56,7 +58,7 @@ pub fn get_scale(color_type: ColorTypes) -> [u8; GRADIENT_COUNT * 3] {
 pub fn set_framerate(val: Framerates) {
     let speed_val: u16 = val as u16;
 
-    let mlx_response = bsp_mlx::read_value(0x800D);
+    let mlx_response = bsp_mlx::read_value(REGISTER_CTRL);
 
     if mlx_response.is_err() { return; }
     let mut ctrl_register_1 = mlx_response.unwrap();
@@ -107,7 +109,7 @@ pub fn read_temperatures() -> Result<TemperatureRead, String> {
 fn read_raw_image() -> Result<[u16; PIXEL_COUNT], String> {
     let mut img: [u16; PIXEL_COUNT] = [0x00; PIXEL_COUNT];
 
-    let subpage = bsp_mlx::read_value(0x8000)? & 0x1;
+    let subpage = bsp_mlx::read_value(REGISTER_STATUS)? & 0x1;
     let mut offset = subpage;
 
     for _sub in 0..2 {
@@ -120,7 +122,7 @@ fn read_raw_image() -> Result<[u16; PIXEL_COUNT], String> {
     
                 addr += pos;
     
-                img[addr as usize ] = bsp_mlx::read_value(0x0400 + addr)?;
+                img[addr as usize ] = bsp_mlx::read_value(ADDRESS_RAM + addr)?;
             }
         }
 
@@ -133,7 +135,7 @@ fn read_raw_image() -> Result<[u16; PIXEL_COUNT], String> {
 fn wait_for_data() {
     let mut status_reg: u16;
     loop {
-        let mlx_response = bsp_mlx::read_value(0x8000);
+        let mlx_response = bsp_mlx::read_value(REGISTER_STATUS);
 
         if mlx_response.is_err() { return; }
         status_reg = mlx_response.unwrap();
