@@ -8,6 +8,11 @@ use super::PIXEL_COUNT;
 
 const CAM_ADDR: u8 = 0x33;
 
+pub const REGISTER_STATUS: u16 = 0x8000;
+pub const REGISTER_CTRL: u16 = 0x800D;
+pub const REGISTER_I2C: u16 = 0x800F;
+pub const ADDRESS_RAM: u16 = 0x0400;
+
 lazy_static! {
     static ref I2C_MUTEX: Mutex<u32> = Mutex::new(0);
 }
