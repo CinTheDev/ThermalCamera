@@ -1,8 +1,9 @@
 use image::{RgbImage, Rgb};
-use std::{fs, io::{self, Write, Read}};
+use std::{fs, io::{self, Write, Read}, str::FromStr};
 use chrono;
 use super::{Opt, mlx};
-use std::str::FromStr;
+
+const OPTIONS_PATH: &str = "/home/thermal-camera/thermal-camera-options.txt";
 
 pub fn check_usb() -> bool {
     let mut paths = fs::read_dir("/dev").unwrap();
@@ -62,14 +63,14 @@ pub fn write_options(opt: &Opt) -> io::Result<()> {
     let opt_string = opt.parse_to_string();
     let buf = opt_string.as_bytes();
 
-    let mut f = fs::File::create("options.txt")?;
+    let mut f = fs::File::create(OPTIONS_PATH)?;
     f.write_all(buf)?;
 
     return Ok(());
 }
 
 pub fn read_options() -> Result<Opt, io::Error> {
-    let f_response = fs::File::open("options.txt");
+    let f_response = fs::File::open(OPTIONS_PATH);
     if f_response.is_err() {
         return Err(f_response.unwrap_err());
     }
@@ -85,8 +86,7 @@ pub fn read_options() -> Result<Opt, io::Error> {
 impl Opt {
     fn parse_to_string(&self) -> String {
         format!(
-            "color:{}\n
-            left_hand:{}\n",
+            "color:{}\nleft_hand:{}\n",
             self.color_type.to_string(),
             self.left_handed.to_string()
         )
