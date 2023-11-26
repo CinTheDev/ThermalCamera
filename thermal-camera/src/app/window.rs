@@ -140,6 +140,10 @@ impl ThermalApp {
         let tx: &Sender<Opt> = self.args_tx.as_ref().unwrap();
         tx.send(self.options.clone()).unwrap();
 
+        bsp::write_options(&self.options).unwrap_or_else(|_| {
+            println!("Failed to write options");
+        });
+
         display::scale::update_scale(self);
     }
 
