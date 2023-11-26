@@ -57,7 +57,10 @@ pub struct ThermalApp {
 }
 
 impl ThermalApp {
-    fn new(_cc: &eframe::CreationContext<'_>, args: Opt) -> Self {
+    fn new(_cc: &eframe::CreationContext<'_>, mut args: Opt) -> Self {
+        let refresh_rate = mlx::read_framerate().unwrap_or(mlx::Framerates::Half);
+        args.framerate = refresh_rate;
+
         let mut s = Self {
             options: args,
             rx_active: true,
