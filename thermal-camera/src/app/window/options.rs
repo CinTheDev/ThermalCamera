@@ -22,29 +22,33 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
     bg_painter.rect_filled(ui.max_rect().expand(10.0), 5.0, bg_color);
 
     const ROWS: u32 = 4;
-    let spacing_y = ui.spacing().item_spacing.y;
-    let elements_height = ui.available_height() / ROWS as f32 - spacing_y;
+    let spacing = ui.spacing().item_spacing;
+    let elements_height = ui.available_height() / ROWS as f32 - spacing.y;
     let element_standard_size = egui::vec2(0.0, elements_height);
     let label_size = egui::vec2(LABEL_WIDTH, elements_height / 2.0);
-
-    ui.vertical_centered_justified(|ui| {
+    let options_width = ui.available_width() * WINDOW_RELATIVE_SIZE - LABEL_WIDTH - spacing.x;
+    
+    ui.with_layout(
+        egui::Layout::bottom_up(egui::Align::BOTTOM),
+        |ui| {
         handle_close_button(ui, app, element_standard_size);
-
-        ui.horizontal(|ui| {
-            draw_label_color(ui, &app, label_size);
-
-            handle_options_color(ui, app, element_standard_size);
+        
+        ui.with_layout(
+            egui::Layout::left_to_right(egui::Align::LEFT),
+            |ui| {
+                draw_label_color(ui, &app, label_size);    
+                handle_options_color(ui, app, element_standard_size, options_width);
         });
 
         ui.horizontal(|ui| {
             draw_label_speed(ui, app, label_size);
-
+            
             handle_options_speed(ui, app, element_standard_size);
         });
 
         ui.horizontal(|ui| {
             draw_label_handedness(ui, app, label_size);
-
+            
             handle_options_handedness(ui, app, element_standard_size);
         });
     });
@@ -85,7 +89,7 @@ fn draw_label_color(ui: &mut egui::Ui, app: &ThermalApp, label_size: egui::Vec2)
     draw_label(ui, label_size, label_text, label_val);
 }
 
-fn handle_options_color(ui: &mut egui::Ui, app: &mut ThermalApp, element_size: egui::Vec2) {
+fn handle_options_color(ui: &mut egui::Ui, app: &mut ThermalApp, element_size: egui::Vec2, width: f32) {
     ui.columns(3, |col| {
         let btn_coloring_gray = col[0].add_sized(
             element_size,
