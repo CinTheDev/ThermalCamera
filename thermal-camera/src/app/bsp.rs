@@ -1,5 +1,5 @@
 use image::{RgbImage, Rgb};
-use std::{fs, io, io::Write};
+use std::{fs, io::{self, Write}, io::BufWriter};
 use chrono;
 use super::{Opt, mlx};
 use std::str::FromStr;
@@ -59,8 +59,13 @@ fn get_path(file_path: &String) -> String {
 }
 
 fn write_options(opt: Opt) -> io::Result<()> {
-    let mut f = fs::File::open("options.txt")?;
-    f.write_all(buf)
+    let opt_string = opt.parse_to_string();
+    let buf = opt_string.as_bytes();
+
+    let mut f = fs::File::create("options.txt")?;
+    f.write_all(buf)?;
+
+    return Ok(());
 }
 
 fn read_options() -> Result<Opt, io::Error> {
