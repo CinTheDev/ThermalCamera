@@ -71,6 +71,12 @@ pub fn set_framerate(val: Framerates) {
     });
 }
 
+pub fn read_framerate() -> Result<Framerates, String> {
+    let ctrl_register = bsp_mlx::read_value(REGISTER_CTRL)?;
+    let refresh_rate_raw = ((ctrl_register >> 7) & 0x7) as u8;
+    return Ok(refresh_rate_raw.try_into().unwrap());
+}
+
 pub fn read_temperatures() -> Result<TemperatureRead, String> {
     let image_raw = read_raw_image()?;
     let image_eval = bsp_mlx::evaluate_image(image_raw)?;
