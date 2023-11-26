@@ -31,8 +31,8 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
         handle_close_button(ui, app, element_standard_size);
         
         ui.horizontal(|ui| {
+            draw_label_color(ui, &app, label_size);
             handle_options_color(ui, app, element_standard_size);
-            draw_label_color(ui, &app, label_size);    
         });
 
         ui.horizontal(|ui| {
