@@ -102,10 +102,3 @@ Since some Pins are used by the MLX, we cannot put the Display directly on the R
 Also, the display, by documentation, occupies every power pin on the raspi. This is a problem since the MLX needs one power pin for itself. I have discovered that keeping **Pin 2 disconnected** won't affect the display. That way we have a free power pin for the MLX.
 
 Use the display guide mentioned above in Display Setup to connect the relevant pins. The pins are listed on the bottom of the page.
-
-## TODOs
-
-- Update README
-- Remember settings in config file
-- Read MLX-specific settings at start of application
-- Solve other TODOs marked inside source files
