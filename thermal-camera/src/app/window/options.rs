@@ -26,33 +26,23 @@ fn draw_options(app: &mut ThermalApp, ui: &mut egui::Ui) {
     let elements_height = ui.available_height() / ROWS as f32 - spacing.y;
     let element_standard_size = egui::vec2(0.0, elements_height);
     let label_size = egui::vec2(LABEL_WIDTH, elements_height / 2.0);
-    let options_width = ui.available_width() * WINDOW_RELATIVE_SIZE - LABEL_WIDTH - spacing.x;
-    let options_layout = egui::Layout::right_to_left(egui::Align::TOP);
     
-    ui.with_layout(
-        egui::Layout::top_down_justified(egui::Align::RIGHT),
-        |ui| {
+    ui.vertical_centered_justified(|ui| {
         handle_close_button(ui, app, element_standard_size);
         
-        ui.with_layout(
-            options_layout,
-            |ui| {
-                handle_options_color(ui, app, element_standard_size, options_width);
-                draw_label_color(ui, &app, label_size);    
+        ui.horizontal(|ui| {
+            handle_options_color(ui, app, element_standard_size);
+            draw_label_color(ui, &app, label_size);    
         });
 
-        ui.with_layout(
-            options_layout,
-            |ui| {
-                draw_label_speed(ui, app, label_size);
-                handle_options_speed(ui, app, element_standard_size);
+        ui.horizontal(|ui| {
+            draw_label_speed(ui, app, label_size);
+            handle_options_speed(ui, app, element_standard_size);
         });
 
-        ui.with_layout(
-            options_layout,
-            |ui| {
-                draw_label_handedness(ui, app, label_size);
-                handle_options_handedness(ui, app, element_standard_size);
+        ui.horizontal(|ui| {
+            draw_label_handedness(ui, app, label_size);
+            handle_options_handedness(ui, app, element_standard_size);
         });
     });
 }
@@ -92,7 +82,7 @@ fn draw_label_color(ui: &mut egui::Ui, app: &ThermalApp, label_size: egui::Vec2)
     draw_label(ui, label_size, label_text, label_val);
 }
 
-fn handle_options_color(ui: &mut egui::Ui, app: &mut ThermalApp, element_size: egui::Vec2, width: f32) {
+fn handle_options_color(ui: &mut egui::Ui, app: &mut ThermalApp, element_size: egui::Vec2) {
     ui.columns(3, |col| {
         let btn_coloring_gray = col[0].add_sized(
             element_size,
