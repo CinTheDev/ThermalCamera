@@ -1,12 +1,25 @@
 use eframe::egui;
 use super::mlx;
+use mlx::ImageRead;
+
 use super::bsp;
 use std::thread;
-use std::sync::mpsc;
+use std::sync::mpsc::{self, Receiver, Sender};
 
 pub use super::Opt;
 
-pub fn open_window(args: Opt) {
+mod display;
+mod controls;
+mod options;
+
+// How much of the screen is covered by these widgets
+const SCALE_X_SPACE: f32 = 0.1;
+const CONTROLS_X_SPACE: f32 = 0.12;
+
+// Fills rest of space
+const IMAGE_X_SPACE: f32 = 1.0 - SCALE_X_SPACE - CONTROLS_X_SPACE;
+
+pub fn open_window() {
     let native_options = eframe::NativeOptions {
         fullscreen: true,
         ..Default::default()
@@ -15,131 +28,139 @@ pub fn open_window(args: Opt) {
     eframe::run_native(
         "Thermal Camera",
         native_options,
-        Box::new(|cc| Box::new(ThermalApp::new(cc, args))),
+        Box::new(|cc| Box::new(ThermalApp::new(cc))),
     )
     .unwrap();
 }
 
-#[derive(Default)]
-struct ThermalApp {
+pub struct ThermalApp {
+    window_size: egui::Vec2,
+
     options: Opt,
-    raw_picture: Option<[u8; mlx::PIXEL_COUNT * 3]>,
+
+    last_read: Result<mlx::ImageRead, String>,
+
     picture: Option<egui::TextureHandle>,
     picture_options: egui::TextureOptions,
-    image_rx: Option<mpsc::Receiver<[u8; mlx::PIXEL_COUNT * 3]>>,
+
+    raw_scale: Option<[u8; mlx::GRADIENT_COUNT * 3]>,
+    scale: Option<egui::TextureHandle>,
+    scale_bound: (f32, f32),
+
+    show_options: bool,
+
+    image_rx: Option<mpsc::Receiver<Result<ImageRead, String>>>,
     rx_active: bool,
+    args_tx: Option<mpsc::Sender<Opt>>,
+
     usb_detected: bool,
 }
 
 impl ThermalApp {
-    fn new(_cc: &eframe::CreationContext<'_>, args: Opt) -> Self {
-        Self {
-            options: args,
+    fn new(_cc: &eframe::CreationContext<'_>) -> Self {
+        let refresh_rate = mlx::read_framerate().unwrap_or(mlx::Framerates::Half);
+
+        let mut saved_options = bsp::read_options().unwrap_or_default();
+        saved_options.framerate = refresh_rate;
+
+        let mut s = Self {
+            options: saved_options,
             rx_active: true,
             picture_options: egui::TextureOptions::NEAREST,
+            scale_bound: (20.0, 40.0),
             ..Default::default()
-        }
+        };
+
+        display::image::init_image_texture(&mut s, &_cc.egui_ctx);
+        display::scale::init_scale(&mut s, &_cc.egui_ctx);
+        display::scale::update_scale(&mut s);
+
+        return s;
     }
 
-    fn get_thread_receiver(&mut self, ctx: &egui::Context) -> &mut mpsc::Receiver<[u8; mlx::PIXEL_COUNT * 3]> {
+    fn get_thread_receiver(&mut self, ctx: &egui::Context) -> &mut Receiver<Result<ImageRead, String>> {
+        let options_clone = self.options.clone();
+
         self.image_rx.get_or_insert_with(|| {
             let (tx, rx) = mpsc::channel();
             let ctx_clone = ctx.clone();
-            let args_clone = self.options.clone();
 
-            thread::spawn(move || ThermalApp::continuuos_read(args_clone, ctx_clone, tx));
+            let (args_tx, args_rx) = mpsc::channel();
+            args_tx.send(options_clone).unwrap();
+            self.args_tx = Some(args_tx);
+
+            thread::spawn(|| ThermalApp::continuuos_read(args_rx, ctx_clone, tx));
 
             return rx;
         })
     }
 
-    fn continuuos_read(args: Opt, ctx: egui::Context, tx: mpsc::Sender<[u8; mlx::PIXEL_COUNT * 3]>) -> ! {
+    fn continuuos_read(args_rx: Receiver<Opt>, ctx: egui::Context, tx: Sender<Result<ImageRead, String>>) -> ! {
+        let mut args: Option<Opt> = Some(Opt::default());
         loop {
-            let img = mlx::take_image(&args);
-            tx.send(img).unwrap();
+            let temp_grid = mlx::read_temperatures();
+
+            let r = args_rx.try_recv();
+            if r.is_ok() {
+                args.replace(r.unwrap());
+            }
+
+            if temp_grid.is_err() {
+                tx.send(Err(temp_grid.unwrap_err())).unwrap();
+                thread::sleep(std::time::Duration::from_millis(5000)); // Don't spam error messages
+                continue;
+            }
+
+            let color_grid = mlx::mlx_image::color_image(&args.as_ref().unwrap().color_type, &temp_grid.unwrap());
+            tx.send(Ok(color_grid)).unwrap();
             ctx.request_repaint();
         }
     }
 
-    fn show_image(&mut self, ui: &mut egui::Ui) {
-        let texture: &egui::TextureHandle = self.picture.get_or_insert_with(|| {
-            let raw_img = self.raw_picture.get_or_insert_with(|| {
-                [0x00; mlx::PIXEL_COUNT * 3]
-            });
+    fn recolor_image(&mut self, ctx: &egui::Context) {
+        if self.last_read.is_err() { return; }
 
-            let img = egui::ColorImage::from_rgb(
-                [mlx::PIXELS_WIDTH, mlx::PIXELS_HEIGHT],
-                raw_img
-            );
+        let last_read = self.last_read.as_ref().unwrap();
 
-            ui.ctx()
-                .load_texture("Picture", img, self.picture_options)
+        let color_grid = mlx::mlx_image::color_image(&self.options.color_type, &last_read.temperature_read);
+        
+        let img = egui::ColorImage::from_rgb(
+            [mlx::PIXELS_WIDTH, mlx::PIXELS_HEIGHT],
+            &color_grid.pixels
+        );
+
+        self.picture.as_mut().unwrap().set(img, self.picture_options);
+
+        self.last_read = Ok(color_grid);
+
+        ctx.request_repaint();
+    }
+
+    fn update_options(&mut self) {
+        if self.args_tx.is_none() { return; }
+        let tx: &Sender<Opt> = self.args_tx.as_ref().unwrap();
+        tx.send(self.options.clone()).unwrap();
+
+        bsp::write_options(&self.options).unwrap_or_else(|_| {
+            println!("Failed to write options");
         });
 
-        let space = ui.available_rect_before_wrap();
-        let aspect_ratio = space.width() / space.height();
-        let desired_ratio = mlx::PIXELS_WIDTH as f32 / mlx::PIXELS_HEIGHT as f32;
-        let new_rect;
-
-        if aspect_ratio > desired_ratio {
-            // Width must be smaller
-            let factor = desired_ratio / aspect_ratio;
-            let new_width = space.width() * factor;
-            let diff = (space.width() - new_width) * 0.5;
-
-            new_rect = space.shrink2(egui::Vec2 {x: diff, y: 0.0});
-        }
-        else {
-            // Height must be smaller
-            let factor = aspect_ratio / desired_ratio;
-            let new_height = space.height() * factor;
-            let diff = (space.height() - new_height) * 0.5;
-
-            new_rect = space.shrink2(egui::Vec2 {x: 0.0, y: diff});
-        }
-
-        ui.painter().image(
-            texture.id(),
-            new_rect,
-            egui::Rect::from_min_max(egui::pos2(0.0, 0.0), egui::pos2(1.0, 1.0)),
-            egui::Color32::WHITE
-        );
-    }
-    
-    fn update_image(&mut self, ctx: &egui::Context) {
-        // Don't update image if not supposed to
-        if !self.rx_active { return }
-
-        let rx = self.get_thread_receiver(ctx);
-
-        let rx_img = rx.try_recv();
-
-        if rx_img.is_ok() {
-            let raw_img = rx_img.unwrap();
-            self.raw_picture.replace(raw_img);
-
-            let img = egui::ColorImage::from_rgb(
-                [mlx::PIXELS_WIDTH, mlx::PIXELS_HEIGHT],
-                &raw_img
-            );
-
-            self.picture.as_mut().unwrap().set(img, self.picture_options);
-        }
+        display::scale::update_scale(self);
     }
 
     fn save_image(&mut self) {
         if self.picture.is_none() { return }
         if !bsp::check_usb() { return }
 
-        let raw_img = self.raw_picture.as_ref().unwrap();
+        let raw_img = self.last_read.as_ref().unwrap_or(&ImageRead::default()).pixels;
 
-        let path = bsp::get_usb_path("png".to_string());
+        let path = bsp::get_usb_path();
 
-        bsp::write_rgb(
+        bsp::write_png(
             &path,
-            raw_img,
-            mlx::PIXELS_WIDTH,
-            mlx::PIXELS_HEIGHT,
+            &raw_img,
+            mlx::PIXELS_WIDTH as u32,
+            mlx::PIXELS_HEIGHT as u32,
         );
     }
 
@@ -153,31 +174,48 @@ impl eframe::App for ThermalApp {
         self.check_usb();
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.with_layout(
-                egui::Layout::top_down_justified(egui::Align::Center),
-                |ui| {
-                    if ui.button("Freeze image").clicked() {
-                        self.rx_active = !self.rx_active;
-                    }
+            self.window_size = ui.available_size();
 
-                    let save_button = ui.add_enabled(
-                        self.usb_detected,
-                        egui::Button::new("Save image")
-                    );
-                    if save_button.clicked() {
-                        self.save_image();
-                        println!("Image saved");
-                    }
+            ui.horizontal_centered(|ui| {
+                if !self.options.left_handed {
+                    display::show(self, ui, ctx);
+                    controls::show(self, ui);
+                }
+
+                else {
+                    controls::show(self, ui);
+                    display::show(self, ui, ctx);
+                }
             });
 
-            self.update_image(ctx);
-
-            ui.with_layout(
-                egui::Layout::top_down_justified(egui::Align::Center)
-                    .with_main_justify(true),
-                |ui| {
-                    self.show_image(ui);
-            });
+            options::show(self, ui);
         });
+    }
+}
+
+impl Default for ThermalApp {
+    fn default() -> Self {
+        Self {
+            window_size: egui::Vec2::ZERO,
+
+            options: Opt::default(),
+
+            last_read: Err("Not initialized".to_string()),
+
+            picture: None,
+            picture_options: egui::TextureOptions::default(),
+
+            raw_scale: None,
+            scale: None,
+            scale_bound: (0.0, 0.0),
+
+            show_options: false,
+
+            image_rx: None,
+            rx_active: false,
+            args_tx: None,
+
+            usb_detected: false,
+        }
     }
 }

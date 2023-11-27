@@ -1,0 +1,11 @@
+[Unit]
+Description=Executes the thermal-camera binary
+After=multi-user.target
+
+[Service]
+Type=simple
+User=thermal-camera
+ExecStart=/bin/bash /opt/thermal-camera/run_thermal_camera.sh
+
+[Install]
+WantedBy=multi-user.target

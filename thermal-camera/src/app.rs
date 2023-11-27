@@ -1,4 +1,3 @@
-use std::str::FromStr;
 use structopt::StructOpt;
 
 mod bsp;
@@ -6,47 +5,27 @@ mod mlx;
 mod window;
 
 use mlx::ColorTypes;
+use mlx::ImageRead;
 
 pub fn run() {
-    mlx::init();
-
     let opt = Opt::from_args();
 
     if opt.windowed {
-        window::open_window(opt);
+        window::open_window();
     }
     else {
-        let filename = opt.filename.as_str();
-        let col = opt.color_type;
-        let min = opt.min;
-        let max = opt.max;
-        let width = mlx::PIXELS_WIDTH;
-        let height = mlx::PIXELS_HEIGHT;
+        let path = opt.filename.as_str();
+        let width = mlx::PIXELS_WIDTH as u32;
+        let height = mlx::PIXELS_HEIGHT as u32;
 
-        let output = get_mlx_output(col, min, max);
+        let output = get_mlx_output(&opt);
 
-        bsp::write_rgb(filename, &output, width, height);
+        bsp::write_png(path, &output.pixels, width, height);
     }
 }
 
-fn get_mlx_output(color_type: ColorTypes, temp_min: f32, temp_max: f32) -> [u8; mlx::PIXEL_COUNT * 3] {
-    match color_type {
-        ColorTypes::Gray => return mlx::grayscale(temp_min, temp_max),
-        ColorTypes::Cheap => return mlx::colored_cheap(temp_min, temp_max),
-    }
-}
-
-impl FromStr for ColorTypes {
-    type Err = &'static str;
-    
-    fn from_str(color_type: &str) -> Result<Self, Self::Err> {
-        match color_type {
-            "gray" => Ok(ColorTypes::Gray),
-            "cheap" => Ok(ColorTypes::Cheap),
-
-            _ => Err("Unrecognised color type"),
-        }
-    }
+fn get_mlx_output(args: &Opt) -> ImageRead {
+    return mlx::take_image(&args.color_type).unwrap();
 }
 
 #[derive(Debug, StructOpt, Clone)]
@@ -55,27 +34,27 @@ pub struct Opt {
     #[structopt(default_value = "out.png")]
     filename: String,
 
-    #[structopt(default_value = "cheap")]
+    #[structopt(default_value = "hue")]
     color_type: ColorTypes,
+
+    #[structopt(default_value = "2")]
+    framerate: mlx::Framerates,
 
     #[structopt(short, long)]
     windowed: bool,
 
-    #[structopt(long, default_value = "20")]
-    min: f32,
-
-    #[structopt(long, default_value = "40")]
-    max: f32,
+    #[structopt(short, long)]
+    left_handed: bool,
 }
 
 impl Default for Opt {
     fn default() -> Self {
         Self {
             filename: "out.png".to_string(),
-            color_type: ColorTypes::Cheap,
+            color_type: ColorTypes::Hue,
+            framerate: mlx::Framerates::Two,
             windowed: false,
-            min: 20.0,
-            max: 40.0,
+            left_handed: false,
         }
     }
 }

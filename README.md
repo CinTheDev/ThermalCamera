@@ -59,6 +59,14 @@ If the touchscreen axes are "inverted" in some way after reboot, you must edit `
 
 Now the touchscreen should behave properly.
 
+#### Increase Display framerate
+
+If the default framerate is too slow:
+
+- `sudo nano /boot/config.txt`
+- Look for `dtoverlay=waveshare35a` and append `:speed=20000000,fps=30` or other desired values
+- Save and restart
+
 ## Development setup
 
 On our working machine, we have to make sure we can cross compile the program and upload it to the raspi.
@@ -79,25 +87,18 @@ Finally, run `cargo clean` inside thermal-camera/ (if there's some build files a
 
 ### MLX Thermal Camera
 
-The Thermal Camera is connected in the following fashion:
+The MLX module is connected to Raspberry Pi GPIO in the following fashion:
 
 - [Camera Pin] > [Raspi Pin]
-- VIN > 5V (Pin 1)
+- VIN > 5V (Pin 2)
 - GND > Ground (Any Pin equal or above Pin 30)
-- SCL > GPIO 3 (I2C SCL)
-- SDA > GPIO 2 (I2C SDA)
-
-**Make sure not to switch up 3.3V and 5V!! Doing so could damage the camera!**
+- SCL > Pin 3 (I2C SCL)
+- SDA > Pin 2 (I2C SDA)
 
 ### Display Pins
 
 Since some Pins are used by the MLX, we cannot put the Display directly on the Raspberry Pi, we have to manually connect the pins with jumper wires.
 
-Also, the display, by documentation, occupies every power pin on the raspi. This is a problem since the MLX needs one power pin for itself. I have discovered that keeping **Pin 1 disconnected** won't affect the display. That way we have a free power pin for the MLX.
+Also, the display, by documentation, occupies every power pin on the raspi. This is a problem since the MLX needs one power pin for itself. I have discovered that keeping **Pin 2 disconnected** won't affect the display. That way we have a free power pin for the MLX.
 
 Use the display guide mentioned above in Display Setup to connect the relevant pins. The pins are listed on the bottom of the page.
-
-## TODOs
-
-- Add Bad Pixel correction
-- Improve eframe UI (aspect ratio correction, nicer buttons, ...)

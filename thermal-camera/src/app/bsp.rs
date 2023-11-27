@@ -1,14 +1,19 @@
 use image::{RgbImage, Rgb};
-use std::fs;
+use std::{fs, io::{self, Write, Read}, str::FromStr};
 use chrono;
+use super::{Opt, mlx};
+
+const OPTIONS_PATH: &str = "/home/thermal-camera/thermal-camera-options.txt";
 
 pub fn check_usb() -> bool {
-    let mut paths = fs::read_dir("/media/thermal-camera").unwrap().peekable();
-    return paths.peek().is_some();
+    let mut paths = fs::read_dir("/dev").unwrap();
+    return paths.any(|val| {
+        return val.as_ref().unwrap().file_name() == "sda1";
+    });
 }
 
-pub fn get_usb_path(filetype: String) -> String {
-    return format!("{}/capture/{}.{}", get_usb_dir(), get_time(), filetype);
+pub fn get_usb_path() -> String {
+    return format!("/media/usb0/thermal-camera/{}.png", get_time());
 }
 
 fn get_time() -> String {
@@ -20,23 +25,7 @@ fn get_time() -> String {
     return res;
 }
 
-fn get_usb_dir() -> String {
-    // Simply return last directory
-    let paths = fs::read_dir("/media/thermal-camera").unwrap();
-    return paths.last().unwrap().unwrap().path().to_str().unwrap().to_string();
-}
-
-pub fn write_rgb(path: &str, image: &[u8], width: usize, height: usize) {
-    let file_suffix = path.split('.').last().expect("Unrecognised file suffix");
-
-    match file_suffix.to_ascii_lowercase().as_str() {
-        "png" => write_png(path, image, width as u32, height as u32),
-
-        _ => panic!()
-    }
-}
-
-fn write_png(path: &str, image: &[u8], width: u32, height: u32) {
+pub fn write_png(file_path: &str, image: &[u8], width: u32, height: u32) {
     let mut img_png = RgbImage::new(width, height);
 
     for y in 0..height {
@@ -51,9 +40,86 @@ fn write_png(path: &str, image: &[u8], width: u32, height: u32) {
         }
     }
 
-    let filename = path.split("/").last().unwrap();
-    let without_file = path.replace(filename, "");
+    fs::create_dir_all(get_path(&file_path.to_string())).unwrap();
+    img_png.save(file_path).unwrap();
+}
 
-    fs::create_dir_all(without_file).unwrap();
-    img_png.save(path).unwrap();
+fn get_path(file_path: &String) -> String {
+    let mut parts = file_path.split_inclusive('/');
+
+    parts.next();
+    parts.next_back();
+    
+    let mut res = "".to_string();
+
+    for p in parts {
+        res += p;
+    }
+
+    return res;
+}
+
+pub fn write_options(opt: &Opt) -> io::Result<()> {
+    let opt_string = opt.parse_to_string();
+    let buf = opt_string.as_bytes();
+
+    let mut f = fs::File::create(OPTIONS_PATH)?;
+    f.write_all(buf)?;
+
+    return Ok(());
+}
+
+pub fn read_options() -> Result<Opt, io::Error> {
+    let f_response = fs::File::open(OPTIONS_PATH);
+    if f_response.is_err() {
+        return Err(f_response.unwrap_err());
+    }
+
+    let mut f = f_response.unwrap();
+    
+    let mut buf = String::new();
+    f.read_to_string(&mut buf)?;
+
+    return Ok(Opt::parse_from_string(buf));
+}
+
+impl Opt {
+    fn parse_to_string(&self) -> String {
+        format!(
+            "color:{}\nleft_hand:{}\n",
+            self.color_type.to_string(),
+            self.left_handed.to_string()
+        )
+    }
+
+    fn parse_from_string(s: String) -> Self {
+        let options = s.split('\n');
+        let mut res: Self = Self::default();
+
+        for o in options {
+            let mut words = o.split(':');
+            let key = words.next();
+            let val = words.next();
+
+            if key.is_none() || val.is_none() {
+                continue;
+            }
+
+            match key.unwrap() {
+                "color" => res.color_type = mlx::ColorTypes::from_str(
+                    val.unwrap()
+                ).unwrap_or(mlx::ColorTypes::Hue),
+
+                "left_hand" => res.left_handed = match val.unwrap() {
+                    "true" => true,
+                    "false" => false,
+                    _ => false,
+                },
+
+                _ => ()
+            }
+        }
+
+        return res;
+    }
 }
