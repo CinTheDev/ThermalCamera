@@ -1,5 +1,10 @@
 [package]
 name = "thermal-camera"
+description = "A GUI application utilizing the MLX90640 with Raspberry Pi to display a thermal image"
+categories = ["embedded", "gui", "visualization"]
+keywords = ["thermal", "mlx", "melexis", "mlx90460", "melexis90460"]
+repository = "https://github.com/CinTheDev/ThermalCamera.git"
+license = "MIT OR Apache-2.0"
 version = "0.1.0"
 edition = "2021"
 
