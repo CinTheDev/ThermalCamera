@@ -39,6 +39,36 @@ If the case is done, make sure to test if the pen holder on the right bottom sid
 
 Another feature of the case is the interface at the bottom. Normally you'd screw the handgrip on for a nice way of holding the case, but anything can be screwed onto it. An example is the tripod connector: This is an adapter which makes it able to put the ThermalCamera onto a tripod, so you can statically record a specific location for a longer period of time.
 
+### Supports and wiring
+
+If all the electrical components have arrived and all three supports have been printed, you can go on with this section.
+
+Before you can do anything else, the MLX module needs to be prepared for wiring. If you haven't noticed it yet, it comes in two parts: the main module, and a pin header. If you are using jumper wires, you need to solder the pin header onto the MLX module. Make sure to put the pins on the bottom side, on the opposite side of the sensor cylinder.
+
+Now put all components on the dedicated supports. The Raspberry Pi must be screwed onto the support, and the MLX module can be screwed on, but it's not mandatory. The display has no way of being fixed to the support.
+
+Important note: when pointing the MLX module sideways, **the edge with the pin header marks the bottom side**. Later when putting the support into the case, make sure to put it in the right way.
+
+With the components on their supports, go on with the wiring. Start with the MLX module
+
+#### MLX wiring
+
+The MLX module is connected to Raspberry Pi GPIO in the following fashion:
+
+- [Camera Pin] > [Raspi Pin]
+- VIN > 5V (Pin 2)
+- GND > Ground (Any GND Pin equal or above Pin 30)
+- SCL > Pin 3 (I2C SCL)
+- SDA > Pin 2 (I2C SDA)
+
+#### Display wiring
+
+Since some Pins are used by the MLX, we cannot put the Display directly on the Raspberry Pi, we have to manually connect the pins with jumper wires.
+
+Also, the display, by documentation, occupies every power pin on the raspi. This is a problem since the MLX needs one power pin for itself. I have discovered that keeping **Pin 2 disconnected** won't affect the display. That way we have a free power pin for the MLX.
+
+Use [this guide](https://www.waveshare.com/wiki/3.5inch_RPi_LCD_(A)#Interface_Definition) to connect all other pins using jumper wires.
+
 ## Development setup
 
 On our working machine, we have to make sure we can cross compile the program and upload it to the raspi.
@@ -54,23 +84,3 @@ For our program to link correctly, we have to manually download the gnu toolchai
 Choose **gcc-arm-10.2-2020.11-x86_64-arm-none-linux-gnueabihf.tar.xz** and extract it to /opt.
 
 Finally, run `cargo clean` inside thermal-camera/ (if there's some build files already), and run a build task from VSCode to verify the configuration (e.g. "Run manual test"). If VSCode somehow doesn't work, just run `./scripts/manual_test.sh` from the project's root directory.
-
-## Hardware setup & Used pins
-
-### MLX Thermal Camera
-
-The MLX module is connected to Raspberry Pi GPIO in the following fashion:
-
-- [Camera Pin] > [Raspi Pin]
-- VIN > 5V (Pin 2)
-- GND > Ground (Any Pin equal or above Pin 30)
-- SCL > Pin 3 (I2C SCL)
-- SDA > Pin 2 (I2C SDA)
-
-### Display Pins
-
-Since some Pins are used by the MLX, we cannot put the Display directly on the Raspberry Pi, we have to manually connect the pins with jumper wires.
-
-Also, the display, by documentation, occupies every power pin on the raspi. This is a problem since the MLX needs one power pin for itself. I have discovered that keeping **Pin 2 disconnected** won't affect the display. That way we have a free power pin for the MLX.
-
-Use the display guide mentioned above in Display Setup to connect the relevant pins. The pins are listed on the bottom of the page.
