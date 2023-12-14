@@ -11,6 +11,7 @@ Before starting the build, let's first talk about what is required for building 
 - A 3D-Printer (Optional, 3D-prints can be ordered online, but it's rather expensive, not recommended)
 - About 150€ [TODO: Verify price] for electrical components
 - Some jumper cables, both female-male and female-female [TODO: Tell precise amount of cables]
+- M3 Bolts, hex nuts and 4 square nuts [TODO: Tell precise amount of bolts and nuts]
 - A soldering kit
 
 ### Preparation
@@ -69,7 +70,7 @@ Also, the display, by documentation, occupies every power pin on the raspi. This
 
 Use [this guide](https://www.waveshare.com/wiki/3.5inch_RPi_LCD_(A)#Interface_Definition) to connect all other pins using jumper wires.
 
-## Raspberry Pi image configuration
+### Raspberry Pi image configuration
 
 Now it's time to install the software on the Raspberry Pi. Install **Raspbian OS x32 lite** onto an sd card, it's important to use the lite version, the installation script later will install all necassary compontents. If you're using the pi-imager tool, you can optionally configure additional things like a different hostname and such. These things are recommended to configure:
 
@@ -90,11 +91,11 @@ The initial user "pi" is used for administrative purposes, like installing packa
 
 The script will take a while to finish, an hour or so can be expected. At the end the Raspberry Pi will restart, and you should see something on the display, shortly followed by the ThermalCamera software being displayed. If that doesn't happen you should troubleshoot and investigate the command logs of the installation. If the display only shows white, it could also be that the display has been wired the wrong way, or some pins became disconnected. A faulty connection with the MLX module will be warned about inside the ThermalCamera Software.
 
-## Case assembly
+### Case assembly
 
 Once the components are connected up and are verified to function properly, and the case has finished printing, everything can be assembled together
 
-### Case preperation
+#### Case preperation
 
 Before doing any assembly, insert all nuts into the designated spots in the case:
 
@@ -103,15 +104,15 @@ Before doing any assembly, insert all nuts into the designated spots in the case
 
 Verify that all nuts are in place and that bolts are able to be screwed in.
 
-### Handgrip
+#### Handgrip
 
 For ease of use, attach the handgrip first. Use 4 bolts to connect the handgrip to the bottom side of the case.
 
-### Support preperation
+#### Support preperation
 
 The supports have space for 4 hex nuts each, 2 on every side. Insert all nuts; if you already have done the wiring, be careful not to rip out any jumper wires.
 
-### Main assembly
+#### Main assembly
 
 Now the supports and case can be assembled together. Start with the MLX module, fit the sensor cylinder through the hole in the front wall, and fix the support with 2 bolts.
 
