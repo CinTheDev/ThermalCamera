@@ -38,7 +38,13 @@ If the supports are done and your components have arrived, you can go on with wi
 
 If the case is done, make sure to test if the pen holder on the right bottom side is good. The Berrybase display comes with a stylus, which can be put into the pen holder. If you need to use a lot of force, it means that 3D-printing artifacts like strings and blobs have clogged the hole a little, and need to be removed by scraping along the inner walls a bit. Once the stylus fits easily into the pen holder, the case is good to go!
 
+![Pen holder](./images/pen_holder.jpg)
+
 Another feature of the case is the interface at the bottom. Normally you'd screw the handgrip on for a nice way of holding the case, but anything can be screwed onto it. An example is the tripod connector: This is an adapter which makes it able to put the ThermalCamera onto a tripod, so you can statically record a specific location for a longer period of time.
+
+Here's an image with all prints, components, bolts and nuts laid out (Note: Raspberry Pi already screwed on its support)
+
+![Collection of all 3D-Prints, electrical components and bolts required](./images/collection.jpg)
 
 ### Supports and wiring
 
@@ -93,6 +99,8 @@ The script will take a while to finish, an hour or so can be expected. At the en
 
 If the display only shows white, it could also be that the display has been wired the wrong way, or some pins became disconnected. A faulty connection with the MLX module will be warned about inside the ThermalCamera Software.
 
+![A finished ThermalCamera system working properly](./images/wiring.jpg)
+
 ### Case assembly
 
 Once the components are connected up and are verified to function properly, and the case has finished printing, everything can be assembled together
@@ -106,9 +114,13 @@ Before doing any assembly, insert all nuts into the designated spots in the case
 
 Verify that all nuts are in place and that bolts are able to be screwed in.
 
+![A square nut being held in place by a bolt](./images/square_nuts.jpg)
+
 #### Handgrip
 
 For ease of use, attach the handgrip first. Use 4 bolts to connect the handgrip to the bottom side of the case.
+
+![The handgrip attached via hex nuts](./images/hex_nuts.jpg)
 
 #### Support preperation
 
@@ -122,9 +134,16 @@ Next, put the Raspberry Pi and display inside the case without any bolts. Lay ou
 
 Before putting the lid on, power up the system and make sure it still works. If it works, continue on the next paragraph, if something doesn't work, check for any detached or loose wires. Do not continue assembly until the problem has been fixed.
 
+![Supports inside the case](./images/assembly_side.jpg)
+![The system powered inside the case, everything working as it should](./images/assembly_check.jpg)
+
 Lastly, put the lid on. Even though 3D-printing is very precise, because of thermal expansion and pressure from the wiring inside the holes for the lid and supports won't line up properly. To combat that, first put the bolts for the MLX support through the lid, and slightly screw them in the MLX support (don't screw them in all the way!). With the additional clearance, insert the bolts for the Raspberry Pi, screw them in slightly, and repeat for the display. Do not be afraid to bend the supports slightly into place, altough don't overdo it.
 
+![The lid with all support screws partially screwed in for alignment](./images/lid_alignment.jpg)
+
 In the last step, insert the bolts in the corners for connecting to the case, and screw these all the way in now. Be careful to not break the lid with too much bend. After that screw in the rest of the bolts. Now the lid should be fixed in place tightly. Power up the ThermalCamera, and if everything works, you're finally done!
+
+![The case bolts fixed the lid in place](./images/lid_fix.jpg)
 
 ## Development setup
 
