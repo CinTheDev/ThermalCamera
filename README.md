@@ -9,7 +9,7 @@ A project for the Raspberry Pi, where a thermal camera is connected to the Raspi
 Before starting the build, let's first talk about what is required for building a ThermalCamera.
 
 - A 3D-Printer (Optional, 3D-prints can be ordered online, but it's rather expensive, not recommended)
-- About 150€ [TODO: Verify price] for electrical components
+- About 150€ for electrical components
 - Some jumper cables, 16 female-male and 4 female-female
 - 24 M3 Bolts, 16 hex nuts and 4 square nuts
 - A soldering kit
