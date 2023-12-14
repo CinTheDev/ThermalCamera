@@ -90,6 +90,39 @@ The initial user "pi" is used for administrative purposes, like installing packa
 
 The script will take a while to finish, an hour or so can be expected. At the end the Raspberry Pi will restart, and you should see something on the display, shortly followed by the ThermalCamera software being displayed. If that doesn't happen you should troubleshoot and investigate the command logs of the installation. If the display only shows white, it could also be that the display has been wired the wrong way, or some pins became disconnected. A faulty connection with the MLX module will be warned about inside the ThermalCamera Software.
 
+## Case assembly
+
+Once the components are connected up and are verified to function properly, and the case has finished printing, everything can be assembled together
+
+### Case preperation
+
+Before doing any assembly, insert all nuts into the designated spots in the case:
+
+- 4 square nuts inside all of the beams
+- 4 hex nuts at the interface
+
+Verify that all nuts are in place and that bolts are able to be screwed in.
+
+### Handgrip
+
+For ease of use, attach the handgrip first. Use 4 bolts to connect the handgrip to the bottom side of the case.
+
+### Support preperation
+
+The supports have space for 4 hex nuts each, 2 on every side. Insert all nuts; if you already have done the wiring, be careful not to rip out any jumper wires.
+
+### Main assembly
+
+Now the supports and case can be assembled together. Start with the MLX module, fit the sensor cylinder through the hole in the front wall, and fix the support with 2 bolts.
+
+Next, put the Raspberry Pi and display inside the case without any bolts. Lay out the wires in a way that it won't get in the way when fixing the supports later, and make sure that no wires poke out of the case anymore. After that, start fixing the Raspberry Pi support and display support with 2 bolts each.
+
+Before putting the lid on, power up the system and make sure it still works. If it works, continue on the next paragraph, if something doesn't work, check for any detached or loose wires. Do not continue assembly until the problem has been fixed.
+
+Lastly, put the lid on. Even though 3D-printing is very precise, because of thermal expansion and pressure from the wiring inside the holes for the lid and supports won't line up properly. To combat that, first put the bolts for the MLX support through the lid, and slightly screw them in the MLX support (don't screw them in all the way!). With the additional clearance, insert the bolts for the Raspberry Pi, screw them in slightly, and repeat for the display. Do not be afraid to bend the supports slightly into place, altough don't overdo it.
+
+In the last step, insert the bolts in the corners for connecting to the case, and screw these all the way in now. Be careful to not break the lid with too much bend. After that screw in the rest of the bolts. Now the lid should be fixed in place tightly. Power up the ThermalCamera, and if everything works, you're finally done!
+
 ## Development setup
 
 On our working machine, we have to make sure we can cross compile the program and upload it to the raspi.
