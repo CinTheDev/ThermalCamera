@@ -2,6 +2,43 @@
 
 A project for the Raspberry Pi, where a thermal camera is connected to the Raspi, which save or display pictures on a screen.
 
+## Build guide
+
+### Requirements
+
+Before starting the build, let's first talk about what is required for building a ThermalCamera.
+
+- A 3D-Printer (Optional, 3D-prints can be ordered online, but it's rather expensive, not recommended)
+- About 150€ [TODO: Verify price] for electrical components
+- Some jumper cables, both female-male and female-female [TODO: Tell precise amount of cables]
+- A soldering kit
+
+### Preparation
+
+#### Ordering components
+
+The ThermalCamera system consits of three components: The IR sensor, a processing unit, and a touchscreen display. With the 150€, order these components:
+
+- [MLX90640](https://www.berrybase.de/adafruit-mlx90640-ir-waermebildkamera-breakout)
+- [Raspberry Pi 3 B](https://www.berrybase.de/detail/index/sArticle/3924?src=raspberrypi)
+- [3.5" Berrybase Display](https://www.berrybase.de/3-5-display-fuer-raspberry-pi-mit-resistivem-touchscreen)
+
+While waiting for the components to arrive, start to print all the parts for the case
+
+#### 3D-Printing the case
+
+I recommend to use a more strong filament type, like PETG or ABS/ASA. The case used by this guide is made of orange PETG.
+
+Under the folder CAD_CaseV2/Export you'll find a bunch of .stl and .3mf files. The .3mf are project files from Prusa Slicer, and can be ignored if you don't have the exact same printer and exact same settings as the file dictates.
+
+The .stl files are the files you'll need, except for the Tripod_Connector.stl, which is optional. Start with printing the support first, as you'll need them right away when continuing with the components.
+
+If the supports are done and your components have arrived, you can go on with wiring while the rest of the case is still printing.
+
+If the case is done, make sure to test if the pen holder on the right bottom side is good. The Berrybase display comes with a stylus, which can be put into the pen holder. If you need to use a lot of force, it means that 3D-printing artifacts like strings and blobs have clogged the hole a little, and need to be removed by scraping along the inner walls a bit. Once the stylus fits easily into the pen holder, the case is good to go!
+
+Another feature of the case is the interface at the bottom. Normally you'd screw the handgrip on for a nice way of holding the case, but anything can be screwed onto it. An example is the tripod connector: This is an adapter which makes it able to put the ThermalCamera onto a tripod, so you can statically record a specific location for a longer period of time.
+
 ## Development setup
 
 On our working machine, we have to make sure we can cross compile the program and upload it to the raspi.
