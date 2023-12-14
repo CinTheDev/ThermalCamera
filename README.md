@@ -69,6 +69,27 @@ Also, the display, by documentation, occupies every power pin on the raspi. This
 
 Use [this guide](https://www.waveshare.com/wiki/3.5inch_RPi_LCD_(A)#Interface_Definition) to connect all other pins using jumper wires.
 
+## Raspberry Pi image configuration
+
+Now it's time to install the software on the Raspberry Pi. Install **Raspbian OS x32 lite** onto an sd card, it's important to use the lite version, the installation script later will install all necassary compontents. If you're using the pi-imager tool, you can optionally configure additional things like a different hostname and such. These things are recommended to configure:
+
+- Set hostname to thermal-camera
+- Create user "pi" with some password
+- Enable ssh
+
+Next step is to somehow get control of the Raspberry Pi terminal. It doesn't matter if it's over ssh, or using hdmi and a keyboard.
+
+- Connect the Raspberry Pi to the internet
+- Copy the contents of scripts/raspi onto the pi
+- Make run.sh executable, and execute
+- You will be prompted to input a password for a new user; input a new password for that user
+
+That new user is the one running the ThermalCamera software, and has no privileges besides running that software. The default name of that user is "thermal-camera". The system logs in as that user at startup.
+
+The initial user "pi" is used for administrative purposes, like installing packages, or configuring the system. This user has sudo priviliges. Whenever connecting via ssh, that user should be logged in as.
+
+The script will take a while to finish, an hour or so can be expected. At the end the Raspberry Pi will restart, and you should see something on the display, shortly followed by the ThermalCamera software being displayed. If that doesn't happen you should troubleshoot and investigate the command logs of the installation. If the display only shows white, it could also be that the display has been wired the wrong way, or some pins became disconnected. A faulty connection with the MLX module will be warned about inside the ThermalCamera Software.
+
 ## Development setup
 
 On our working machine, we have to make sure we can cross compile the program and upload it to the raspi.
