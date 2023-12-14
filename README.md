@@ -10,8 +10,8 @@ Before starting the build, let's first talk about what is required for building 
 
 - A 3D-Printer (Optional, 3D-prints can be ordered online, but it's rather expensive, not recommended)
 - About 150€ [TODO: Verify price] for electrical components
-- Some jumper cables, both female-male and female-female [TODO: Tell precise amount of cables]
-- M3 Bolts, hex nuts and 4 square nuts [TODO: Tell precise amount of bolts and nuts]
+- Some jumper cables, 16 female-male and 4 female-female
+- 24 M3 Bolts, 16 hex nuts and 4 square nuts
 - A soldering kit
 
 ### Preparation
