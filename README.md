@@ -18,13 +18,13 @@ Before starting the build, let's first talk about what is required for building 
 
 #### Ordering components
 
-The ThermalCamera system consits of three components: The IR sensor, a processing unit, and a touchscreen display. With the 150€, order these components:
+The ThermalCamera system consists of three components: The IR sensor, a processing unit, and a touchscreen display. With the 150€, order these components:
 
 - [MLX90640](https://www.berrybase.de/adafruit-mlx90640-ir-waermebildkamera-breakout)
 - [Raspberry Pi 3 B](https://www.berrybase.de/detail/index/sArticle/3924?src=raspberrypi)
 - [3.5" Berrybase Display](https://www.berrybase.de/3-5-display-fuer-raspberry-pi-mit-resistivem-touchscreen)
 
-While waiting for the components to arrive, start to print all the parts for the case
+While waiting for the components to arrive, start to print all parts for the case.
 
 #### 3D-Printing the case
 
@@ -32,7 +32,7 @@ I recommend to use a more strong filament type, like PETG or ABS/ASA. The case u
 
 Under the folder CAD_CaseV2/Export you'll find a bunch of .stl and .3mf files. The .3mf are project files from Prusa Slicer, and can be ignored if you don't have the exact same printer and exact same settings as the file dictates.
 
-The .stl files are the files you'll need, except for the Tripod_Connector.stl, which is optional. Start with printing the support first, as you'll need them right away when continuing with the components.
+The .stl files are the files you'll need, except for the Tripod_Connector.stl, which is optional. Start with printing the supports first, as you'll need them right away when continuing with the components.
 
 If the supports are done and your components have arrived, you can go on with wiring while the rest of the case is still printing.
 
@@ -50,7 +50,7 @@ Now put all components on the dedicated supports. The Raspberry Pi must be screw
 
 Important note: when pointing the MLX module sideways, **the edge with the pin header marks the bottom side**. Later when putting the support into the case, make sure to put it in the right way.
 
-With the components on their supports, go on with the wiring. Start with the MLX module
+With the components on their supports, go on with the wiring. Start with the MLX module.
 
 #### MLX wiring
 
@@ -58,13 +58,13 @@ The MLX module is connected to Raspberry Pi GPIO in the following fashion:
 
 - [Camera Pin] > [Raspi Pin]
 - VIN > 5V (Pin 2)
-- GND > Ground (Any GND Pin equal or above Pin 30)
-- SCL > Pin 3 (I2C SCL)
-- SDA > Pin 2 (I2C SDA)
+- GND > GND (Any GND Pin equal or above Pin 30)
+- SCL > I2C SCL (Pin 3)
+- SDA > I2C SDA (Pin 2)
 
 #### Display wiring
 
-Since some Pins are used by the MLX, we cannot put the Display directly on the Raspberry Pi, we have to manually connect the pins with jumper wires.
+Since some pins are used by the MLX, we cannot put the display directly on the Raspberry Pi, we have to manually connect the pins with jumper wires.
 
 Also, the display, by documentation, occupies every power pin on the raspi. This is a problem since the MLX needs one power pin for itself. I have discovered that keeping **Pin 2 disconnected** won't affect the display. That way we have a free power pin for the MLX.
 
@@ -89,7 +89,9 @@ That new user is the one running the ThermalCamera software, and has no privileg
 
 The initial user "pi" is used for administrative purposes, like installing packages, or configuring the system. This user has sudo priviliges. Whenever connecting via ssh, that user should be logged in as.
 
-The script will take a while to finish, an hour or so can be expected. At the end the Raspberry Pi will restart, and you should see something on the display, shortly followed by the ThermalCamera software being displayed. If that doesn't happen you should troubleshoot and investigate the command logs of the installation. If the display only shows white, it could also be that the display has been wired the wrong way, or some pins became disconnected. A faulty connection with the MLX module will be warned about inside the ThermalCamera Software.
+The script will take a while to finish, an hour or so can be expected. At the end the Raspberry Pi will restart, and you should see something on the display, shortly followed by the ThermalCamera software being displayed. If that doesn't happen you should troubleshoot and investigate the command logs of the installation.
+
+If the display only shows white, it could also be that the display has been wired the wrong way, or some pins became disconnected. A faulty connection with the MLX module will be warned about inside the ThermalCamera Software.
 
 ### Case assembly
 
@@ -116,7 +118,7 @@ The supports have space for 4 hex nuts each, 2 on every side. Insert all nuts; i
 
 Now the supports and case can be assembled together. Start with the MLX module, fit the sensor cylinder through the hole in the front wall, and fix the support with 2 bolts.
 
-Next, put the Raspberry Pi and display inside the case without any bolts. Lay out the wires in a way that it won't get in the way when fixing the supports later, and make sure that no wires poke out of the case anymore. After that, start fixing the Raspberry Pi support and display support with 2 bolts each.
+Next, put the Raspberry Pi and display inside the case without any bolts. Lay out the wires in a way that it won't get in the way when fixing the supports later, and make sure that no wires poke out of the case anymore. After that, start fixing the Raspberry Pi support and Display support with 2 bolts each.
 
 Before putting the lid on, power up the system and make sure it still works. If it works, continue on the next paragraph, if something doesn't work, check for any detached or loose wires. Do not continue assembly until the problem has been fixed.
 
