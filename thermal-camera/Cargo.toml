@@ -10,11 +10,8 @@ edition = "2021"
 
 [dependencies]
 chrono = "0.4.26"
-eframe = "0.22.0"
+eframe = "0.27.0"
 image = "0.24.6"
 lazy_static = "1.4.0"
 rppal = "0.14.1"
 structopt = "0.3.26"
-
-[profile.dev]
-debug-assertions = false
