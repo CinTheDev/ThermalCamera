@@ -3,7 +3,7 @@
 # Copy this directory onto raspi and connect via ssh
 
 cd thermal-camera
-cargo build
+cross build --target armv7-unknown-linux-gnueabihf
 cd ..
 
 rsync -P -r --delete ./scripts/raspi/ pi@thermal-camera:~/thermal-camera-config/
