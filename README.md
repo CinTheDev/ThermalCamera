@@ -77,7 +77,7 @@ We first have to add the correct Rust toolchain:
 
 We will use cargo cross for compiling. Install cross with `cargo install cross`
 
-Additionally, we will use `podman` for cross, you can use docker, but it's kinda a chore to deal with root priviledges. Install podman with `sudo apt install podman`.
+Additionally, we will use `podman` for cross, you can use docker instead, but it's kinda a chore to deal with root priviledges. Install podman with `sudo apt install podman`.
 
 ## Hardware setup & Used pins
 
