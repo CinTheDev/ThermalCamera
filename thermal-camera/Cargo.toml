@@ -15,3 +15,6 @@ image = "0.24.6"
 lazy_static = "1.4.0"
 rppal = "0.14.1"
 structopt = "0.3.26"
+
+[patch.crates-io]
+winit = { git = "https://github.com/CinTheDev/winit", branch = "fix-misaligned-dereference-v0.29.x" }
