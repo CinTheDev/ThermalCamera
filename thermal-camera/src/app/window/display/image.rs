@@ -8,7 +8,8 @@ pub fn show_image(app: &mut ThermalApp, ui: &mut egui::Ui) {
     let height = width * (mlx::PIXELS_HEIGHT as f32 / mlx::PIXELS_WIDTH as f32);
     let size = egui::Vec2::new(width, height);
 
-    let response = ui.image(texture);
+    let sized_texture = egui::load::SizedTexture::new(texture, size);
+    let response = ui.image(sized_texture);
 
     if app.last_read.is_err() {
         // Draw error message
