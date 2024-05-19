@@ -75,13 +75,9 @@ We first have to add the correct Rust toolchain:
 
 `rustup target add armv7-unknown-linux-gnueabihf`
 
-For our program to link correctly, we have to manually download the gnu toolchain and add it to our PATH. I got my toolchain from here: <https://developer.arm.com/downloads/-/gnu-a>
+We will use cargo cross for compiling. Install cross with `cargo install cross`
 
-**IMPORTANT: The glibc version of the toolchain must NOT be higher than 2.31!! Otherwise the program will crash on the raspi.**
-
-Choose **gcc-arm-10.2-2020.11-x86_64-arm-none-linux-gnueabihf.tar.xz** and extract it to /opt.
-
-Finally, run `cargo clean` inside thermal-camera/ (if there's some build files already), and run a build task from VSCode to verify the configuration (e.g. "Run manual test"). If VSCode somehow doesn't work, just run `./scripts/manual_test.sh` from the project's root directory.
+Additionally, we will use `podman` for cross, you can use docker, but it's kinda a chore to deal with root priviledges. Install podman with `sudo apt install podman`.
 
 ## Hardware setup & Used pins
 
