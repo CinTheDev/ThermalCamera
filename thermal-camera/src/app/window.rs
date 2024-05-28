@@ -20,10 +20,7 @@ const CONTROLS_X_SPACE: f32 = 0.12;
 const IMAGE_X_SPACE: f32 = 1.0 - SCALE_X_SPACE - CONTROLS_X_SPACE;
 
 pub fn open_window() {
-    let native_options = eframe::NativeOptions {
-        fullscreen: true,
-        ..Default::default()
-    };
+    let native_options = eframe::NativeOptions::default();
 
     eframe::run_native(
         "Thermal Camera",

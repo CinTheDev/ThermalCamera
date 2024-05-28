@@ -8,7 +8,8 @@ pub fn show_image(app: &mut ThermalApp, ui: &mut egui::Ui) {
     let height = width * (mlx::PIXELS_HEIGHT as f32 / mlx::PIXELS_WIDTH as f32);
     let size = egui::Vec2::new(width, height);
 
-    let response = ui.image(texture, size);
+    let sized_texture = egui::load::SizedTexture::new(texture, size);
+    let response = ui.image(sized_texture);
 
     if app.last_read.is_err() {
         // Draw error message
@@ -26,8 +27,8 @@ pub fn show_image(app: &mut ThermalApp, ui: &mut egui::Ui) {
             .translate(pos)
             .expand(5.0);
 
-        painter.rect_filled(bg_rect, egui::Rounding::none(), bg_col);
-        painter.galley(pos.to_pos2(), txt_galley);
+        painter.rect_filled(bg_rect, egui::Rounding::ZERO, bg_col);
+        painter.galley(pos.to_pos2(), txt_galley, egui::Color32::WHITE);
 
         return;
     }
@@ -130,6 +131,6 @@ pub fn check_clicked(app: &mut ThermalApp, ui: &mut egui::Ui, response: egui::Re
         .translate(pos.to_vec2())
         .expand(5.0);
 
-    painter.rect_filled(bg_rect, egui::Rounding::none(), bg_col);
-    painter.galley(pos, txt_galley);
+    painter.rect_filled(bg_rect, egui::Rounding::ZERO, bg_col);
+    painter.galley(pos, txt_galley, egui::Color32::WHITE);
 }

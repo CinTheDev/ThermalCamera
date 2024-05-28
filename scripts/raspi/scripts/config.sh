@@ -3,7 +3,7 @@
 sudo apt update
 sudo apt -y full-upgrade
 
-sudo apt -y install git xorg xserver-xorg-video-fbturbo xserver-xorg-input-evdev x11-xserver-utils lightdm ratpoison
+sudo apt -y install git xorg xserver-xorg-video-fbturbo xserver-xorg-input-evdev x11-xserver-utils libxkbcommon-x11-dev lightdm ratpoison
 
 # Login automatically as thermal-camera user
 sudo raspi-config nonint do_boot_behaviour B4
